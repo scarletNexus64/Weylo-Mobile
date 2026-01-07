@@ -1,0 +1,232 @@
+/// Parse une valeur en double, qu'elle soit String, int, double ou null
+double _parseDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  return 0.0;
+}
+
+class User {
+  final int id;
+  final String firstName;
+  final String? lastName;
+  final String username;
+  final String? email;
+  final String? phone;
+  final String? avatar;
+  final String? bio;
+  final double walletBalance;
+  final bool isPremium;
+  final DateTime? premiumExpiresAt;
+  final bool isBanned;
+  final String role;
+  final String? fcmToken;
+  final UserSettings? settings;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final int followersCount;
+  final int followingCount;
+  final bool? isFollowing;
+  final bool? isFollowedBy;
+  final int? confessionsCount;
+  final int? messagesReceivedCount;
+
+  User({
+    required this.id,
+    required this.firstName,
+    this.lastName,
+    required this.username,
+    this.email,
+    this.phone,
+    this.avatar,
+    this.bio,
+    this.walletBalance = 0.0,
+    this.isPremium = false,
+    this.premiumExpiresAt,
+    this.isBanned = false,
+    this.role = 'user',
+    this.fcmToken,
+    this.settings,
+    this.createdAt,
+    this.updatedAt,
+    this.followersCount = 0,
+    this.followingCount = 0,
+    this.isFollowing,
+    this.isFollowedBy,
+    this.confessionsCount,
+    this.messagesReceivedCount,
+  });
+
+  String get fullName => lastName != null ? '$firstName $lastName' : firstName;
+
+  String get initials {
+    String result = '';
+    if (firstName.isNotEmpty) result += firstName[0].toUpperCase();
+    if (lastName != null && lastName!.isNotEmpty) {
+      result += lastName![0].toUpperCase();
+    }
+    return result.isEmpty ? '?' : result;
+  }
+
+  bool get isAdmin => role == 'admin' || role == 'superadmin';
+  bool get isModerator => role == 'moderator' || isAdmin;
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] ?? 0,
+      firstName: json['first_name'] ?? json['firstName'] ?? '',
+      lastName: json['last_name'] ?? json['lastName'],
+      username: json['username'] ?? '',
+      email: json['email'],
+      phone: json['phone'],
+      avatar: json['avatar'] ?? json['avatar_url'],
+      bio: json['bio'],
+      walletBalance: _parseDouble(json['wallet_balance'] ?? json['walletBalance']),
+      isPremium: json['is_premium'] ?? json['isPremium'] ?? false,
+      premiumExpiresAt: json['premium_expires_at'] != null
+          ? DateTime.parse(json['premium_expires_at'])
+          : null,
+      isBanned: json['is_banned'] ?? json['isBanned'] ?? false,
+      role: json['role'] ?? 'user',
+      fcmToken: json['fcm_token'] ?? json['fcmToken'],
+      settings: json['settings'] != null
+          ? UserSettings.fromJson(json['settings'])
+          : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
+      followersCount: json['followers_count'] ?? json['followersCount'] ?? 0,
+      followingCount: json['following_count'] ?? json['followingCount'] ?? 0,
+      isFollowing: json['is_following'] ?? json['isFollowing'],
+      isFollowedBy: json['is_followed_by'] ?? json['isFollowedBy'],
+      confessionsCount: json['confessions_count'] ?? json['confessionsCount'],
+      messagesReceivedCount: json['messages_received_count'] ?? json['messagesReceivedCount'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'first_name': firstName,
+      'last_name': lastName,
+      'username': username,
+      'email': email,
+      'phone': phone,
+      'avatar': avatar,
+      'bio': bio,
+      'wallet_balance': walletBalance,
+      'is_premium': isPremium,
+      'premium_expires_at': premiumExpiresAt?.toIso8601String(),
+      'is_banned': isBanned,
+      'role': role,
+      'fcm_token': fcmToken,
+      'settings': settings?.toJson(),
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'followers_count': followersCount,
+      'following_count': followingCount,
+      'is_following': isFollowing,
+      'is_followed_by': isFollowedBy,
+      'confessions_count': confessionsCount,
+      'messages_received_count': messagesReceivedCount,
+    };
+  }
+
+  User copyWith({
+    int? id,
+    String? firstName,
+    String? lastName,
+    String? username,
+    String? email,
+    String? phone,
+    String? avatar,
+    String? bio,
+    double? walletBalance,
+    bool? isPremium,
+    DateTime? premiumExpiresAt,
+    bool? isBanned,
+    String? role,
+    String? fcmToken,
+    UserSettings? settings,
+    int? followersCount,
+    int? followingCount,
+    bool? isFollowing,
+    bool? isFollowedBy,
+    int? confessionsCount,
+    int? messagesReceivedCount,
+  }) {
+    return User(
+      id: id ?? this.id,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      avatar: avatar ?? this.avatar,
+      bio: bio ?? this.bio,
+      walletBalance: walletBalance ?? this.walletBalance,
+      isPremium: isPremium ?? this.isPremium,
+      premiumExpiresAt: premiumExpiresAt ?? this.premiumExpiresAt,
+      isBanned: isBanned ?? this.isBanned,
+      role: role ?? this.role,
+      fcmToken: fcmToken ?? this.fcmToken,
+      settings: settings ?? this.settings,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      followersCount: followersCount ?? this.followersCount,
+      followingCount: followingCount ?? this.followingCount,
+      isFollowing: isFollowing ?? this.isFollowing,
+      isFollowedBy: isFollowedBy ?? this.isFollowedBy,
+      confessionsCount: confessionsCount ?? this.confessionsCount,
+      messagesReceivedCount: messagesReceivedCount ?? this.messagesReceivedCount,
+    );
+  }
+}
+
+class UserSettings {
+  final bool notificationsEnabled;
+  final bool emailNotifications;
+  final bool pushNotifications;
+  final bool showOnlineStatus;
+  final bool allowAnonymousMessages;
+  final String language;
+  final String theme;
+
+  UserSettings({
+    this.notificationsEnabled = true,
+    this.emailNotifications = true,
+    this.pushNotifications = true,
+    this.showOnlineStatus = true,
+    this.allowAnonymousMessages = true,
+    this.language = 'fr',
+    this.theme = 'system',
+  });
+
+  factory UserSettings.fromJson(Map<String, dynamic> json) {
+    return UserSettings(
+      notificationsEnabled: json['notifications_enabled'] ?? true,
+      emailNotifications: json['email_notifications'] ?? true,
+      pushNotifications: json['push_notifications'] ?? true,
+      showOnlineStatus: json['show_online_status'] ?? true,
+      allowAnonymousMessages: json['allow_anonymous_messages'] ?? true,
+      language: json['language'] ?? 'fr',
+      theme: json['theme'] ?? 'system',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'notifications_enabled': notificationsEnabled,
+      'email_notifications': emailNotifications,
+      'push_notifications': pushNotifications,
+      'show_online_status': showOnlineStatus,
+      'allow_anonymous_messages': allowAnonymousMessages,
+      'language': language,
+      'theme': theme,
+    };
+  }
+}
