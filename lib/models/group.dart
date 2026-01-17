@@ -166,6 +166,18 @@ class GroupMessage {
   }
 
   Map<String, dynamic> toJson() {
+    Map<String, dynamic>? replyTo;
+    if (replyToMessage != null) {
+      replyTo = {
+        'id': replyToMessage!.id,
+        'content': replyToMessage!.content,
+        'type': replyToMessage!.type,
+        'media_url': replyToMessage!.mediaUrl,
+        'sender_id': replyToMessage!.senderId,
+        if (replyToMessage!.sender != null) 'sender': replyToMessage!.sender!.toJson(),
+      };
+    }
+
     return {
       'id': id,
       'group_id': groupId,
@@ -174,6 +186,8 @@ class GroupMessage {
       'type': type,
       'media_url': mediaUrl,
       'reply_to_message_id': replyToMessageId,
+      if (sender != null) 'sender': sender!.toJson(),
+      if (replyTo != null) 'reply_to_message': replyTo,
       'created_at': createdAt.toIso8601String(),
     };
   }

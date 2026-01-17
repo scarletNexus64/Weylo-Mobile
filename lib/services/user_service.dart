@@ -112,6 +112,14 @@ class UserService {
     return response.data['success'] ?? true;
   }
 
+  Future<bool> reportUser(String username, {String? reason}) async {
+    final response = await _apiClient.post(
+      ApiConstants.userReport(username),
+      data: reason != null && reason.trim().isNotEmpty ? {'reason': reason.trim()} : null,
+    );
+    return response.data['success'] ?? true;
+  }
+
   Future<bool> unblockUser(String username) async {
     final response = await _apiClient.delete('${ApiConstants.users}/$username/block');
     return response.data['success'] ?? true;

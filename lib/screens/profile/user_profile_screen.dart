@@ -7,6 +7,7 @@ import '../../models/user.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/gift_service.dart';
+import '../../services/user_service.dart';
 import '../../widgets/confessions/confession_card.dart';
 import '../../widgets/common/loading_overlay.dart';
 import '../messages/send_message_screen.dart';
@@ -23,6 +24,7 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final UserService _userService = UserService();
 
   @override
   void initState() {
@@ -492,11 +494,90 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   void _blockUser() {
-    // Block user
+    final username = widget.username;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Bloquer cet utilisateur'),
+        content: const Text(
+          'Vous ne verrez plus les messages et les posts de cet utilisateur.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _userService.blockUser(username);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Utilisateur bloqué')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur: $e')),
+                  );
+                }
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Bloquer'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _reportUser() {
-    // Report user
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Signaler cet utilisateur'),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Expliquez la raison (optionnel)',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _userService.reportUser(
+                  widget.username,
+                  reason: controller.text,
+                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Signalement envoyé')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Signaler'),
+          ),
+        ],
+      ),
+    );
   }
 }
 

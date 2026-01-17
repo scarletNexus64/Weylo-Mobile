@@ -4,8 +4,8 @@ class ApiConstants {
   //static const String baseUrl = 'http://10.0.2.2:8000/api/v1'; // Local Development (Android Emulator)
   //static const String wsUrl = 'wss://10.0.2.2:8000'; // Local Development (Android Emulator)
 
-  static const String baseUrl ='http://192.168.1.177:8000/api/v1'; // Local Development (Physical Device)
-  static const String wsUrl ='ws://192.168.1.177:8000'; // Local Development (Physical Device)
+  static const String baseUrl ='http://172.20.10.2:8000/api/v1'; // Local Development (Physical Device)
+  static const String wsUrl ='ws://172.20.10.2:8000'; // Local Development (Physical Device)
 
   // Reverb/Pusher Configuration
   // static const String reverbHost = 'weylo-adminpanel.space'; // Production
@@ -13,7 +13,7 @@ class ApiConstants {
   // static const String reverbAppKey = '1425cdd3ef7425fa6746d2895a233e52'; // Production
   // static const String reverbScheme = 'https';  // Production
   //static const String reverbHost = '10.0.2.2'; // Local Development (Android Emulator)
-  static const String reverbHost = '192.168.1.177'; // Local Development (Physical Device)
+  static const String reverbHost = '172.20.10.2'; // Local Development (Physical Device)
   static const int reverbPort = 6001; // Local Development
   static const String reverbAppKey = '1425cdd3ef7425fa6746d2895a233e52'; // Local Development
   static const String reverbScheme = 'http';  // Local Development
@@ -50,6 +50,7 @@ class ApiConstants {
   static String userFollowers(String username) => '/users/$username/followers';
   static String userFollowing(String username) => '/users/$username/following';
   static String userFollowStatus(String username) => '/users/$username/follow-status';
+  static String userReport(String username) => '/users/$username/report';
   static String userBlock(String username) => '/users/$username/block';
 
   // Messages

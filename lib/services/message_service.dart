@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart' as http_parser;
 import '../core/constants/api_constants.dart';
 import '../core/constants/app_constants.dart';
@@ -81,6 +82,8 @@ class MessageService {
           contentType = 'audio/mpeg';
           break;
         case 'm4a':
+          contentType = 'audio/m4a';
+          break;
         case 'aac':
           contentType = 'audio/aac';
           break;
@@ -94,6 +97,10 @@ class MessageService {
           contentType = 'audio/webm';
           break;
       }
+
+      debugPrint(
+        'Sending voice file: $filename (ext=$extension, type=$contentType, path=${voice.path})',
+      );
 
       formData.files.add(MapEntry(
         'voice',

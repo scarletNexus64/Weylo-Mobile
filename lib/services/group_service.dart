@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart' as http_parser;
 import '../core/constants/api_constants.dart';
 import '../core/constants/app_constants.dart';
@@ -121,9 +122,10 @@ class GroupService {
     int? replyToId,
     dynamic image,
     dynamic voice,
+    dynamic video,
   }) async {
     // If there's media, use multipart form data
-    if (image != null || voice != null) {
+    if (image != null || voice != null || video != null) {
       final formData = <String, dynamic>{};
       if (content != null && content.isNotEmpty) {
         formData['content'] = content;
@@ -148,6 +150,8 @@ class GroupService {
             contentType = 'audio/mpeg';
             break;
           case 'm4a':
+            contentType = 'audio/m4a';
+            break;
           case 'aac':
             contentType = 'audio/aac';
             break;
@@ -162,8 +166,42 @@ class GroupService {
             break;
         }
 
+        debugPrint(
+          'Sending group voice: $filename (ext=$extension, type=$contentType, path=${voice.path})',
+        );
+
         formData['voice'] = await MultipartFile.fromFile(
           voice.path,
+          filename: filename,
+          contentType: http_parser.MediaType.parse(contentType),
+        );
+      }
+      if (video != null) {
+        final filename = video.path.split('/').last;
+        final extension = filename.split('.').last.toLowerCase();
+        String contentType = 'video/mp4';
+
+        switch (extension) {
+          case 'mov':
+            contentType = 'video/quicktime';
+            break;
+          case 'avi':
+            contentType = 'video/x-msvideo';
+            break;
+          case 'mkv':
+            contentType = 'video/x-matroska';
+            break;
+          case 'webm':
+            contentType = 'video/webm';
+            break;
+          case 'mp4':
+          default:
+            contentType = 'video/mp4';
+            break;
+        }
+
+        formData['video'] = await MultipartFile.fromFile(
+          video.path,
           filename: filename,
           contentType: http_parser.MediaType.parse(contentType),
         );

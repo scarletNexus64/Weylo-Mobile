@@ -258,6 +258,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
   final ImagePicker _imagePicker = ImagePicker();
 
   File? _selectedImage;
+  File? _selectedVideo;
   bool _isPublic = true;
   bool _isLoading = false;
 
@@ -278,6 +279,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
+        _selectedVideo = null;
       });
     }
   }
@@ -291,6 +293,37 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
+        _selectedVideo = null;
+      });
+    }
+  }
+
+  Future<void> _pickVideo() async {
+    final XFile? video = await _imagePicker.pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(minutes: 2),
+    );
+
+    if (video != null) {
+      setState(() {
+        _selectedVideo = File(video.path);
+        _selectedImage = null;
+      });
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    final XFile? image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1080,
+      maxHeight: 1080,
+      imageQuality: 85,
+    );
+
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+        _selectedVideo = null;
       });
     }
   }
@@ -298,9 +331,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
   Future<void> _publishPost() async {
     final content = _contentController.text.trim();
 
-    if (content.isEmpty && _selectedImage == null) {
+    if (content.isEmpty && _selectedImage == null && _selectedVideo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez écrire quelque chose ou ajouter une image')),
+        const SnackBar(content: Text('Veuillez écrire quelque chose ou ajouter un média')),
       );
       return;
     }
@@ -313,6 +346,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
         type: 'public',
         isAnonymous: !_isPublic,
         image: _selectedImage,
+        video: _selectedVideo,
       );
 
       if (mounted) {
@@ -407,19 +441,36 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     ),
                   ),
 
-                  // Selected image preview
-                  if (_selectedImage != null) ...[
+                  // Selected media preview
+                  if (_selectedImage != null || _selectedVideo != null) ...[
                     const SizedBox(height: 16),
                     Stack(
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            _selectedImage!,
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
+                          child: _selectedImage != null
+                              ? Image.file(
+                                  _selectedImage!,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  height: 200,
+                                  width: double.infinity,
+                                  color: Colors.grey[200],
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.videocam, size: 48, color: Colors.grey[600]),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Vidéo sélectionnée',
+                                        style: TextStyle(color: Colors.grey[600]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                         ),
                         Positioned(
                           top: 8,
@@ -428,6 +479,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                             onTap: () {
                               setState(() {
                                 _selectedImage = null;
+                                _selectedVideo = null;
                               });
                             },
                             child: Container(
@@ -474,6 +526,14 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                   onPressed: _pickImage,
                   tooltip: 'Ajouter une image',
                 ),
+                IconButton(
+                  icon: Icon(
+                    Icons.camera_alt_outlined,
+                    color: Colors.grey[600],
+                  ),
+                  onPressed: _takePhoto,
+                  tooltip: 'Prendre une photo',
+                ),
                 // GIF button
                 IconButton(
                   icon: Icon(
@@ -482,6 +542,14 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                   ),
                   onPressed: _pickGif,
                   tooltip: 'Ajouter un GIF',
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.videocam_outlined,
+                    color: _selectedVideo != null ? AppColors.primary : Colors.grey[600],
+                  ),
+                  onPressed: _pickVideo,
+                  tooltip: 'Ajouter une vidéo',
                 ),
                 const Spacer(),
                 // Visibility selector

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
 import '../providers/auth_provider.dart';
 import '../services/story_service.dart';
 import '../services/user_service.dart';
@@ -17,6 +18,7 @@ import '../services/notification_service.dart';
 import '../services/premium_service.dart';
 import '../services/group_service.dart';
 import '../services/message_service.dart';
+import '../services/story_reply_service.dart';
 import '../models/story.dart' hide StoryView;
 import '../models/user.dart';
 import '../models/notification.dart';
@@ -43,6 +45,7 @@ import '../screens/premium/premium_settings_screen.dart';
 import '../screens/confessions/confession_detail_screen.dart';
 import '../screens/search/search_screen.dart';
 import '../widgets/voice/voice_recorder_widget.dart';
+import '../widgets/stories/story_reply_input.dart';
 
 class AppRouter {
   static GoRouter router(AuthProvider authProvider) {
@@ -2041,11 +2044,14 @@ class _StoryViewerScreen extends StatefulWidget {
 class _StoryViewerScreenState extends State<_StoryViewerScreen> {
   final StoryController _storyController = StoryController();
   final StoryService _storyService = StoryService();
+  final StoryReplyService _replyService = StoryReplyService();
   List<StoryItem> _storyItems = [];
   List<Story> _stories = [];
   bool _isLoading = true;
   String? _error;
   User? _storyUser;
+  int _currentIndex = 0;
+  bool _isReplying = false;
 
   @override
   void initState() {
@@ -2161,6 +2167,24 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
     }
   }
 
+  void _toggleReplyMode() {
+    setState(() {
+      _isReplying = !_isReplying;
+    });
+    if (_isReplying) {
+      _storyController.pause();
+    } else {
+      _storyController.play();
+    }
+  }
+
+  Story? get _currentStory {
+    if (_currentIndex < 0 || _currentIndex >= _stories.length) {
+      return null;
+    }
+    return _stories[_currentIndex];
+  }
+
   Color? _parseColor(String? colorString) {
     if (colorString == null) return null;
     try {
@@ -2214,6 +2238,12 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
                 Navigator.of(context).pop();
               }
             },
+            onStoryShow: (storyItem, index) {
+              if (!mounted) return;
+              setState(() {
+                _currentIndex = index;
+              });
+            },
             progressPosition: ProgressPosition.top,
             repeat: false,
           ),
@@ -2263,6 +2293,49 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
                 ],
               ),
             ),
+          Positioned(
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+            left: 16,
+            right: 16,
+            child: StoryReplyInput(
+              storyId: _currentStory?.id ?? 0,
+              isExpanded: _isReplying,
+              onTap: _toggleReplyMode,
+              onSend: (content, {isAnonymous = true, voiceFile, voiceEffect}) async {
+                final story = _currentStory;
+                if (story == null) return;
+                try {
+                  if (voiceFile != null) {
+                    await _replyService.sendVoiceReply(
+                      storyId: story.id,
+                      audioFile: voiceFile,
+                      voiceEffect: voiceEffect,
+                      isAnonymous: isAnonymous,
+                    );
+                  } else {
+                    await _replyService.sendTextReply(
+                      storyId: story.id,
+                      content: content,
+                      isAnonymous: isAnonymous,
+                    );
+                  }
+                  _toggleReplyMode();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Réponse envoyée')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Erreur lors de l\'envoi')),
+                    );
+                  }
+                }
+              },
+              onClose: _toggleReplyMode,
+            ),
+          ),
         ],
       ),
     );
@@ -2917,6 +2990,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   bool _isSending = false;
   bool _showVoiceRecorder = false;
   File? _selectedImage;
+  File? _selectedVideo;
   File? _voiceFile;
   String? _groupName;
   Group? _group;
@@ -3015,6 +3089,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
+        _selectedVideo = null;
+        _voiceFile = null;
+        _showVoiceRecorder = false;
       });
     }
   }
@@ -3030,6 +3107,25 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
+        _selectedVideo = null;
+        _voiceFile = null;
+        _showVoiceRecorder = false;
+      });
+    }
+  }
+
+  Future<void> _pickVideo() async {
+    final XFile? video = await _imagePicker.pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(minutes: 2),
+    );
+
+    if (video != null) {
+      setState(() {
+        _selectedVideo = File(video.path);
+        _selectedImage = null;
+        _voiceFile = null;
+        _showVoiceRecorder = false;
       });
     }
   }
@@ -3037,6 +3133,8 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   void _onVoiceRecorded(File file, dynamic effect) {
     setState(() {
       _voiceFile = file;
+      _selectedImage = null;
+      _selectedVideo = null;
       _showVoiceRecorder = false;
     });
     _sendMessage();
@@ -3045,7 +3143,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
 
-    if (content.isEmpty && _selectedImage == null && _voiceFile == null) {
+    if (content.isEmpty && _selectedImage == null && _selectedVideo == null && _voiceFile == null) {
       return;
     }
 
@@ -3081,6 +3179,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
         groupId: int.tryParse(widget.groupId) ?? 0,
         content: content,
         image: _selectedImage,
+        video: _selectedVideo,
         voice: _voiceFile,
         replyToId: replyToId,
       );
@@ -3088,6 +3187,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       _messageController.clear();
       setState(() {
         _selectedImage = null;
+        _selectedVideo = null;
         _voiceFile = null;
         _replyToMessage = null;
         _isSending = false;
@@ -3099,8 +3199,16 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
         _isSending = false;
       });
       if (mounted) {
+        final errorMessage = _extractErrorMessage(e);
+        final voiceInfo = _voiceFile != null ? _voiceDebugInfo(_voiceFile!) : null;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(
+            content: Text(
+              voiceInfo != null
+                  ? 'Erreur: $errorMessage | voice=$voiceInfo'
+                  : 'Erreur: $errorMessage',
+            ),
+          ),
         );
       }
     }
@@ -3181,6 +3289,48 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     right: 0,
                     child: GestureDetector(
                       onTap: () => setState(() => _selectedImage = null),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (_selectedVideo != null)
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: Stack(
+                children: [
+                  Container(
+                    height: 100,
+                    width: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.videocam, size: 28, color: Colors.grey[700]),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Vidéo sélectionnée',
+                          style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedVideo = null),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
@@ -3327,6 +3477,13 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   ),
                   IconButton(
                     icon: Icon(
+                      Icons.videocam,
+                      color: _selectedVideo != null ? AppColors.primary : Colors.grey,
+                    ),
+                    onPressed: _pickVideo,
+                  ),
+                  IconButton(
+                    icon: Icon(
                       Icons.mic,
                       color: _showVoiceRecorder ? AppColors.primary : Colors.grey,
                     ),
@@ -3383,6 +3540,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     final messageType = message['type'] ?? 'text';
     final hasImage = messageType == 'image' && mediaUrl != null;
     final hasVoice = messageType == 'voice' && mediaUrl != null;
+    final hasVideo = messageType == 'video' && mediaUrl != null;
     final senderId = message['sender_id'] ?? message['sender']?['id'] ?? 0;
     final senderColor = isMe ? AppColors.primary : _getUserColor(senderId);
     final replyTo = message['reply_to_message'];
@@ -3432,7 +3590,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     ),
                   ),
                   child: Text(
-                    replyTo['content'] ?? '',
+                    _replyPreviewText(replyTo),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -3448,6 +3606,31 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     imageUrl: mediaUrl,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                  ),
+                ),
+              if (hasVideo)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isMe ? Colors.white.withOpacity(0.2) : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.play_circle_fill,
+                        color: isMe ? Colors.white : senderColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Vidéo',
+                          style: TextStyle(
+                            color: isMe ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               if (hasVoice)
@@ -3481,6 +3664,25 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       ),
       ),
     );
+  }
+
+  String _replyPreviewText(Map<String, dynamic> replyTo) {
+    final content = replyTo['content'];
+    if (content is String && content.trim().isNotEmpty) {
+      return content;
+    }
+
+    final type = replyTo['type'] ?? 'text';
+    switch (type) {
+      case 'image':
+        return 'Image';
+      case 'voice':
+        return 'Message vocal';
+      case 'video':
+        return 'Vidéo';
+      default:
+        return 'Message';
+    }
   }
 
   void _showMessageOptions(Map<String, dynamic> message) {
@@ -3577,6 +3779,77 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
         ],
       ),
     );
+  }
+
+  String _voiceDebugInfo(File voice) {
+    final filename = voice.path.split('/').last;
+    final extension = filename.contains('.') ? filename.split('.').last.toLowerCase() : '';
+    String contentType = 'audio/m4a';
+    String signature = 'unknown';
+
+    switch (extension) {
+      case 'mp3':
+        contentType = 'audio/mpeg';
+        break;
+      case 'm4a':
+        contentType = 'audio/m4a';
+        break;
+      case 'aac':
+        contentType = 'audio/aac';
+        break;
+      case 'wav':
+        contentType = 'audio/wav';
+        break;
+      case 'ogg':
+        contentType = 'audio/ogg';
+        break;
+      case 'webm':
+        contentType = 'audio/webm';
+        break;
+    }
+
+    try {
+      final bytes = voice.readAsBytesSync();
+      if (bytes.length >= 12) {
+        final header4 = String.fromCharCodes(bytes.sublist(0, 4));
+        final header8 = String.fromCharCodes(bytes.sublist(8, 12));
+        final ftyp = String.fromCharCodes(bytes.sublist(4, 8));
+        if (header4 == 'RIFF' && header8 == 'WAVE') {
+          signature = 'RIFF/WAVE';
+        } else if (ftyp == 'ftyp') {
+          signature = 'ftyp';
+        } else if (header4 == 'OggS') {
+          signature = 'OggS';
+        } else if (header4 == 'ID3') {
+          signature = 'ID3';
+        } else {
+          signature = header4;
+        }
+      }
+    } catch (_) {
+      signature = 'read_error';
+    }
+
+    return 'file=$filename ext=$extension type=$contentType sig=$signature';
+  }
+
+  String _extractErrorMessage(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map) {
+        final message = data['message'] ?? data['error'];
+        if (message != null) return message.toString();
+        final errors = data['errors'];
+        if (errors is Map) {
+          return errors.values.map((v) => v.toString()).join(' ');
+        }
+      }
+      if (error.message != null && error.message!.isNotEmpty) {
+        return error.message!;
+      }
+    }
+
+    return error.toString();
   }
 
   void _showMembers() {
@@ -4468,12 +4741,32 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                                         ],
                                       ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      Helpers.getTimeAgo(_message!.createdAt),
-                                      style: const TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 14,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          Helpers.getTimeAgo(_message!.createdAt),
+                                          style: const TextStyle(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        if (!_message!.isIdentityRevealed)
+                                          IconButton(
+                                            tooltip: 'Découvrir l\'identité',
+                                            onPressed: _isRevealing ? null : _revealIdentity,
+                                            icon: _isRevealing
+                                                ? const SizedBox(
+                                                    width: 18,
+                                                    height: 18,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                                  )
+                                                : const Icon(Icons.visibility),
+                                            color: AppColors.primary,
+                                          ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -4512,37 +4805,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
 
                       const SizedBox(height: 24),
 
-                      // Reveal identity button
-                      if (!_message!.isIdentityRevealed)
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ElevatedButton.icon(
-                            onPressed: _isRevealing ? null : _revealIdentity,
-                            icon: _isRevealing
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(Icons.visibility, color: Colors.white),
-                            label: Text(
-                              _isRevealing ? 'Révélation...' : 'Payer pour découvrir l\'identité',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                          ),
-                        )
-                      else
+                      if (_message!.isIdentityRevealed)
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(

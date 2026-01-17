@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http_parser/http_parser.dart' as http_parser;
 import '../core/constants/api_constants.dart';
 import 'api_client.dart';
 
@@ -56,13 +58,43 @@ class StoryReplyService {
     String? voiceEffect,
     bool isAnonymous = true,
   }) async {
+    final filename = audioFile.path.split('/').last;
+    final extension = filename.split('.').last.toLowerCase();
+    String contentType = 'audio/m4a';
+
+    switch (extension) {
+      case 'mp3':
+        contentType = 'audio/mpeg';
+        break;
+      case 'm4a':
+        contentType = 'audio/m4a';
+        break;
+      case 'aac':
+        contentType = 'audio/aac';
+        break;
+      case 'wav':
+        contentType = 'audio/wav';
+        break;
+      case 'ogg':
+        contentType = 'audio/ogg';
+        break;
+      case 'webm':
+        contentType = 'audio/webm';
+        break;
+    }
+
+    debugPrint(
+      'Sending story voice: $filename (ext=$extension, type=$contentType, path=${audioFile.path})',
+    );
+
     final formData = FormData.fromMap({
       'type': 'voice',
       'is_anonymous': isAnonymous,
       if (voiceEffect != null) 'voice_effect': voiceEffect,
       'media': await MultipartFile.fromFile(
         audioFile.path,
-        filename: 'voice_reply.m4a',
+        filename: filename,
+        contentType: http_parser.MediaType.parse(contentType),
       ),
     });
 

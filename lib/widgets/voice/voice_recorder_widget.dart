@@ -73,11 +73,11 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
       if (await _recorder.hasPermission()) {
         final dir = await getTemporaryDirectory();
         _recordPath =
-            '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+            '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.wav';
 
         await _recorder.start(
           const RecordConfig(
-            encoder: AudioEncoder.aacLc,
+            encoder: AudioEncoder.wav,
             bitRate: 128000,
             sampleRate: 44100,
           ),
