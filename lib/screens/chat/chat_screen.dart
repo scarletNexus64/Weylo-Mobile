@@ -8,7 +8,9 @@ import '../../models/conversation.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/chat_service.dart';
 import '../../services/websocket_service.dart';
-import '../../widgets/common/widgets.dart';
+import '../../services/widgets/common/widgets.dart';
+
+enum MessageDeliveryStatus { sending, sent, read, failed }
 
 class ChatScreen extends StatefulWidget {
   final int conversationId;
@@ -30,6 +32,8 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoading = true;
   bool _isSending = false;
   ChatMessage? _replyTo;
+  final Map<int, MessageDeliveryStatus> _messageDeliveryStatus = {};
+  String? _pendingMessageContent;
 
   @override
   void initState() {
@@ -48,19 +52,25 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _subscribeToChannel() {
     _webSocket.subscribeToConversation(widget.conversationId);
-    _webSocket.messages.listen((message) {
-      if (message.isChatMessage && message.channel?.contains('${widget.conversationId}') == true) {
-        final chatMessage = ChatMessage.fromJson(message.data);
-        setState(() {
-          _messages.insert(0, chatMessage);
-        });
-        _scrollToBottom();
-      }
-    });
+      _webSocket.messages.listen((message) {
+        debugPrint('[ChatScreen] WebSocket event: ${message.event} / channel: ${message.channel} / data: ${message.data}');
+        if (message.isChatMessage && message.channel?.contains('${widget.conversationId}') == true) {
+          final chatMessage = ChatMessage.fromJson(message.data);
+          debugPrint('[ChatScreen] Incoming chat message -> id: ${chatMessage.id}, sender: ${chatMessage.senderId}, content: "${chatMessage.content}"');
+          _messageDeliveryStatus[chatMessage.id] = chatMessage.isRead
+              ? MessageDeliveryStatus.read
+              : MessageDeliveryStatus.sent;
+          if (!mounted) return;
+          setState(() {
+            _messages.insert(0, chatMessage);
+          });
+          _scrollToBottom();
+        }
+      });
   }
 
   Future<void> _loadData() async {
-    try {
+      try {
       final results = await Future.wait([
         _chatService.getConversation(widget.conversationId),
         _chatService.getMessages(widget.conversationId),
@@ -69,8 +79,18 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {
         _conversation = results[0] as Conversation;
         _messages = (results[1] as PaginatedChatMessages).messages;
+        _sortMessages();
         _isLoading = false;
       });
+
+      final currentUserId = context.read<AuthProvider>().user?.id ?? 0;
+      for (final message in _messages) {
+        if (message.senderId == currentUserId) {
+          _messageDeliveryStatus[message.id] = message.isRead
+              ? MessageDeliveryStatus.read
+              : MessageDeliveryStatus.sent;
+        }
+      }
 
       _chatService.markAsRead(widget.conversationId);
     } catch (e) {
@@ -90,10 +110,20 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void _sortMessages() {
+    _messages.sort((a, b) {
+      final aTime = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bTime = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bTime.compareTo(aTime);
+    });
+  }
+
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
     if (content.isEmpty || _isSending) return;
 
+    debugPrint('[ChatScreen] Sending message -> content: "$content", replyTo: ${_replyTo?.id}');
+    _pendingMessageContent = content;
     setState(() {
       _isSending = true;
     });
@@ -105,14 +135,19 @@ class _ChatScreenState extends State<ChatScreen> {
         replyToId: _replyTo?.id,
       );
 
+      debugPrint('[ChatScreen] Message sent -> id: ${message.id}, data: ${message.content}');
+      _messageDeliveryStatus[message.id] = MessageDeliveryStatus.sent;
+
       setState(() {
         _messages.insert(0, message);
         _replyTo = null;
       });
 
       _messageController.clear();
+      _pendingMessageContent = null;
       _scrollToBottom();
     } catch (e) {
+      debugPrint('[ChatScreen] Message send failed -> error: $e');
       Helpers.showErrorSnackBar(context, 'Erreur lors de l\'envoi du message');
     } finally {
       setState(() {
@@ -223,10 +258,11 @@ class _ChatScreenState extends State<ChatScreen> {
                               final message = _messages[index];
                               // Check if message is from current user using senderId or sender object
                               final isMe = message.senderId == currentUserId ||
-                                           (message.sender?.id == currentUserId && currentUserId != 0);
+                                  (message.sender?.id == currentUserId && currentUserId != 0);
                               return _MessageBubble(
                                 message: message,
                                 isMe: isMe,
+                                statusLabel: _getMessageStatusLabel(message, isMe),
                                 onReply: () {
                                   setState(() {
                                     _replyTo = message;
@@ -339,6 +375,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),
+              onChanged: _onMessageChanged,
               maxLines: 4,
               minLines: 1,
             ),
@@ -366,6 +403,34 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  String _getMessageStatusLabel(ChatMessage message, bool isMe) {
+    if (!isMe) return '';
+    if (_isSending &&
+        _pendingMessageContent != null &&
+        message.content == _pendingMessageContent) {
+      return 'En cours';
+    }
+
+    final status = _messageDeliveryStatus[message.id];
+    if (status != null) {
+      return _statusText(status);
+    }
+    return message.isRead ? 'Lu' : 'Non lu';
+  }
+
+  String _statusText(MessageDeliveryStatus status) {
+    switch (status) {
+      case MessageDeliveryStatus.sending:
+        return 'En cours';
+      case MessageDeliveryStatus.sent:
+        return 'Envoyé';
+      case MessageDeliveryStatus.read:
+        return 'Lu';
+      case MessageDeliveryStatus.failed:
+        return 'Erreur';
+    }
   }
 
   void _showRevealDialog() {
@@ -416,6 +481,10 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  void _onMessageChanged(String value) {
+    debugPrint('[ChatScreen] Input changed -> "$value"');
   }
 
   void _showOptions() {
@@ -540,11 +609,13 @@ class _ChatScreenState extends State<ChatScreen> {
 class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isMe;
+  final String statusLabel;
   final VoidCallback? onReply;
 
   const _MessageBubble({
     required this.message,
     required this.isMe,
+    required this.statusLabel,
     this.onReply,
   });
 
@@ -608,6 +679,17 @@ class _MessageBubble extends StatelessWidget {
                       Helpers.formatTime(message.createdAt),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
                     ),
+                    if (statusLabel.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Text(
+                        statusLabel,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 11,
+                          color: isMe ? AppColors.textPrimary : AppColors.textSecondary,
+                          fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ],
                     if (isMe && message.isRead) ...[
                       const SizedBox(width: 4),
                       Icon(

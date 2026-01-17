@@ -8,8 +8,8 @@ import '../../providers/profile_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/gift_service.dart';
 import '../../services/user_service.dart';
-import '../../widgets/confessions/confession_card.dart';
-import '../../widgets/common/loading_overlay.dart';
+import '../../services/widgets/confessions/confession_card.dart';
+import '../../services/widgets/common/loading_overlay.dart';
 import '../messages/send_message_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
