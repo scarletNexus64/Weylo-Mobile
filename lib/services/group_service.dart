@@ -73,11 +73,35 @@ class GroupService {
     String? name,
     String? description,
     bool? isPublic,
+    int? maxMembers,
+    File? avatar,
   }) async {
     final data = <String, dynamic>{};
     if (name != null) data['name'] = name;
     if (description != null) data['description'] = description;
     if (isPublic != null) data['is_public'] = isPublic;
+    if (maxMembers != null) data['max_members'] = maxMembers;
+
+    if (avatar != null) {
+      final formData = FormData.fromMap({
+        ...data,
+        'avatar': await MultipartFile.fromFile(
+          avatar.path,
+          filename: avatar.path.split('/').last,
+        ),
+      });
+
+      final response = await _apiClient.put(
+        '${ApiConstants.groups}/$groupId',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+      return Group.fromJson(response.data['group'] ?? response.data);
+    }
 
     final response = await _apiClient.put(
       '${ApiConstants.groups}/$groupId',
@@ -132,6 +156,13 @@ class GroupService {
       }
       if (replyToId != null) {
         formData['reply_to_message_id'] = replyToId;
+      }
+      if (video != null) {
+        formData['type'] = 'video';
+      } else if (voice != null) {
+        formData['type'] = 'voice';
+      } else if (image != null) {
+        formData['type'] = 'image';
       }
       if (image != null) {
         formData['image'] = await MultipartFile.fromFile(

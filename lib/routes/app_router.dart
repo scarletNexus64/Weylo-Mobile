@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:video_player/video_player.dart';
 import '../providers/auth_provider.dart';
 import '../services/story_service.dart';
 import '../services/user_service.dart';
@@ -26,7 +28,9 @@ import '../models/notification.dart';
 import '../models/group.dart';
 import '../models/message.dart';
 import '../core/theme/app_colors.dart';
+import '../core/constants/app_constants.dart';
 import '../core/utils/helpers.dart';
+import '../core/constants/api_constants.dart';
 import '../widgets/common/avatar_widget.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
@@ -3093,6 +3097,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final ImagePicker _imagePicker = ImagePicker();
   final GroupService _groupService = GroupService();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   List<Map<String, dynamic>> _messages = [];
   bool _isLoading = true;
@@ -3101,6 +3106,8 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   File? _selectedImage;
   File? _selectedVideo;
   File? _voiceFile;
+  int? _playingMessageId;
+  bool _isAudioLoading = false;
   String? _groupName;
   Group? _group;
   int? _currentUserId;
@@ -3128,12 +3135,21 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     super.initState();
     _loadGroup();
     _loadMessages();
+    _audioPlayer.playerStateStream.listen((state) {
+      if (!mounted) return;
+      if (state.processingState == ProcessingState.completed) {
+        setState(() {
+          _playingMessageId = null;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -3150,6 +3166,105 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     } catch (e) {
       // Handle error
     }
+  }
+
+  String _resolveMediaUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    if (url.startsWith('http')) return url;
+
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    if (url.startsWith('/storage/')) {
+      return '$base$url';
+    }
+    if (url.startsWith('storage/')) {
+      return '$base/$url';
+    }
+    return '$base/storage/$url';
+  }
+
+  Future<void> _toggleVoicePlayback(int messageId, String mediaUrl) async {
+    if (mediaUrl.isEmpty) return;
+    try {
+      if (_playingMessageId == messageId && _audioPlayer.playing) {
+        await _audioPlayer.pause();
+        return;
+      }
+
+      setState(() {
+        _playingMessageId = messageId;
+        _isAudioLoading = true;
+      });
+      await _audioPlayer.setUrl(mediaUrl);
+      await _audioPlayer.play();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lecture audio: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAudioLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _openVideoPlayer(String mediaUrl) async {
+    if (mediaUrl.isEmpty) return;
+    final controller = VideoPlayerController.networkUrl(Uri.parse(mediaUrl));
+    try {
+      await controller.initialize();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lecture vidéo: $e')),
+        );
+      }
+      await controller.dispose();
+      return;
+    }
+
+    if (!mounted) {
+      await controller.dispose();
+      return;
+    }
+
+    await showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(16),
+        child: AspectRatio(
+          aspectRatio: controller.value.aspectRatio,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              VideoPlayer(controller),
+              IconButton(
+                onPressed: () {
+                  if (controller.value.isPlaying) {
+                    controller.pause();
+                  } else {
+                    controller.play();
+                  }
+                },
+                icon: Icon(
+                  controller.value.isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_filled,
+                  size: 56,
+                  color: Colors.white.withOpacity(0.85),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await controller.dispose();
   }
 
   Future<void> _loadMessages() async {
@@ -3284,12 +3399,14 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       // Handle reply
       final replyToId = _replyToMessage?['id'];
 
+      final voice = (_selectedImage != null || _selectedVideo != null) ? null : _voiceFile;
+
       await _groupService.sendMessage(
         groupId: int.tryParse(widget.groupId) ?? 0,
         content: content,
         image: _selectedImage,
         video: _selectedVideo,
-        voice: _voiceFile,
+        voice: voice,
         replyToId: replyToId,
       );
 
@@ -3327,7 +3444,17 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_groupName ?? 'Groupe'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_groupName ?? 'Groupe'),
+            if (_group != null)
+              Text(
+                '${_group!.membersCount} membre${_group!.membersCount > 1 ? 's' : ''}',
+                style: const TextStyle(fontSize: 12, color: Colors.white70),
+              ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.people),
@@ -3343,8 +3470,15 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/fond.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Column(
+          children: [
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -3638,14 +3772,16 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMessageBubble(Map<String, dynamic> message) {
     final isMe = message['is_mine'] == true;
-    final mediaUrl = message['media_full_url'] ?? message['media_url'];
+    final rawMediaUrl = message['media_full_url'] ?? message['media_url'];
+    final mediaUrl = _resolveMediaUrl(rawMediaUrl);
     final messageType = message['type'] ?? 'text';
     final hasImage = messageType == 'image' && mediaUrl != null;
     final hasVoice = messageType == 'voice' && mediaUrl != null;
@@ -3714,40 +3850,58 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   child: CachedNetworkImage(
                     imageUrl: mediaUrl,
                     width: double.infinity,
+                    height: 200,
                     fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      height: 200,
+                      color: Colors.grey[300],
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 200,
+                      color: Colors.grey[300],
+                      child: const Center(
+                        child: Icon(Icons.broken_image_outlined, color: Colors.grey),
+                      ),
+                    ),
                   ),
                 ),
               if (hasVideo)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isMe ? Colors.white.withOpacity(0.2) : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
+                GestureDetector(
+                  onTap: () => _openVideoPlayer(mediaUrl),
+                  child: Container(
+                    height: 200,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Center(
+                      child: Icon(
                         Icons.play_circle_fill,
+                        size: 56,
                         color: isMe ? Colors.white : senderColor,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Vidéo',
-                          style: TextStyle(
-                            color: isMe ? Colors.white : Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               if (hasVoice)
                 Row(
                   children: [
-                    Icon(
-                      Icons.play_circle_fill,
-                      color: isMe ? Colors.white : senderColor,
+                    IconButton(
+                      icon: _isAudioLoading && _playingMessageId == message['id']
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(
+                              _playingMessageId == message['id'] && _audioPlayer.playing
+                                  ? Icons.pause_circle_filled
+                                  : Icons.play_circle_fill,
+                              color: isMe ? Colors.white : senderColor,
+                            ),
+                      onPressed: () => _toggleVoicePlayback(message['id'], mediaUrl),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -4254,7 +4408,11 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   void _showEditGroupDialog() {
     final nameController = TextEditingController(text: _group?.name ?? '');
     final descriptionController = TextEditingController(text: _group?.description ?? '');
+    final maxMembersController = TextEditingController(
+      text: (_group?.maxMembers ?? AppConstants.maxGroupMembers).toString(),
+    );
     bool isPublic = _group?.isPublic ?? false;
+    File? avatarFile;
 
     showDialog(
       context: context,
@@ -4265,6 +4423,48 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Row(
+                  children: [
+                    Builder(
+                      builder: (context) {
+                        ImageProvider<Object>? backgroundImage;
+                        if (avatarFile != null) {
+                          backgroundImage = FileImage(avatarFile!);
+                        } else if (_group?.avatarUrl != null) {
+                          backgroundImage = CachedNetworkImageProvider(_group!.avatarUrl!);
+                        }
+
+                        return CircleAvatar(
+                          radius: 26,
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage: backgroundImage,
+                          child: avatarFile == null && _group?.avatarUrl == null
+                              ? const Icon(Icons.group, color: Colors.grey)
+                              : null,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    TextButton.icon(
+                      onPressed: () async {
+                        final image = await _imagePicker.pickImage(
+                          source: ImageSource.gallery,
+                          maxWidth: 1024,
+                          maxHeight: 1024,
+                          imageQuality: 85,
+                        );
+                        if (image != null) {
+                          setDialogState(() {
+                            avatarFile = File(image.path);
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.photo_camera),
+                      label: const Text('Changer le logo'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 TextField(
                   controller: nameController,
                   decoration: const InputDecoration(
@@ -4279,6 +4479,15 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     prefixIcon: Icon(Icons.description),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: maxMembersController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Nombre maximum de membres',
+                    prefixIcon: Icon(Icons.people),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -4303,11 +4512,14 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             ElevatedButton(
               onPressed: () async {
                 try {
+                  final maxMembers = int.tryParse(maxMembersController.text.trim());
                   await _groupService.updateGroup(
                     int.tryParse(widget.groupId) ?? 0,
                     name: nameController.text,
                     description: descriptionController.text,
                     isPublic: isPublic,
+                    maxMembers: maxMembers,
+                    avatar: avatarFile,
                   );
                   Navigator.pop(context);
                   _loadGroup();
@@ -4597,6 +4809,7 @@ class _AnonymousMessageDetailScreen extends StatefulWidget {
 
 class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailScreen> {
   final MessageService _messageService = MessageService();
+  final ChatService _chatService = ChatService();
   AnonymousMessage? _message;
   bool _isLoading = true;
   bool _isRevealing = false;
@@ -4717,6 +4930,10 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
     try {
       // Start conversation by replying to the message
       final result = await _messageService.startConversation(widget.messageId);
+      final conversation = result['conversation'] ?? result['data'];
+      final conversationId = conversation is Map
+          ? (conversation['id'] ?? conversation['conversation_id'] ?? conversation['conversationId'])
+          : (result['conversation_id'] ?? result['conversationId']);
 
       setState(() {
         _isReplying = false;
@@ -4724,8 +4941,12 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
 
       if (mounted) {
         // Navigate to the chat conversation
-        final conversationId = result['conversation_id'] ?? result['conversationId'];
         if (conversationId != null) {
+          await _chatService.sendMessage(
+            conversationId,
+            content: _replyController.text.trim(),
+          );
+          _replyController.clear();
           context.go('/chat/$conversationId');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -4809,11 +5030,18 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
           ? const Center(child: CircularProgressIndicator())
           : _message == null
               ? const Center(child: Text('Message introuvable'))
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+              : Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/fond.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       // Sender info card
                       Card(
                         child: Padding(
@@ -5024,7 +5252,8 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                           ),
                         ),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
     );

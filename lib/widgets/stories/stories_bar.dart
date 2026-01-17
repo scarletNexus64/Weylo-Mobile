@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -15,16 +16,35 @@ class StoriesBar extends StatefulWidget {
   State<StoriesBar> createState() => _StoriesBarState();
 }
 
-class _StoriesBarState extends State<StoriesBar> {
+class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
   final StoryService _storyService = StoryService();
   List<UserStories> _stories = [];
   List<Story> _myStories = [];
   bool _isLoading = true;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadStories();
+    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _loadStories();
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadStories();
+    }
   }
 
   Future<void> _loadStories() async {
@@ -133,15 +153,21 @@ class _StoriesBarState extends State<StoriesBar> {
     final lastStory = hasStory ? _myStories.first : null;
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (hasStory) {
-          context.push('/my-stories');
+          await context.push('/my-stories');
         } else {
-          context.push('/create-story');
+          await context.push('/create-story');
+        }
+        if (mounted) {
+          _loadStories();
         }
       },
-      onLongPress: hasStory ? () {
-        context.push('/create-story');
+      onLongPress: hasStory ? () async {
+        await context.push('/create-story');
+        if (mounted) {
+          _loadStories();
+        }
       } : null,
       child: Container(
         width: 100,

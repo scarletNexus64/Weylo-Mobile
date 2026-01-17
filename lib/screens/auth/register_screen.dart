@@ -298,7 +298,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   margin: const EdgeInsets.only(bottom: 32),
                   child: Center(
                     child: Image.asset(
-                      'assets/logo.PNG',
+                      'assets/logo.jpg',
                       height: 100,
                       width: 100,
                       fit: BoxFit.contain,

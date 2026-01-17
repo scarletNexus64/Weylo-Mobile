@@ -41,6 +41,7 @@ class ConfessionCard extends StatefulWidget {
 class _ConfessionCardState extends State<ConfessionCard> {
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
+  bool _videoInitError = false;
 
   @override
   void initState() {
@@ -60,10 +61,18 @@ class _ConfessionCardState extends State<ConfessionCard> {
     _videoController = VideoPlayerController.networkUrl(
       Uri.parse(widget.confession.videoUrl!),
     )..initialize().then((_) {
-      setState(() {
-        _isVideoInitialized = true;
+        if (!mounted) return;
+        setState(() {
+          _isVideoInitialized = true;
+          _videoInitError = false;
+        });
+      }).catchError((_) {
+        if (!mounted) return;
+        setState(() {
+          _isVideoInitialized = false;
+          _videoInitError = true;
+        });
       });
-    });
   }
 
   Confession get confession => widget.confession;
@@ -249,8 +258,10 @@ class _ConfessionCardState extends State<ConfessionCard> {
                       : Container(
                           height: 200,
                           color: Colors.grey[200],
-                          child: const Center(
-                            child: CircularProgressIndicator(),
+                          child: Center(
+                            child: _videoInitError
+                                ? const Icon(Icons.error_outline, color: Colors.grey)
+                                : const CircularProgressIndicator(),
                           ),
                         ),
                 ),

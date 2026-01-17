@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
@@ -19,6 +21,7 @@ class ConfessionDetailScreen extends StatefulWidget {
 
 class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   final ConfessionService _confessionService = ConfessionService();
+  final ImagePicker _imagePicker = ImagePicker();
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -27,6 +30,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   bool _isLoading = true;
   bool _isLoadingComments = false;
   bool _isSendingComment = false;
+  File? _selectedCommentImage;
   String? _error;
 
   @override
@@ -82,7 +86,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
 
   Future<void> _sendComment() async {
     final content = _commentController.text.trim();
-    if (content.isEmpty) return;
+    if (content.isEmpty && _selectedCommentImage == null) return;
 
     try {
       setState(() => _isSendingComment = true);
@@ -90,9 +94,13 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
       final comment = await _confessionService.addComment(
         widget.confessionId,
         content,
+        image: _selectedCommentImage,
       );
 
       _commentController.clear();
+      setState(() {
+        _selectedCommentImage = null;
+      });
 
       setState(() {
         _comments.insert(0, comment);
@@ -595,10 +603,35 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  comment.content,
-                  style: const TextStyle(fontSize: 14, height: 1.4),
-                ),
+                if (comment.content.isNotEmpty)
+                  Text(
+                    comment.content,
+                    style: const TextStyle(fontSize: 14, height: 1.4),
+                  ),
+                if (comment.mediaFullUrl != null || comment.mediaUrl != null) ...[
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: comment.mediaFullUrl ?? comment.mediaUrl ?? '',
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        height: 200,
+                        color: Colors.grey[200],
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: 200,
+                        color: Colors.grey[200],
+                        child: const Center(
+                          child: Icon(Icons.broken_image_outlined, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -625,51 +658,123 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: TextField(
-              controller: _commentController,
-              decoration: InputDecoration(
-                hintText: 'Ajouter un commentaire...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey.withOpacity(0.1),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-              ),
-              maxLines: null,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-          ),
-          const SizedBox(width: 8),
-          _isSendingComment
-              ? const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+          if (_selectedCommentImage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      _selectedCommentImage!,
+                      height: 120,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                )
-              : Container(
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    shape: BoxShape.circle,
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedCommentImage = null;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close, color: Colors.white, size: 18),
+                      ),
+                    ),
                   ),
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: _sendComment,
+                ],
+              ),
+            ),
+          Row(
+            children: [
+              IconButton(
+                tooltip: 'Ajouter une image',
+                icon: const Icon(Icons.image_outlined),
+                onPressed: () async {
+                  final image = await _imagePicker.pickImage(
+                    source: ImageSource.gallery,
+                    maxWidth: 1080,
+                    maxHeight: 1080,
+                    imageQuality: 85,
+                  );
+                  if (image != null) {
+                    setState(() {
+                      _selectedCommentImage = File(image.path);
+                    });
+                  }
+                },
+              ),
+              IconButton(
+                tooltip: 'Ajouter un GIF',
+                icon: const Icon(Icons.gif_box_outlined),
+                onPressed: () async {
+                  final image = await _imagePicker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (image != null) {
+                    setState(() {
+                      _selectedCommentImage = File(image.path);
+                    });
+                  }
+                },
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  decoration: InputDecoration(
+                    hintText: 'Ajouter un commentaire...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.withOpacity(0.1),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                   ),
+                  maxLines: null,
+                  textCapitalization: TextCapitalization.sentences,
                 ),
+              ),
+              const SizedBox(width: 8),
+              _isSendingComment
+                  ? const SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        onPressed: _sendComment,
+                      ),
+                    ),
+            ],
+          ),
         ],
       ),
     );

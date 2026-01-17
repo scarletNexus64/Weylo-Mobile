@@ -200,38 +200,46 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: _isLoading
           ? const LoadingWidget()
-          : Column(
-              children: [
-                Expanded(
-                  child: _messages.isEmpty
-                      ? const Center(
-                          child: Text('Aucun message. Commencez la conversation !'),
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          reverse: true,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          itemCount: _messages.length,
-                          itemBuilder: (context, index) {
-                            final message = _messages[index];
-                            // Check if message is from current user using senderId or sender object
-                            final isMe = message.senderId == currentUserId ||
-                                         (message.sender?.id == currentUserId && currentUserId != 0);
-                            return _MessageBubble(
-                              message: message,
-                              isMe: isMe,
-                              onReply: () {
-                                setState(() {
-                                  _replyTo = message;
-                                });
-                              },
-                            );
-                          },
-                        ),
+          : Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/fond.png'),
+                  fit: BoxFit.cover,
                 ),
-                if (_replyTo != null) _buildReplyPreview(),
-                _buildInputArea(),
-              ],
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: _messages.isEmpty
+                        ? const Center(
+                            child: Text('Aucun message. Commencez la conversation !'),
+                          )
+                        : ListView.builder(
+                            controller: _scrollController,
+                            reverse: true,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            itemCount: _messages.length,
+                            itemBuilder: (context, index) {
+                              final message = _messages[index];
+                              // Check if message is from current user using senderId or sender object
+                              final isMe = message.senderId == currentUserId ||
+                                           (message.sender?.id == currentUserId && currentUserId != 0);
+                              return _MessageBubble(
+                                message: message,
+                                isMe: isMe,
+                                onReply: () {
+                                  setState(() {
+                                    _replyTo = message;
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                  if (_replyTo != null) _buildReplyPreview(),
+                  _buildInputArea(),
+                ],
+              ),
             ),
     );
   }

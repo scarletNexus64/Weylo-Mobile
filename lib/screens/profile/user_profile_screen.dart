@@ -535,47 +535,78 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   void _reportUser() {
     final controller = TextEditingController();
+    String reason = 'spam';
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Signaler cet utilisateur'),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Expliquez la raison (optionnel)',
-            border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Signaler cet utilisateur'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                value: reason,
+                items: const [
+                  DropdownMenuItem(value: 'spam', child: Text('Spam')),
+                  DropdownMenuItem(value: 'harassment', child: Text('Harcèlement')),
+                  DropdownMenuItem(value: 'inappropriate', child: Text('Inapproprié')),
+                  DropdownMenuItem(value: 'other', child: Text('Autre')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      reason = value;
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Raison',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  hintText: 'Détails (optionnel)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                try {
+                  await _userService.reportUser(
+                    widget.username,
+                    reason: reason,
+                    description: controller.text,
+                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Signalement envoyé')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Erreur: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Signaler'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await _userService.reportUser(
-                  widget.username,
-                  reason: controller.text,
-                );
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Signalement envoyé')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')),
-                  );
-                }
-              }
-            },
-            child: const Text('Signaler'),
-          ),
-        ],
       ),
     );
   }

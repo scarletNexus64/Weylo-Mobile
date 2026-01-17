@@ -112,10 +112,14 @@ class UserService {
     return response.data['success'] ?? true;
   }
 
-  Future<bool> reportUser(String username, {String? reason}) async {
+  Future<bool> reportUser(String username, {required String reason, String? description}) async {
     final response = await _apiClient.post(
       ApiConstants.userReport(username),
-      data: reason != null && reason.trim().isNotEmpty ? {'reason': reason.trim()} : null,
+      data: {
+        'reason': reason.trim(),
+        if (description != null && description.trim().isNotEmpty)
+          'description': description.trim(),
+      },
     );
     return response.data['success'] ?? true;
   }

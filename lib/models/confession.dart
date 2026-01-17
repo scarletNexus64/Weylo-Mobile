@@ -173,6 +173,9 @@ class ConfessionComment {
   final int confessionId;
   final int userId;
   final String content;
+  final String? mediaUrl;
+  final String? mediaFullUrl;
+  final String? mediaType;
   final User? user;
   final DateTime createdAt;
 
@@ -181,6 +184,9 @@ class ConfessionComment {
     required this.confessionId,
     required this.userId,
     required this.content,
+    this.mediaUrl,
+    this.mediaFullUrl,
+    this.mediaType,
     this.user,
     required this.createdAt,
   });
@@ -191,6 +197,9 @@ class ConfessionComment {
       confessionId: json['confession_id'] ?? json['confessionId'] ?? 0,
       userId: json['user_id'] ?? json['userId'] ?? 0,
       content: json['content'] ?? '',
+      mediaUrl: json['media_url'],
+      mediaFullUrl: json['media_full_url'] ?? json['mediaFullUrl'],
+      mediaType: json['media_type'] ?? json['mediaType'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])

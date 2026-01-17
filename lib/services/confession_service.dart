@@ -245,7 +245,49 @@ class ConfessionService {
     return (data as List).map((c) => ConfessionComment.fromJson(c)).toList();
   }
 
-  Future<ConfessionComment> addComment(int confessionId, String content) async {
+  Future<ConfessionComment> addComment(
+    int confessionId,
+    String content, {
+    File? image,
+  }) async {
+    if (image != null) {
+      final filename = image.path.split('/').last;
+      final extension = filename.split('.').last.toLowerCase();
+      String contentType = 'image/jpeg';
+
+      switch (extension) {
+        case 'png':
+          contentType = 'image/png';
+          break;
+        case 'gif':
+          contentType = 'image/gif';
+          break;
+        case 'webp':
+          contentType = 'image/webp';
+          break;
+        case 'jpg':
+        case 'jpeg':
+        default:
+          contentType = 'image/jpeg';
+          break;
+      }
+
+      final formData = FormData.fromMap({
+        'content': content,
+        'image': await MultipartFile.fromFile(
+          image.path,
+          filename: filename,
+          contentType: http_parser.MediaType.parse(contentType),
+        ),
+      });
+
+      final response = await _apiClient.post(
+        '${ApiConstants.confessions}/$confessionId/comments',
+        data: formData,
+      );
+      return ConfessionComment.fromJson(response.data['comment'] ?? response.data);
+    }
+
     final response = await _apiClient.post(
       '${ApiConstants.confessions}/$confessionId/comments',
       data: {'content': content},
