@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import 'custom_button.dart';
 
@@ -89,11 +90,12 @@ class ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return EmptyState(
       icon: Icons.error_outline,
-      title: 'Une erreur est survenue',
-      subtitle: message ?? 'Veuillez réessayer plus tard',
-      buttonText: onRetry != null ? 'Réessayer' : null,
+      title: l10n.errorOccurredTitle,
+      subtitle: message ?? l10n.retryLaterSubtitle,
+      buttonText: onRetry != null ? l10n.retry : null,
       onButtonPressed: onRetry,
     );
   }

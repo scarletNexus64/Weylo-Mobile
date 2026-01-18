@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
-import 'package:timeago/timeago.dart' as timeago;
+import 'l10n/app_localizations.dart';
 
 import 'core/theme/app_theme.dart';
 import 'providers/auth_provider.dart';
+import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/feed_provider.dart';
 import 'providers/profile_provider.dart';
@@ -32,13 +32,6 @@ void main() async {
     ),
   );
 
-  // Initialize timeago locale
-  timeago.setLocaleMessages('fr', timeago.FrMessages());
-  timeago.setDefaultLocale('fr');
-
-  // Initialize date formatting for French locale
-  await initializeDateFormatting('fr_FR', null);
-
   runApp(const WeyloApp());
 }
 
@@ -50,6 +43,7 @@ class WeyloApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => FeedProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
@@ -76,6 +70,7 @@ class _AppContentState extends State<_AppContent> {
     // Check auth status and load theme
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().checkAuthStatus();
+      context.read<LocaleProvider>().loadLocale();
       context.read<ThemeProvider>().loadTheme();
       _deepLinkService.initialize(context);
     });
@@ -91,6 +86,7 @@ class _AppContentState extends State<_AppContent> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final themeProvider = context.watch<ThemeProvider>();
+    final localeProvider = context.watch<LocaleProvider>();
 
     return MaterialApp.router(
       title: 'Weylo',
@@ -98,6 +94,9 @@ class _AppContentState extends State<_AppContent> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
+      locale: localeProvider.locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: AppRouter.router(authProvider),
       builder: (context, child) {
         return MediaQuery(

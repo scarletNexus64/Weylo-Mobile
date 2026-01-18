@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../services/auth_service.dart';
@@ -57,7 +58,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         });
       } else {
         setState(() {
-          _error = 'Impossible de vérifier votre identité';
+          _error = AppLocalizations.of(context)!.verifyIdentityError;
         });
       }
     } catch (e) {
@@ -90,12 +91,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (success && mounted) {
         Helpers.showSuccessSnackBar(
           context,
-          'Mot de passe modifié avec succès',
+          AppLocalizations.of(context)!.passwordResetSuccess,
         );
         context.go('/login');
       } else {
         setState(() {
-          _error = 'Impossible de réinitialiser le mot de passe';
+          _error = AppLocalizations.of(context)!.resetPasswordError;
         });
       }
     } catch (e) {
@@ -115,7 +116,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       isLoading: _isLoading,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Mot de passe oublié'),
+          title: Text(AppLocalizations.of(context)!.forgotPasswordTitle),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.pop(),
@@ -147,8 +148,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   // Title
                   Text(
                     _identityVerified
-                        ? 'Nouveau mot de passe'
-                        : 'Vérification d\'identité',
+                        ? AppLocalizations.of(context)!.newPasswordTitle
+                        : AppLocalizations.of(context)!.verifyIdentityTitle,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -157,8 +158,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   const SizedBox(height: 8),
                   Text(
                     _identityVerified
-                        ? 'Créez votre nouveau mot de passe'
-                        : 'Entrez votre numéro de téléphone et prénom pour vérifier votre identité',
+                        ? AppLocalizations.of(context)!.newPasswordSubtitle
+                        : AppLocalizations.of(context)!.verifyIdentitySubtitle,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -192,17 +193,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     // Phone field
                     CustomTextField(
                       controller: _phoneController,
-                      label: 'Numéro de téléphone',
-                      hintText: '6XXXXXXXX',
+                      label: AppLocalizations.of(context)!.phoneLabel,
+                      hintText: AppLocalizations.of(context)!.phoneHint,
                       prefixIcon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.next,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Le numéro de téléphone est requis';
+                          return AppLocalizations.of(context)!.phoneRequired;
                         }
                         if (!Helpers.isValidPhone(value)) {
-                          return 'Numéro de téléphone invalide';
+                          return AppLocalizations.of(context)!.phoneInvalid;
                         }
                         return null;
                       },
@@ -211,21 +212,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     // First name field
                     CustomTextField(
                       controller: _firstNameController,
-                      label: 'Prénom',
-                      hintText: 'Entrez votre prénom',
+                      label: AppLocalizations.of(context)!.firstNameLabel,
+                      hintText: AppLocalizations.of(context)!.firstNameHint,
                       prefixIcon: Icons.person_outline,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _verifyIdentity(),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Le prénom est requis';
+                          return AppLocalizations.of(context)!.firstNameRequiredSimple;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 24),
                     CustomButton(
-                      text: 'Vérifier mon identité',
+                      text: AppLocalizations.of(context)!.verifyIdentityAction,
                       onPressed: _verifyIdentity,
                       isLoading: _isLoading,
                     ),
@@ -233,8 +234,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     // New password fields
                     CustomTextField(
                       controller: _passwordController,
-                      label: 'Nouveau mot de passe',
-                      hintText: 'Créez un nouveau mot de passe',
+                      label: AppLocalizations.of(context)!.newPasswordLabel,
+                      hintText: AppLocalizations.of(context)!.newPasswordHint,
                       prefixIcon: Icons.lock_outline,
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.next,
@@ -250,10 +251,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Le mot de passe est requis';
+                          return AppLocalizations.of(context)!.passwordRequired;
                         }
                         if (value.length < 8) {
-                          return 'Le mot de passe doit contenir au moins 8 caractères';
+                          return AppLocalizations.of(context)!.passwordTooShort;
                         }
                         return null;
                       },
@@ -261,8 +262,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const SizedBox(height: 16),
                     CustomTextField(
                       controller: _confirmPasswordController,
-                      label: 'Confirmer le mot de passe',
-                      hintText: 'Confirmez votre mot de passe',
+                      label: AppLocalizations.of(context)!.confirmPasswordLabel,
+                      hintText: AppLocalizations.of(context)!.confirmPasswordHint,
                       prefixIcon: Icons.lock_outline,
                       obscureText: _obscureConfirmPassword,
                       textInputAction: TextInputAction.done,
@@ -279,17 +280,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez confirmer votre mot de passe';
+                          return AppLocalizations.of(context)!.confirmPasswordRequired;
                         }
                         if (value != _passwordController.text) {
-                          return 'Les mots de passe ne correspondent pas';
+                          return AppLocalizations.of(context)!.passwordMismatch;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 24),
                     CustomButton(
-                      text: 'Réinitialiser le mot de passe',
+                      text: AppLocalizations.of(context)!.resetPasswordAction,
                       onPressed: _resetPassword,
                       isLoading: _isLoading,
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/wallet.dart';
@@ -64,11 +65,12 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthProvider>().user;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mon portefeuille'),
+        title: Text(l10n.walletTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -101,9 +103,9 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                             ),
                             child: Column(
                               children: [
-                                const Text(
-                                  'Solde disponible',
-                                  style: TextStyle(
+                                Text(
+                                  l10n.availableBalanceLabel,
+                                  style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14,
                                   ),
@@ -123,7 +125,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                                     Expanded(
                                       child: _ActionButton(
                                         icon: Icons.add,
-                                        label: 'Déposer',
+                                        label: l10n.depositAction,
                                         onTap: () => _showDepositDialog(context),
                                       ),
                                     ),
@@ -131,7 +133,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                                     Expanded(
                                       child: _ActionButton(
                                         icon: Icons.arrow_upward,
-                                        label: 'Retirer',
+                                        label: l10n.withdrawAction,
                                         onTap: () => _showWithdrawDialog(context),
                                       ),
                                     ),
@@ -146,13 +148,13 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                               child: Row(
                                 children: [
                                   _StatItem(
-                                    label: 'Total dépôts',
+                                    label: l10n.totalDepositsLabel,
                                     value: Helpers.formatCurrency(_stats!.totalDeposits),
                                     color: AppColors.success,
                                   ),
                                   const SizedBox(width: 12),
                                   _StatItem(
-                                    label: 'Total retraits',
+                                    label: l10n.totalWithdrawalsLabel,
                                     value: Helpers.formatCurrency(_stats!.totalWithdrawals),
                                     color: AppColors.warning,
                                   ),
@@ -168,9 +170,9 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                       delegate: _WalletTabBarDelegate(
                         TabBar(
                           controller: _tabController,
-                          tabs: const [
-                            Tab(text: 'Transactions'),
-                            Tab(text: 'Retraits'),
+                          tabs: [
+                            Tab(text: l10n.transactionsTab),
+                            Tab(text: l10n.withdrawalsTab),
                           ],
                         ),
                       ),
@@ -190,15 +192,16 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
   }
 
   Widget _buildTransactionsList() {
+    final l10n = AppLocalizations.of(context)!;
     return _transactions.isEmpty
         ? ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
-            children: const [
+            children: [
               EmptyState(
                 icon: Icons.receipt_long_outlined,
-                title: 'Aucune transaction',
-                subtitle: 'Vos transactions apparaîtront ici',
+                title: l10n.noTransactionsTitle,
+                subtitle: l10n.noTransactionsSubtitle,
               ),
             ],
           )
@@ -214,15 +217,16 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
   }
 
   Widget _buildWithdrawalsList() {
+    final l10n = AppLocalizations.of(context)!;
     return _withdrawals.isEmpty
         ? ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
-            children: const [
+            children: [
               EmptyState(
                 icon: Icons.account_balance_outlined,
-                title: 'Aucun retrait',
-                subtitle: 'Vos demandes de retrait apparaîtront ici',
+                title: l10n.noWithdrawalsTitle,
+                subtitle: l10n.noWithdrawalsSubtitle,
               ),
             ],
           )
@@ -238,6 +242,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
   }
 
   void _showDepositDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final amountController = TextEditingController();
 
     showModalBottomSheet(
@@ -255,7 +260,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Deposer de l\'argent',
+              l10n.depositTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -272,7 +277,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                   Icon(Icons.payment, color: AppColors.success, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'Paiement via Ligos',
+                    l10n.depositViaLigos,
                     style: TextStyle(
                       color: AppColors.success,
                       fontWeight: FontWeight.w500,
@@ -285,15 +290,15 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
             TextField(
               controller: amountController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Montant (FCFA)',
-                hintText: 'Ex: 5000',
-                prefixIcon: Icon(Icons.attach_money),
+              decoration: InputDecoration(
+                labelText: l10n.amountLabel,
+                hintText: l10n.amountExample,
+                prefixIcon: const Icon(Icons.attach_money),
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'Montant minimum: 500 FCFA',
+              l10n.minimumAmountLabel('500 FCFA'),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 24),
@@ -301,7 +306,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
               onPressed: () async {
                 final amount = double.tryParse(amountController.text);
                 if (amount == null || amount < 500) {
-                  Helpers.showErrorSnackBar(context, 'Montant minimum: 500 FCFA');
+                  Helpers.showErrorSnackBar(context, l10n.minimumAmountLabel('500 FCFA'));
                   return;
                 }
 
@@ -316,10 +321,10 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                     context.push('/payment?url=${Uri.encodeComponent(response.paymentUrl)}');
                   }
                 } catch (e) {
-                  Helpers.showErrorSnackBar(context, 'Erreur lors de l\'initialisation');
+                  Helpers.showErrorSnackBar(context, l10n.depositInitError);
                 }
               },
-              child: const Text('Continuer vers Ligos'),
+              child: Text(l10n.continueToLigos),
             ),
           ],
         ),
@@ -328,6 +333,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
   }
 
   void _showWithdrawDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final amountController = TextEditingController();
     final phoneController = TextEditingController();
     String selectedProvider = 'mtn';
@@ -347,12 +353,12 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Demander un retrait',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            Text(
+              l10n.withdrawRequestTitle,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
+            ),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -362,73 +368,73 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.account_balance_wallet, color: AppColors.warning, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Retrait via Cinetpay',
-                      style: TextStyle(
-                        color: AppColors.warning,
-                        fontWeight: FontWeight.w500,
+                  Icon(Icons.account_balance_wallet, color: AppColors.warning, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.withdrawViaCinetpay,
+                    style: TextStyle(
+                      color: AppColors.warning,
+                      fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Montant (FCFA)',
-                  hintText: 'Ex: 5000',
-                  prefixIcon: Icon(Icons.attach_money),
-                ),
+            TextField(
+              controller: amountController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: l10n.amountLabel,
+                hintText: l10n.amountExample,
+                prefixIcon: const Icon(Icons.attach_money),
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedProvider,
-                decoration: const InputDecoration(
-                  labelText: 'Methode de retrait',
-                  prefixIcon: Icon(Icons.account_balance),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'mtn', child: Text('MTN Mobile Money')),
-                  DropdownMenuItem(value: 'orange', child: Text('Orange Money')),
-                ],
-                onChanged: (value) {
-                  setModalState(() {
-                    selectedProvider = value!;
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: selectedProvider,
+              decoration: InputDecoration(
+                labelText: l10n.withdrawMethodLabel,
+                prefixIcon: const Icon(Icons.account_balance),
+              ),
+              items: [
+                DropdownMenuItem(value: 'mtn', child: Text(l10n.mtnMobileMoneyLabel)),
+                DropdownMenuItem(value: 'orange', child: Text(l10n.orangeMoneyLabel)),
+              ],
+              onChanged: (value) {
+                setModalState(() {
+                  selectedProvider = value!;
                   });
                 },
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Numero de telephone',
-                  hintText: '6XXXXXXXX',
-                  prefixIcon: Icon(Icons.phone),
-                ),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                labelText: l10n.phoneNumberLabel,
+                hintText: l10n.phoneNumberHint,
+                prefixIcon: const Icon(Icons.phone),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Montant minimum: 1 000 FCFA',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.minimumAmountLabel('1 000 FCFA'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
-                  final amount = double.tryParse(amountController.text);
-                  if (amount == null || amount < 1000) {
-                    Helpers.showErrorSnackBar(context, 'Montant minimum: 1 000 FCFA');
-                    return;
-                  }
+                final amount = double.tryParse(amountController.text);
+                if (amount == null || amount < 1000) {
+                  Helpers.showErrorSnackBar(context, l10n.minimumAmountLabel('1 000 FCFA'));
+                  return;
+                }
 
-                  if (phoneController.text.isEmpty) {
-                    Helpers.showErrorSnackBar(context, 'Veuillez entrer un numero de telephone');
-                    return;
-                  }
+                if (phoneController.text.isEmpty) {
+                  Helpers.showErrorSnackBar(context, l10n.phoneNumberRequiredError);
+                  return;
+                }
 
                   try {
                     await _walletService.requestWithdrawal(
@@ -438,14 +444,14 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                     );
                     if (mounted) {
                       Navigator.pop(context);
-                      Helpers.showSuccessSnackBar(context, 'Demande de retrait envoyee');
+                      Helpers.showSuccessSnackBar(context, l10n.withdrawRequestSent);
                       _loadData();
                     }
                   } catch (e) {
-                    Helpers.showErrorSnackBar(context, 'Erreur lors de la demande');
+                    Helpers.showErrorSnackBar(context, l10n.withdrawRequestError);
                   }
                 },
-                child: const Text('Demander le retrait'),
+                child: Text(l10n.withdrawAction),
               ),
             ],
           ),

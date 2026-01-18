@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:video_player/video_player.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/story.dart';
@@ -187,6 +188,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   }
 
   Future<void> _addComment(String content) async {
+    final l10n = AppLocalizations.of(context)!;
     final story = widget.stories[_currentIndex];
     try {
       final comment = await _storyService.addComment(story.id, content);
@@ -195,13 +197,14 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de l\'ajout du commentaire')),
+        SnackBar(content: Text(l10n.commentAddError)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final story = widget.stories[_currentIndex];
 
     return Scaffold(
@@ -312,7 +315,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                           ),
                         ),
                         Text(
-                          _formatTime(story.createdAt),
+                          Helpers.getTimeAgo(story.createdAt),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.7),
                             fontSize: 12,
@@ -376,8 +379,8 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                       const SizedBox(width: 8),
                       Text(
                         _comments.isEmpty
-                          ? 'Voir les commentaires'
-                          : 'Voir les ${_comments.length} commentaire${_comments.length > 1 ? 's' : ''}',
+                          ? l10n.viewCommentsAction
+                          : l10n.viewCommentsCount(_comments.length),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -417,11 +420,11 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     }
                     _toggleReplyMode();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Réponse envoyée')),
+                      SnackBar(content: Text(l10n.storyReplySent)),
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Erreur lors de l\'envoi')),
+                      SnackBar(content: Text(l10n.storyReplySendError)),
                     );
                   }
                 },
@@ -435,6 +438,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   }
 
   Widget _buildCommentsOverlay() {
+    final l10n = AppLocalizations.of(context)!;
     final TextEditingController commentController = TextEditingController();
 
     return Positioned.fill(
@@ -450,9 +454,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Text(
-                        'Commentaires',
-                        style: TextStyle(
+                      Text(
+                        l10n.commentsTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -487,7 +491,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      'Aucun commentaire',
+                                      l10n.noCommentsTitle,
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(0.7),
                                         fontSize: 16,
@@ -495,7 +499,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Soyez le premier à commenter !',
+                                      l10n.noCommentsSubtitle,
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(0.5),
                                         fontSize: 14,
@@ -528,7 +532,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                           controller: commentController,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
-                            hintText: 'Ajouter un commentaire...',
+                            hintText: l10n.commentHint,
                             hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
@@ -571,6 +575,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   }
 
   Widget _buildCommentItem(StoryComment comment) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -578,7 +583,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         children: [
           AvatarWidget(
             imageUrl: comment.user?.avatar,
-            name: comment.user?.fullName ?? 'Utilisateur',
+            name: comment.user?.fullName ?? l10n.userFallback,
             size: 36,
           ),
           const SizedBox(width: 12),
@@ -589,7 +594,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                 Row(
                   children: [
                     Text(
-                      comment.user?.fullName ?? 'Utilisateur',
+                      comment.user?.fullName ?? l10n.userFallback,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -624,7 +629,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                           children: [
                             AvatarWidget(
                               imageUrl: reply.user?.avatar,
-                              name: reply.user?.fullName ?? 'Utilisateur',
+                              name: reply.user?.fullName ?? l10n.userFallback,
                               size: 28,
                             ),
                             const SizedBox(width: 8),
@@ -633,7 +638,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    reply.user?.fullName ?? 'Utilisateur',
+                                    reply.user?.fullName ?? l10n.userFallback,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -719,13 +724,4 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     }
   }
 
-  String _formatTime(DateTime dateTime) {
-    final difference = DateTime.now().difference(dateTime);
-    if (difference.inMinutes < 60) {
-      return 'Il y a ${difference.inMinutes}m';
-    } else if (difference.inHours < 24) {
-      return 'Il y a ${difference.inHours}h';
-    }
-    return 'Il y a ${difference.inDays}j';
-  }
 }

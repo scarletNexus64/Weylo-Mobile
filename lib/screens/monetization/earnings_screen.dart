@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/monetization.dart';
@@ -44,9 +45,10 @@ class _EarningsScreenState extends State<EarningsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Revenus'),
+        title: Text(l10n.earningsTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -62,14 +64,14 @@ class _EarningsScreenState extends State<EarningsScreen> {
                   _buildTotalsCard(),
                   const SizedBox(height: 16),
                   if (_overview != null) ...[
-                    _buildPeriodCard('Creator Fund', _overview!.creatorFund, AppColors.primary),
+                    _buildPeriodCard(l10n.creatorFundLabel, _overview!.creatorFund, AppColors.primary),
                     const SizedBox(height: 12),
-                    _buildPeriodCard('Revenus publicitaires', _overview!.adRevenue, AppColors.success),
+                    _buildPeriodCard(l10n.adRevenueLabel, _overview!.adRevenue, AppColors.success),
                   ],
                   const SizedBox(height: 24),
-                  const Text(
-                    'Historique des paiements',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  Text(
+                    l10n.earningsHistoryTitle,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   _buildPayoutsList(),
@@ -80,6 +82,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
   }
 
   Widget _buildTotalsCard() {
+    final l10n = AppLocalizations.of(context)!;
     final totalCreator = _overview?.totalCreatorFund ?? 0;
     final totalAds = _overview?.totalAdRevenue ?? 0;
     final total = totalCreator + totalAds;
@@ -90,12 +93,12 @@ class _EarningsScreenState extends State<EarningsScreen> {
         gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Revenus cumulés',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+          Text(
+            l10n.earningsTotalsLabel,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
           ),
           const SizedBox(height: 8),
           Text(
@@ -109,9 +112,9 @@ class _EarningsScreenState extends State<EarningsScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              _buildTotalChip('Creator Fund', totalCreator, Colors.white),
+              _buildTotalChip(l10n.creatorFundLabel, totalCreator, Colors.white),
               const SizedBox(width: 8),
-              _buildTotalChip('Ads', totalAds, Colors.white),
+              _buildTotalChip(l10n.adsLabel, totalAds, Colors.white),
             ],
           ),
         ],
@@ -134,6 +137,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
   }
 
   Widget _buildPeriodCard(String title, MonetizationPeriodStats stats, Color color) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -173,16 +177,16 @@ class _EarningsScreenState extends State<EarningsScreen> {
           const SizedBox(height: 12),
           Row(
             children: [
-              _buildMetric('Vues', stats.views.toString()),
+              _buildMetric(l10n.viewsLabel, stats.views.toString()),
               const SizedBox(width: 12),
-              _buildMetric('Likes', stats.likes.toString()),
+              _buildMetric(l10n.likesLabel, stats.likes.toString()),
               const SizedBox(width: 12),
-              _buildMetric('Score', stats.score.toString()),
+              _buildMetric(l10n.scoreLabel, stats.score.toString()),
             ],
           ),
           const SizedBox(height: 10),
           Text(
-            'Pool: ${Helpers.formatCurrency(stats.pool)}',
+            l10n.poolLabel(Helpers.formatCurrency(stats.pool)),
             style: TextStyle(color: Colors.grey[600], fontSize: 12),
           ),
         ],
@@ -211,10 +215,11 @@ class _EarningsScreenState extends State<EarningsScreen> {
 
   Widget _buildPayoutsList() {
     if (_payouts.isEmpty) {
-      return const EmptyState(
+      final l10n = AppLocalizations.of(context)!;
+      return EmptyState(
         icon: Icons.payments_outlined,
-        title: 'Aucun paiement',
-        subtitle: 'Les paiements apparaîtront ici',
+        title: l10n.noPayoutsTitle,
+        subtitle: l10n.noPayoutsSubtitle,
       );
     }
 

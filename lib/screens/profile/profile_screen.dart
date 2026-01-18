@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../providers/auth_provider.dart';
@@ -55,11 +56,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthProvider>().user;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text(l10n.profileTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
@@ -154,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           IconButton(
                             icon: const Icon(Icons.copy, size: 20),
                             onPressed: () {
-                              Helpers.showSuccessSnackBar(context, 'Lien copié !');
+                              Helpers.showSuccessSnackBar(context, l10n.profileShareLinkCopied);
                             },
                           ),
                           IconButton(
@@ -200,8 +202,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Mon portefeuille',
+                            Text(
+                              l10n.profileWalletTitle,
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 14,
@@ -239,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Expanded(
                     child: _StatCard(
                       icon: Icons.mail_outline,
-                      label: 'Messages',
+                      label: l10n.profileStatsMessages,
                       value: '${_stats!.messagesReceived}',
                     ),
                   ),
@@ -247,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Expanded(
                     child: _StatCard(
                       icon: Icons.favorite_outline,
-                      label: 'Confessions',
+                      label: l10n.profileStatsConfessions,
                       value: '${_stats!.confessionsReceived}',
                     ),
                   ),
@@ -255,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Expanded(
                     child: _StatCard(
                       icon: Icons.chat_bubble_outline,
-                      label: 'Conversations',
+                      label: l10n.profileStatsConversations,
                       value: '${_stats!.conversationsCount}',
                     ),
                   ),
@@ -292,8 +294,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Passer à Premium',
+                              Text(
+                                l10n.profileUpgradeTitle,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -302,7 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Voir toutes les identités pour 5 000 FCFA/mois',
+                                l10n.profileUpgradeSubtitle,
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.9),
                                   fontSize: 12,
@@ -328,31 +330,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _MenuItem(
                     icon: Icons.edit_outlined,
-                    title: 'Modifier le profil',
+                    title: l10n.profileMenuEditProfile,
                     onTap: () => context.push('/edit-profile'),
                   ),
                   const Divider(height: 1),
                   _MenuItem(
                     icon: Icons.card_giftcard_outlined,
-                    title: 'Mes cadeaux',
+                    title: l10n.profileMenuMyGifts,
                     onTap: () => context.push('/my-gifts'),
                   ),
                   const Divider(height: 1),
                   _MenuItem(
                     icon: Icons.block_outlined,
-                    title: 'Utilisateurs bloqués',
+                    title: l10n.profileMenuBlockedUsers,
                     onTap: () => context.push('/blocked-users'),
                   ),
                   const Divider(height: 1),
                   _MenuItem(
                     icon: Icons.help_outline,
-                    title: 'Aide & Support',
+                    title: l10n.profileMenuHelpSupport,
                     onTap: () => context.push('/help'),
                   ),
                   const Divider(height: 1),
                   _MenuItem(
                     icon: Icons.info_outline,
-                    title: 'À propos',
+                    title: l10n.profileMenuAbout,
                     onTap: () => context.push('/about'),
                   ),
                 ],
@@ -363,7 +365,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Card(
               child: _MenuItem(
                 icon: Icons.logout,
-                title: 'Déconnexion',
+                title: l10n.logout,
                 textColor: AppColors.error,
                 onTap: () => _showLogoutDialog(context),
               ),
@@ -377,15 +379,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Déconnexion'),
-        content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+        title: Text(l10n.logoutTitle),
+        content: Text(l10n.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -396,7 +399,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Déconnexion'),
+            child: Text(l10n.logoutButton),
           ),
         ],
       ),

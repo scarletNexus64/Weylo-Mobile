@@ -1,0 +1,1055 @@
+{
+  "@appVersion": {
+    "description": "Libellé de version de l'application"
+  },
+  "appVersion": "Weylo v{version}",
+  "settingsTitle": "Paramètres",
+  "accountSection": "Compte",
+  "accountInfo": "Informations du compte",
+  "editProfile": "Modifier le profil",
+  "wallet": "Portefeuille",
+  "privacy": "Confidentialité",
+  "notifications": "Notifications",
+  "appearanceSection": "Apparence",
+  "darkMode": "Mode sombre",
+  "language": "Langue",
+  "premiumSection": "Premium",
+  "weyloPremium": "Weylo Premium",
+  "premiumSubtitle": "Débloquez des fonctionnalités exclusives",
+  "upgrade": "UPGRADE",
+  "mySubscriptions": "Mes abonnements",
+  "subscriptionsSubtitle": "Pass Premium et abonnements ciblés",
+  "premiumSettings": "Réglages Premium",
+  "earnings": "Revenus",
+  "earningsSubtitle": "Creator Fund et revenus publicitaires",
+  "supportSection": "Support",
+  "help": "Aide",
+  "about": "À propos",
+  "termsOfUse": "Conditions d'utilisation",
+  "privacyPolicy": "Politique de confidentialité",
+  "logout": "Déconnexion",
+  "logoutTitle": "Déconnexion",
+  "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+  "logoutButton": "Déconnexion",
+  "chooseLanguage": "Choisir la langue",
+  "cancel": "Annuler",
+  "languageFrench": "Français",
+  "languageEnglish": "Anglais",
+  "languageChangedToFrench": "Langue changée en français",
+  "languageChangedToEnglish": "Langue changée en anglais",
+  "accountInfoTitle": "Informations du compte",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "username": "Nom d'utilisateur",
+  "email": "Email",
+  "phone": "Téléphone",
+  "bio": "Bio",
+  "notProvided": "Non renseigné",
+  "signupDate": "Date d'inscription",
+  "@errorMessage": {
+    "description": "Message d'erreur avec détails",
+    "placeholders": {
+      "details": {}
+    }
+  },
+  "errorMessage": "Erreur : {details}",
+  "profilePostsTab": "Publications",
+  "profileLikesTab": "Likes",
+  "profileGiftsTab": "Cadeaux",
+  "profileFollowers": "Abonnés",
+  "profileFollowing": "Suivis",
+  "profileEditProfile": "Modifier le profil",
+  "profileShareProfile": "Partager le profil",
+  "profileNoPostsTitle": "Aucune publication",
+  "profileNoPostsSubtitle": "Partagez votre première publication !",
+  "profilePromote": "Promouvoir",
+  "profilePromoteSubtitle": "Augmentez la visibilité de ce post",
+  "profileShare": "Partager",
+  "@profileSharePostMessage": {
+    "description": "Message de partage de publication",
+    "placeholders": {
+      "url": {}
+    }
+  },
+  "profileSharePostMessage": "Découvre ce post sur Weylo : {url}",
+  "profileSharePostSubject": "Post Weylo",
+  "profileDelete": "Supprimer",
+  "profileDeletePostTitle": "Supprimer la publication",
+  "profileDeletePostConfirm": "Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.",
+  "profileDeletePostSuccess": "Publication supprimée",
+  "profileNoLikesTitle": "Aucun like",
+  "profileNoLikesSubtitle": "Les posts que vous aimez apparaîtront ici",
+  "profileNoGiftsTitle": "Aucun cadeau reçu",
+  "profileNoGiftsSubtitle": "Les cadeaux que vous recevez apparaîtront ici",
+  "giftDefaultName": "Cadeau",
+  "@giftFromUser": {
+    "description": "Expéditeur du cadeau",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "giftFromUser": "De @{username}",
+  "giftAnonymous": "Cadeau anonyme",
+  "@timeAgoMinutes": {
+    "description": "Temps écoulé en minutes",
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "timeAgoMinutes": "Il y a {minutes} min",
+  "@timeAgoHours": {
+    "description": "Temps écoulé en heures",
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "timeAgoHours": "Il y a {hours} h",
+  "@timeAgoDays": {
+    "description": "Temps écoulé en jours",
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "timeAgoDays": "Il y a {days} j",
+  "shareProfileTitle": "Partager votre lien anonyme",
+  "shareProfileSubtitle": "Choisissez comment partager votre lien",
+  "shareQrCodeTitle": "Afficher le QR Code",
+  "shareQrCodeSubtitle": "Idéal pour les tests locaux",
+  "shareWebLinkTitle": "Partager le lien web",
+  "@shareWebLinkMessage": {
+    "description": "Message de partage du lien web",
+    "placeholders": {
+      "url": {}
+    }
+  },
+  "shareWebLinkMessage": "Envoyez-moi un message anonyme sur Weylo ! {url}",
+  "shareWebLinkSubject": "Mon profil Weylo",
+  "shareAppLinkTitle": "Copier le lien de l'app",
+  "copyToClipboardSuccess": "Lien copié dans le presse-papiers",
+  "scanQrTitle": "Scannez ce QR Code",
+  "close": "Fermer",
+  "profileTitle": "Profil",
+  "profileWalletTitle": "Mon portefeuille",
+  "profileStatsMessages": "Messages",
+  "profileStatsConfessions": "Confessions",
+  "profileStatsConversations": "Conversations",
+  "profileUpgradeTitle": "Passer à Premium",
+  "profileUpgradeSubtitle": "Voir toutes les identités pour 5 000 FCFA/mois",
+  "profileMenuEditProfile": "Modifier le profil",
+  "profileMenuMyGifts": "Mes cadeaux",
+  "profileMenuBlockedUsers": "Utilisateurs bloqués",
+  "profileMenuHelpSupport": "Aide & Support",
+  "profileMenuAbout": "À propos",
+  "profileShareLinkCopied": "Lien copié !",
+  "userNotFound": "Utilisateur introuvable",
+  "retry": "Réessayer",
+  "block": "Bloquer",
+  "report": "Signaler",
+  "userAnonymous": "Anonyme",
+  "profileSubscriptions": "Abonnements",
+  "followed": "Abonné",
+  "follow": "Suivre",
+  "message": "Message",
+  "blockUserTitle": "Bloquer cet utilisateur",
+  "blockUserConfirm": "Voulez-vous vraiment bloquer cet utilisateur ? Vous ne recevrez plus de messages de sa part.",
+  "userBlocked": "Utilisateur bloqué",
+  "reportUserTitle": "Signaler cet utilisateur",
+  "reportReason": "Raison",
+  "reportDetailsHint": "Détails (optionnel)",
+  "reportSent": "Signalement envoyé",
+  "reportSpam": "Spam",
+  "reportHarassment": "Harcèlement",
+  "reportInappropriate": "Inapproprié",
+  "reportOther": "Autre",
+  "giftsPrivate": "Les cadeaux sont privés",
+  "giftsLoadError": "Erreur lors du chargement",
+  "@giftFromUserLower": {
+    "description": "Expéditeur du cadeau en minuscule",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "giftFromUserLower": "de {username}",
+  "@identityRevealed": {
+    "description": "Libellé identité révélée",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "identityRevealed": "Identité révélée : {name}",
+  "anonymousUser": "Anonyme",
+  "@toRecipient": {
+    "description": "Libellé destinataire",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "toRecipient": "À {name}",
+  "userFallback": "Utilisateur",
+  "messagesTitle": "Messages anonymes",
+  "shareLinkSubject": "Mon lien Weylo",
+  "inboxTabReceived": "Reçus",
+  "inboxTabSent": "Envoyés",
+  "emptyInboxTitle": "Aucun message reçu",
+  "emptyInboxSubtitle": "Partagez votre lien pour recevoir des messages anonymes",
+  "emptyInboxButton": "Partager mon lien",
+  "emptySentTitle": "Aucun message envoyé",
+  "emptySentSubtitle": "Envoyez votre premier message anonyme",
+  "emptySentButton": "Envoyer un message",
+  "sendMessageTitle": "Envoyer un message",
+  "newMessageTitle": "Nouveau message",
+  "searchUserHint": "Rechercher un utilisateur...",
+  "noUsersFound": "Aucun utilisateur trouvé",
+  "noUsersAvailable": "Aucun utilisateur disponible pour le moment",
+  "maskedInfo": "Informations masquées",
+  "statusNew": "Nouveau",
+  "statusRevealed": "Révélée",
+  "statusAnonymous": "Anonyme",
+  "revealedConversations": "Conversations révélées",
+  "revealedConversationsHelper": "Ils ont déjà dévoilé leur identité",
+  "anonymousConversations": "Conversations anonymes",
+  "anonymousConversationsHelper": "Identité masquée malgré un échange",
+  "noConversation": "Sans conversation",
+  "noConversationHelper": "Pas encore échangé avec vous",
+  "selectRecipientError": "Veuillez sélectionner un destinataire",
+  "enterMessageError": "Veuillez entrer un message",
+  "messageSentSuccess": "Message envoyé avec succès !",
+  "anonymousMode": "Mode anonyme",
+  "publicMode": "Mode public",
+  "anonymousModeSubtitle": "Votre identité sera cachée",
+  "publicModeSubtitle": "Votre nom sera visible",
+  "messageHint": "Écrivez votre message...",
+  "voiceMessageRecorded": "Message vocal enregistré",
+  "@voiceEffectLabel": {
+    "description": "Libellé effet vocal",
+    "placeholders": {
+      "effect": {}
+    }
+  },
+  "voiceEffectLabel": "Effet : {effect}",
+  "sendAction": "Envoyer",
+  "conversationsTitle": "Conversations",
+  "emptyConversationsTitle": "Aucune conversation",
+  "emptyConversationsSubtitle": "Commencez une conversation avec quelqu'un",
+  "searchConversationsHint": "Rechercher dans les conversations...",
+  "noResultsFound": "Aucun résultat trouvé",
+  "anonymousConversation": "Anonyme",
+  "newConversationFab": "Démarrer une nouvelle conversation",
+  "anonymousMessage": "Message anonyme",
+  "replyTo": "Répondre à",
+  "reply": "Réponse",
+  "audioPlaybackError": "Erreur lecture audio : {details}",
+  "videoPlaybackError": "Erreur lecture vidéo : {details}",
+  "attachmentImage": "Image",
+  "attachmentVideo": "Vidéo",
+  "chatSendError": "Erreur lors de l'envoi du message",
+  "chatEmpty": "Aucun message. Commencez la conversation !",
+  "videoSelected": "Vidéo sélectionnée",
+  "messageHintShort": "Message...",
+  "statusSending": "En cours",
+  "statusSent": "Envoyé",
+  "statusRead": "Lu",
+  "statusUnread": "Non lu",
+  "statusFailed": "Erreur",
+  "revealIdentityTitle": "Révéler l'identité",
+  "@revealIdentityPrompt": {
+    "description": "Demande de révélation d'identité",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "revealIdentityPrompt": "Voulez-vous payer pour révéler l'identité de cette personne ? Cette action coûte {amount} FCFA.",
+  "revealIdentitySuccess": "Identité révélée !",
+  "revealIdentityAction": "Révéler",
+  "sendGift": "Envoyer un cadeau",
+  "blockUser": "Bloquer",
+  "deleteConversation": "Supprimer la conversation",
+  "@blockUserConfirm": {
+    "description": "Confirmation de blocage"
+  },
+  "conversationDeleted": "Conversation supprimée",
+  "conversationDeleteError": "Erreur lors de la suppression",
+  "messageCopied": "Message copié",
+  "@streakDays": {
+    "description": "Nombre de jours de streak",
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "streakDays": "{days} jours de streak",
+  "copyAction": "Copier",
+  "deleteAction": "Supprimer",
+  "@deleteConversationConfirm": {
+    "description": "Confirmation de suppression de conversation"
+  },
+  "deleteConversationConfirm": "Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.",
+  "giftRecipientUnknown": "Impossible de déterminer le destinataire",
+  "loading": "Chargement...",
+  "paymentTitle": "Paiement",
+  "invalidPaymentUrl": "URL de paiement invalide",
+  "@pageNotFound": {
+    "description": "Message page non trouvée",
+    "placeholders": {
+      "uri": {}
+    }
+  },
+  "pageNotFound": "Page non trouvée : {uri}",
+  "backToHome": "Retour à l'accueil",
+  "newChatTitle": "Nouvelle conversation",
+  "startAction": "Démarrer",
+  "startConversationError": "Impossible de démarrer la conversation",
+  "addContentOrMediaError": "Veuillez ajouter du contenu ou un média",
+  "postCreatedSuccess": "Publication créée avec succès !",
+  "@postCreateError": {
+    "description": "Erreur de création de publication",
+    "placeholders": {
+      "details": {}
+    }
+  },
+  "postCreateError": "Erreur lors de la création : {details}",
+  "createPostTitle": "Nouvelle publication",
+  "publishAction": "Publier",
+  "confessionHint": "Qu'avez-vous à confesser ? (optionnel avec média)",
+  "photoAction": "Photo",
+  "postAnonymousTitle": "Publication anonyme",
+  "postAnonymousSubtitle": "Votre identité sera cachée",
+  "postPublicTitle": "Publication publique",
+  "postPublicSubtitle": "Visible par tous les utilisateurs",
+  "settingsUpdated": "Paramètres mis à jour",
+  "@blockedUsersWithCount": {
+    "description": "Utilisateurs bloqués avec compteur",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockedUsersWithCount": "Utilisateurs bloqués ({count})",
+  "noBlockedUsers": "Aucun utilisateur bloqué",
+  "unblockAction": "Débloquer",
+  "blockedUsersTitle": "Utilisateurs bloqués",
+  "@blockedUsersCount": {
+    "description": "Nombre d'utilisateurs bloqués",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockedUsersCount": "{count} utilisateur(s)",
+  "profileVisibilityHeader": "VISIBILITÉ DU PROFIL",
+  "showNameOnPostsTitle": "Afficher mon nom sur mes publications",
+  "showNameOnPostsSubtitle": "Votre nom sera visible sur vos posts publics",
+  "showPhotoOnPostsTitle": "Afficher ma photo sur mes publications",
+  "showPhotoOnPostsSubtitle": "Votre photo de profil sera visible",
+  "activityHeader": "ACTIVITÉ",
+  "showOnlineStatusTitle": "Afficher le statut en ligne",
+  "showOnlineStatusSubtitle": "Les autres peuvent voir quand vous êtes en ligne",
+  "allowAnonymousMessagesTitle": "Autoriser les messages anonymes",
+  "allowAnonymousMessagesSubtitle": "Recevoir des messages anonymes",
+  "accountManagementHeader": "GESTION DU COMPTE",
+  "deleteAccountTitle": "Supprimer mon compte",
+  "deleteAccountSubtitle": "Cette action est irréversible",
+  "deleteAccountConfirm": "Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront définitivement supprimées.",
+  "@userUnblocked": {
+    "description": "Utilisateur débloqué",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "userUnblocked": "@{username} a été débloqué",
+  "legalLastUpdated": "Dernière mise à jour : 1er janvier 2026",
+  "legalIntro": "En utilisant Weylo, vous acceptez les conditions suivantes...",
+  "legalBody": "1. Utilisation du service\n\nWeylo est une plateforme de messagerie anonyme. En utilisant ce service, vous vous engagez à respecter les autres utilisateurs et à ne pas publier de contenu illégal ou offensant.\n\n2. Confidentialité\n\nNous respectons votre vie privée. Vos messages anonymes ne révèlent pas votre identité sauf si vous choisissez de la révéler.\n\n3. Responsabilité\n\nVous êtes responsable du contenu que vous publiez. Weylo se réserve le droit de supprimer tout contenu inapproprié.",
+  "faqTitle": "Questions fréquentes",
+  "faqSendAnonymousQuestion": "Comment envoyer un message anonyme ?",
+  "faqSendAnonymousAnswer": "Allez sur le profil d'un utilisateur et tapez sur \"Envoyer un message\". Votre identité restera cachée à moins que vous ne choisissiez de la révéler.",
+  "faqRevealIdentityQuestion": "Comment voir qui m'a envoyé un message ?",
+  "faqRevealIdentityAnswer": "Par défaut, les messages sont anonymes. Vous pouvez demander la révélation d'identité moyennant des crédits ou un abonnement Premium.",
+  "faqShareLinkQuestion": "Comment partager mon lien ?",
+  "faqShareLinkAnswer": "Allez dans votre profil et tapez sur \"Partager le profil\". Vous pouvez partager votre lien sur les réseaux sociaux.",
+  "faqContactSupportQuestion": "Comment contacter le support ?",
+  "faqContactSupportAnswer": "Envoyez un email à support@weylo.app pour toute question ou problème.",
+  "emailClientError": "Impossible d'ouvrir le client email",
+  "contactSupport": "Contacter le support",
+  "appName": "Weylo",
+  "@versionLabel": {
+    "description": "Libellé de version",
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "versionLabel": "Version {version}",
+  "aboutTagline": "La plateforme de messagerie anonyme\nqui connecte les gens en toute sécurité.",
+  "copyrightNotice": "© 2026 Weylo. Tous droits réservés.",
+  "takePhotoAction": "Prendre une photo",
+  "chooseFromGalleryAction": "Choisir dans la galerie",
+  "deletePhotoAction": "Supprimer la photo",
+  "profilePhotoUpdated": "Photo de profil mise à jour !",
+  "profilePhotoDeleted": "Photo de profil supprimée !",
+  "profileUpdated": "Profil mis à jour !",
+  "saveAction": "Enregistrer",
+  "changeProfilePhoto": "Changer la photo de profil",
+  "firstNameRequired": "Veuillez entrer votre prénom",
+  "bioHint": "Parlez de vous...",
+  "premiumActiveTitle": "Vous êtes Premium !",
+  "@premiumDaysRemaining": {
+    "description": "Jours restants",
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "premiumDaysRemaining": "{days} jours restants",
+  "autoRenewTitle": "Renouvellement automatique",
+  "autoRenewSubtitle": "Renouveler automatiquement votre abonnement",
+  "premiumUnlockTitle": "Débloquez toutes les fonctionnalités",
+  "featureRevealTitle": "Voir l'identité",
+  "featureRevealSubtitle": "Révélez qui vous envoie des messages",
+  "featureBadgeTitle": "Badge Premium",
+  "featureBadgeSubtitle": "Montrez votre statut Premium",
+  "featureNoAdsTitle": "Sans publicités",
+  "featureNoAdsSubtitle": "Profitez d'une expérience sans pub",
+  "featureStatsTitle": "Statistiques avancées",
+  "featureStatsSubtitle": "Analysez vos interactions",
+  "monthlyPlanTitle": "Mensuel",
+  "monthlyPlanPrice": "2 500 FCFA/mois",
+  "yearlyPlanTitle": "Annuel",
+  "yearlyPlanPrice": "20 000 FCFA/an (économisez 33 %)",
+  "subscribeAction": "S'abonner",
+  "premiumActivated": "Abonnement Premium activé !",
+  "autoRenewEnabled": "Renouvellement automatique activé",
+  "autoRenewDisabled": "Renouvellement automatique désactivé",
+  "markAllRead": "Tout lire",
+  "noNotifications": "Aucune notification",
+  "notificationsMarkedRead": "Toutes les notifications marquées comme lues",
+  "@timeAgoMinutesShort": {
+    "description": "Minutes écoulées (court)",
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "timeAgoMinutesShort": "{minutes} min",
+  "@timeAgoHoursShort": {
+    "description": "Heures écoulées (court)",
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "timeAgoHoursShort": "{hours} h",
+  "@timeAgoDaysShort": {
+    "description": "Jours écoulés (court)",
+    "placeholders": {
+      "days": {}
+    }
+  },
+  "timeAgoDaysShort": "{days} j",
+  "storyInvalidUserId": "ID utilisateur invalide",
+  "storyNoAvailable": "Aucune story disponible",
+  "@storyLoadError": {
+    "description": "Erreur de chargement de story",
+    "placeholders": {
+      "details": {}
+    }
+  },
+  "storyLoadError": "Erreur de chargement : {details}",
+  "storyReplySent": "Réponse envoyée",
+  "storyReplyError": "Erreur lors de l'envoi",
+  "storyNoActive": "Vous n'avez pas de story active",
+  "deleteStoryTitle": "Supprimer la story ?",
+  "deleteStoryConfirm": "Cette action est irréversible.",
+  "storyDeleted": "Story supprimée",
+  "storyNoneTitle": "Aucune story",
+  "createStoryAction": "Créer une story",
+  "@viewsCount": {
+    "description": "Nombre de vues",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "viewsCount": "{count} vues",
+  "storyViewsEmpty": "Les vues seront affichées ici",
+  "myStoryTitle": "Ma story",
+  "followersTitle": "Abonnés",
+  "followingTitle": "Abonnements",
+  "noFollowers": "Aucun abonné",
+  "noFollowing": "Aucun abonnement",
+  "groupTitleFallback": "Groupe",
+  "@membersCount": {
+    "description": "Nombre de membres",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "membersCount": "{count} membres",
+  "@membersCountWithMax": {
+    "description": "Nombre de membres avec max",
+    "placeholders": {
+      "count": {},
+      "max": {}
+    }
+  },
+  "membersCountWithMax": "{count}/{max} membres",
+  "groupEmptyTitle": "Aucun message",
+  "groupEmptySubtitle": "Envoyez un message pour démarrer la conversation",
+  "@replyToUser": {
+    "description": "Répondre à l'utilisateur",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "replyToUser": "Répondre à {name}",
+  "messageEditMode": "Modification du message",
+  "editMessageHint": "Modifier le message...",
+  "messageInputHint": "Écrire un message...",
+  "voiceMessageLabel": "Message vocal",
+  "messageLabel": "Message",
+  "editAction": "Modifier",
+  "deleteMessageTitle": "Supprimer le message",
+  "deleteMessageConfirm": "Êtes-vous sûr de vouloir supprimer ce message ?",
+  "messageDeleted": "Message supprimé",
+  "inviteCodeTitle": "Code d'invitation",
+  "inviteCodeCopied": "Code copié !",
+  "editGroup": "Modifier le groupe",
+  "groupInfo": "Infos du groupe",
+  "regenerateInviteCode": "Régénérer le code d'invitation",
+  "@newInviteCode": {
+    "description": "Nouveau code d'invitation",
+    "placeholders": {
+      "code": {}
+    }
+  },
+  "newInviteCode": "Nouveau code : {code}",
+  "regenerateInviteError": "Erreur lors de la régénération",
+  "leaveGroup": "Quitter le groupe",
+  "deleteGroup": "Supprimer le groupe",
+  "deleteGroupConfirm": "Êtes-vous sûr de vouloir supprimer ce groupe ? Cette action est irréversible. Tous les messages et les membres seront supprimés.",
+  "groupDeleted": "Groupe supprimé",
+  "inviteCodeShareHint": "Partagez ce code pour inviter des personnes à rejoindre le groupe.",
+  "descriptionLabel": "Description",
+  "publicGroup": "Groupe public",
+  "privateGroup": "Groupe privé",
+  "changeGroupLogo": "Changer le logo",
+  "groupNameLabel": "Nom du groupe",
+  "maxMembersLabel": "Nombre maximum de membres",
+  "publicGroupSubtitle": "Visible dans la découverte",
+  "groupUpdated": "Groupe modifié !",
+  "leaveGroupConfirm": "Êtes-vous sûr de vouloir quitter ce groupe ?",
+  "leftGroupSuccess": "Vous avez quitté le groupe",
+  "groupMembersTitle": "Membres du groupe",
+  "noMembers": "Aucun membre",
+  "roleCreator": "Créateur",
+  "roleAdmin": "Admin",
+  "removeMemberTitle": "Retirer le membre",
+  "@removeMemberConfirm": {
+    "description": "Confirmation de retrait",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "removeMemberConfirm": "Voulez-vous retirer {name} du groupe ?",
+  "removeAction": "Retirer",
+  "memberRemoved": "Membre retiré",
+  "@errorWithDebug": {
+    "description": "Erreur avec debug",
+    "placeholders": {
+      "error": {},
+      "debug": {}
+    }
+  },
+  "errorWithDebug": "{error} (debug : {debug})",
+  "messageEdited": "Message modifié",
+  "anonymousSender": "Expéditeur anonyme",
+  "messageReported": "Message signalé",
+  "messageNotFound": "Message introuvable",
+  "identityRevealedTitle": "Identité révélée",
+  "@sentByUser": {
+    "description": "Envoyé par l'utilisateur",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "sentByUser": "Envoyé par {name}",
+  "replyOnceTitle": "Répondre une fois",
+  "replyOnceSubtitle": "Répondez à ce message pour démarrer une conversation dans le chat.",
+  "replyPlaceholder": "Écrivez votre réponse...",
+  "replyAndStartConversation": "Répondre et démarrer la conversation",
+  "sendingLabel": "Envoi...",
+  "conversationStarted": "Conversation démarrée ! Vous pouvez maintenant discuter.",
+  "replySent": "Réponse envoyée",
+  "revealIdentityCreditsPrompt": "Voulez-vous dépenser des crédits pour découvrir qui a envoyé ce message ? Cette action est irréversible.",
+  "supportEmailSubject": "Support - Weylo",
+  "loginWelcome": "Bon retour !",
+  "loginSubtitle": "Connectez-vous pour continuer",
+  "loginIdentifierLabel": "Nom d'utilisateur, email ou téléphone",
+  "loginIdentifierHint": "Entrez votre identifiant",
+  "loginIdentifierRequired": "Veuillez entrer votre identifiant",
+  "loginPinLabel": "Code PIN",
+  "loginPinHint": "Entrez votre code à 4 chiffres",
+  "loginPinRequired": "Veuillez entrer votre code PIN",
+  "forgotPin": "Code oublié ?",
+  "loginAction": "Se connecter",
+  "orSeparator": "ou",
+  "createAccount": "Créer un compte",
+  "registerTitle": "Inscription",
+  "registerStepLabel": "Étape {step} sur {total}",
+  "registerPersonalInfoTitle": "Informations personnelles",
+  "registerAccountInfoTitle": "Votre compte",
+  "registerSecurityTitle": "Sécurité",
+  "registerNameQuestion": "Comment vous appelez-vous ?",
+  "registerNameSubtitle": "Entrez votre prénom et nom pour personnaliser votre profil",
+  "firstNameLabelRequired": "Prénom *",
+  "firstNameHint": "Entrez votre prénom",
+  "firstNameTooShort": "Le prénom doit contenir au moins 2 caractères",
+  "lastNameLabelOptional": "Nom (optionnel)",
+  "lastNameHint": "Entrez votre nom",
+  "continueAction": "Continuer",
+  "registerIdentityTitle": "Créez votre identité",
+  "registerIdentitySubtitle": "Choisissez un nom d'utilisateur unique et ajoutez vos coordonnées",
+  "usernameLabelRequired": "Nom d'utilisateur *",
+  "usernameHint": "Choisissez un nom unique",
+  "usernameRequired": "Le nom d'utilisateur est requis",
+  "usernameInvalid": "Utilisez 3 à 20 caractères (lettres, chiffres, _)",
+  "emailLabelOptional": "Email (optionnel)",
+  "emailHint": "Entrez votre email",
+  "emailInvalid": "Email invalide",
+  "phoneLabelOptional": "Téléphone (optionnel)",
+  "phoneHint": "6XXXXXXXX",
+  "phoneInvalid": "Numéro de téléphone invalide",
+  "registerSecureTitle": "Sécurisez votre compte",
+  "registerSecureSubtitle": "Créez un code PIN à 4 chiffres pour protéger votre compte",
+  "pinLabelRequired": "Code PIN *",
+  "pinCreateHint": "Créez un code à 4 chiffres",
+  "pinRequired": "Le code est requis",
+  "pinInvalid": "Le code doit contenir exactement 4 chiffres",
+  "pinConfirmLabelRequired": "Confirmer le code *",
+  "pinConfirmHint": "Confirmez votre code PIN",
+  "pinConfirmRequired": "Veuillez confirmer votre code",
+  "pinMismatch": "Les codes ne correspondent pas",
+  "acceptTermsError": "Veuillez accepter les conditions d'utilisation",
+  "acceptTermsPrefix": "J'accepte les ",
+  "acceptTermsLink": "conditions d'utilisation",
+  "acceptPrivacyMiddle": " et la ",
+  "acceptPrivacyLink": "politique de confidentialité",
+  "createMyAccount": "Créer mon compte",
+  "alreadyHaveAccount": "Vous avez déjà un compte ? ",
+  "loginLink": "Se connecter",
+  "forgotPasswordTitle": "Mot de passe oublié",
+  "verifyIdentityTitle": "Vérification d'identité",
+  "verifyIdentitySubtitle": "Entrez votre numéro de téléphone et votre prénom pour vérifier votre identité",
+  "newPasswordTitle": "Nouveau mot de passe",
+  "newPasswordSubtitle": "Créez votre nouveau mot de passe",
+  "verifyIdentityError": "Impossible de vérifier votre identité",
+  "resetPasswordError": "Impossible de réinitialiser le mot de passe",
+  "passwordResetSuccess": "Mot de passe modifié avec succès",
+  "phoneLabel": "Numéro de téléphone",
+  "phoneRequired": "Le numéro de téléphone est requis",
+  "firstNameLabel": "Prénom",
+  "firstNameRequiredSimple": "Le prénom est requis",
+  "verifyIdentityAction": "Vérifier mon identité",
+  "newPasswordLabel": "Nouveau mot de passe",
+  "newPasswordHint": "Créez un nouveau mot de passe",
+  "passwordRequired": "Le mot de passe est requis",
+  "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+  "confirmPasswordLabel": "Confirmer le mot de passe",
+  "confirmPasswordHint": "Confirmez votre mot de passe",
+  "confirmPasswordRequired": "Veuillez confirmer votre mot de passe",
+  "passwordMismatch": "Les mots de passe ne correspondent pas",
+  "resetPasswordAction": "Réinitialiser le mot de passe",
+  "navMessages": "Messages",
+  "navConfessions": "Confessions",
+  "navChat": "Chat",
+  "navGroups": "Groupes",
+  "navProfile": "Profil",
+  "searchAction": "Rechercher",
+  "loadingErrorTitle": "Erreur de chargement",
+  "feedEmptyTitle": "Aucune publication",
+  "feedEmptySubtitle": "Soyez le premier à publier !",
+  "@sharePostMessage": {
+    "description": "Message de partage d'une publication",
+    "placeholders": {
+      "url": {}
+    }
+  },
+  "sharePostMessage": "Découvrez cette publication sur Weylo ! {url}",
+  "sharePostSubject": "Publication Weylo",
+  "feedPostHint": "Exprimez-vous...",
+  "videoSelectedLabel": "Vidéo sélectionnée",
+  "addImageAction": "Ajouter une image",
+  "addGifAction": "Ajouter un GIF",
+  "addVideoAction": "Ajouter une vidéo",
+  "visibilityPublic": "Public",
+  "visibilityAnonymous": "Anonyme",
+  "storyContentRequired": "Ajoutez du contenu à votre story.",
+  "storyPublishedSuccess": "Story publiée !",
+  "storyPublishError": "Erreur lors de la publication",
+  "connectionError": "Erreur de connexion. Vérifiez votre connexion Internet.",
+  "unsupportedFileFormat": "Format de fichier non pris en charge",
+  "fileTooLarge": "Fichier trop volumineux",
+  "storyWriteHint": "Écrivez quelque chose...",
+  "galleryLabel": "Galerie",
+  "videoLabel": "Vidéo",
+  "textLabel": "Texte",
+  "commentAddError": "Impossible d'ajouter le commentaire",
+  "viewCommentsAction": "Voir les commentaires",
+  "@viewCommentsCount": {
+    "description": "Voir le nombre de commentaires",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "viewCommentsCount": "Voir les {count} commentaire(s)",
+  "storyReplySendError": "Erreur lors de l'envoi",
+  "commentsTitle": "Commentaires",
+  "noCommentsTitle": "Aucun commentaire",
+  "noCommentsSubtitle": "Soyez le premier à commenter !",
+  "commentHint": "Ajouter un commentaire...",
+  "earningsTitle": "Revenus",
+  "earningsHistoryTitle": "Historique des paiements",
+  "earningsTotalsLabel": "Revenus cumulés",
+  "creatorFundLabel": "Fonds des créateurs",
+  "adRevenueLabel": "Revenus publicitaires",
+  "adsLabel": "Publicités",
+  "viewsLabel": "Vues",
+  "likesLabel": "Likes",
+  "scoreLabel": "Score",
+  "@poolLabel": {
+    "description": "Libellé du pool",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "poolLabel": "Pool : {amount}",
+  "noPayoutsTitle": "Aucun paiement",
+  "noPayoutsSubtitle": "Les paiements apparaîtront ici",
+  "searchHint": "Rechercher des personnes ou des publications...",
+  "@peopleTabCount": {
+    "description": "Nombre d'utilisateurs",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "peopleTabCount": "Personnes ({count})",
+  "@postsTabCount": {
+    "description": "Nombre de publications",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "postsTabCount": "Publications ({count})",
+  "searchEmptyTitle": "Rechercher sur Weylo",
+  "searchEmptySubtitle": "Trouvez des personnes ou des publications",
+  "searchNoUsers": "Aucun utilisateur trouvé",
+  "searchNoPosts": "Aucune publication trouvée",
+  "joinGroupTitle": "Rejoindre un groupe",
+  "inviteCodeHint": "Entrez le code d'invitation",
+  "joinGroupSuccess": "Vous avez rejoint le groupe !",
+  "invalidInviteCode": "Code d'invitation invalide",
+  "joinAction": "Rejoindre",
+  "groupsTitle": "Groupes",
+  "joinWithCodeTooltip": "Rejoindre avec un code",
+  "myGroupsTab": "Mes groupes",
+  "discoverTab": "Découvrir",
+  "noGroupsTitle": "Aucun groupe",
+  "noGroupsDiscoverTitle": "Aucun groupe à découvrir",
+  "noGroupsSubtitle": "Créez ou rejoignez un groupe pour commencer",
+  "noGroupsDiscoverSubtitle": "Revenez plus tard pour découvrir de nouveaux groupes",
+  "createGroupAction": "Créer un groupe",
+  "@joinGroupNameTitle": {
+    "description": "Rejoindre un groupe par nom",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "joinGroupNameTitle": "Rejoindre {name}",
+  "@groupMembersCount": {
+    "description": "Nombre de membres du groupe",
+    "placeholders": {
+      "current": {},
+      "max": {}
+    }
+  },
+  "groupMembersCount": "{current}/{max} membres",
+  "joinGroupError": "Impossible de rejoindre le groupe",
+  "removePhotoAction": "Supprimer la photo",
+  "groupCreatedSuccess": "Groupe créé avec succès !",
+  "createGroupTitle": "Créer un groupe",
+  "createAction": "Créer",
+  "groupNameHint": "Ex : Amis de l'université",
+  "groupNameRequiredError": "Le nom du groupe est requis",
+  "@groupNameMinLengthError": {
+    "description": "Erreur de longueur du nom",
+    "placeholders": {
+      "min": {}
+    }
+  },
+  "groupNameMinLengthError": "Le nom doit contenir au moins {min} caractères",
+  "groupDescriptionLabel": "Description (optionnelle)",
+  "groupDescriptionHint": "Décrivez le but de ce groupe...",
+  "maxMembersTitle": "Nombre maximum de membres",
+  "publicGroupTitle": "Groupe public",
+  "privateGroupSubtitle": "Seules les personnes avec le code d'invitation peuvent rejoindre",
+  "groupInviteCodeInfo": "Un code d'invitation sera généré automatiquement pour votre groupe.",
+  "walletTitle": "Mon portefeuille",
+  "availableBalanceLabel": "Solde disponible",
+  "depositAction": "Déposer",
+  "withdrawAction": "Retirer",
+  "totalDepositsLabel": "Total dépôts",
+  "totalWithdrawalsLabel": "Total retraits",
+  "transactionsTab": "Transactions",
+  "withdrawalsTab": "Retraits",
+  "noTransactionsTitle": "Aucune transaction",
+  "noTransactionsSubtitle": "Vos transactions apparaîtront ici",
+  "noWithdrawalsTitle": "Aucun retrait",
+  "noWithdrawalsSubtitle": "Vos demandes de retrait apparaîtront ici",
+  "depositTitle": "Déposer de l'argent",
+  "depositViaLigos": "Paiement via Ligos",
+  "amountLabel": "Montant (FCFA)",
+  "amountExample": "Ex : 5000",
+  "@minimumAmountLabel": {
+    "description": "Montant minimum",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "minimumAmountLabel": "Montant minimum : {amount}",
+  "depositInitError": "Erreur lors de l'initialisation",
+  "continueToLigos": "Continuer vers Ligos",
+  "withdrawRequestTitle": "Demander un retrait",
+  "withdrawViaCinetpay": "Retrait via Cinetpay",
+  "withdrawMethodLabel": "Méthode de retrait",
+  "mtnMobileMoneyLabel": "MTN Mobile Money",
+  "orangeMoneyLabel": "Orange Money",
+  "phoneNumberLabel": "Numéro de téléphone",
+  "phoneNumberHint": "6XXXXXXXX",
+  "phoneNumberRequiredError": "Veuillez entrer un numéro de téléphone",
+  "withdrawRequestSent": "Demande de retrait envoyée",
+  "withdrawRequestError": "Erreur lors de la demande",
+  "confessionsTitle": "Confessions",
+  "receivedTab": "Reçues",
+  "sentTab": "Envoyées",
+  "noConfessionsReceivedTitle": "Aucune confession reçue",
+  "noConfessionsSentTitle": "Aucune confession envoyée",
+  "noConfessionsTitle": "Aucune confession",
+  "noConfessionsReceivedSubtitle": "Les confessions qui vous sont adressées apparaîtront ici",
+  "noConfessionsSentSubtitle": "Vos confessions apparaîtront ici",
+  "noConfessionsSubtitle": "Soyez le premier à poster une confession",
+  "createConfessionAction": "Créer une confession",
+  "@loadingErrorMessage": {
+    "description": "Erreur de chargement avec détails",
+    "placeholders": {
+      "details": {}
+    }
+  },
+  "loadingErrorMessage": "Erreur de chargement : {details}",
+  "postTitle": "Publication",
+  "postNotFound": "Publication non trouvée",
+  "@likesCount": {
+    "description": "Nombre de j'aime",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "likesCount": "{count} j'aime",
+  "@commentsCount": {
+    "description": "Nombre de commentaires",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "commentsCount": "{count} commentaire(s)",
+  "likeAction": "J'aime",
+  "commentAction": "Commenter",
+  "shareAction": "Partager",
+  "@commentsCountTitle": {
+    "description": "Titre des commentaires",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "commentsCountTitle": "Commentaires ({count})",
+  "replyAction": "Répondre",
+  "@revealIdentityCost": {
+    "description": "Coût de révélation d'identité",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "revealIdentityCost": "Coût : {amount}",
+  "@revealIdentityAmount": {
+    "description": "Montant de révélation d'identité",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "revealIdentityAmount": "{amount}",
+  "costLabel": "Coût",
+  "@revealIdentitySuccessWithName": {
+    "description": "Succès de révélation avec nom",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "revealIdentitySuccessWithName": "Identité révélée : {name}",
+  "reportPostTitle": "Signaler la publication",
+  "reportPostPrompt": "Voulez-vous signaler cette publication pour contenu inapproprié ?",
+  "reportPostSuccess": "Publication signalée",
+  "reportAction": "Signaler",
+  "statusLabel": "Statut",
+  "viewAction": "Voir",
+  "subscriptionsTitle": "Mes abonnements",
+  "premiumPassTab": "Pass Premium",
+  "targetedSubscriptionsTab": "Ciblés",
+  "statusActive": "Actif",
+  "statusInactive": "Inactif",
+  "historyTitle": "Historique",
+  "noPassTitle": "Aucun pass",
+  "noPassSubtitle": "Votre historique Premium apparaîtra ici",
+  "@expiresOnDate": {
+    "description": "Expire le",
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "expiresOnDate": "Expire le {date}",
+  "noSubscriptionsTitle": "Aucun abonnement",
+  "noSubscriptionsSubtitle": "Vos abonnements ciblés apparaîtront ici",
+  "noExpiryLabel": "Sans date d'expiration",
+  "premiumBrandName": "Weylo Premium",
+  "subscriptionCancelled": "Abonnement annulé",
+  "storyReplyPlaceholder": "Répondre à la story...",
+  "visibleLabel": "Visible",
+  "storyReplyHint": "Écrivez votre réponse...",
+  "visibilityPrivate": "Privée",
+  "viewMoreAction": "Voir plus",
+  "viewLessAction": "Voir moins",
+  "@confessionForUser": {
+    "description": "Destinataire de la confession",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "confessionForUser": "Pour {name}",
+  "boostAction": "Booster",
+  "postDeletedSuccess": "Publication supprimée",
+  "giftSentTitle": "Cadeau envoyé !",
+  "@giftSentMessage": {
+    "description": "Message cadeau envoyé",
+    "placeholders": {
+      "gift": {},
+      "username": {}
+    }
+  },
+  "giftSentMessage": "Votre {gift} a été envoyé à {username}",
+  "@sendGiftToUser": {
+    "description": "Envoyer un cadeau à un utilisateur",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "sendGiftToUser": "Envoyer un cadeau à {username}",
+  "sendAnonymouslyLabel": "Envoyer anonymement",
+  "@sendGiftAction": {
+    "description": "Action envoyer un cadeau",
+    "placeholders": {
+      "gift": {}
+    }
+  },
+  "sendGiftAction": "Envoyer {gift}",
+  "selectGiftLabel": "Sélectionnez un cadeau",
+  "promoObjectiveBoostTitle": "Booster mon compte",
+  "promoObjectiveBoostDescription": "Augmentez votre visibilité et gagnez des abonnés",
+  "promoObjectiveFollowers": "Gagner des abonnés",
+  "promoObjectiveVisibility": "Plus de visibilité",
+  "promoObjectiveEngagement": "Plus d'engagement",
+  "promoObjectiveSalesTitle": "Obtenir des ventes",
+  "promoObjectiveSalesDescription": "Convertissez vos visiteurs en clients",
+  "promoObjectiveSellProducts": "Vendre des produits",
+  "promoObjectiveSellServices": "Vendre des services",
+  "promoObjectivePromoteEvent": "Promouvoir un événement",
+  "promoObjectiveProspectsTitle": "Obtenir des prospects",
+  "promoObjectiveProspectsDescription": "Générez des leads qualifiés pour votre activité",
+  "promoObjectiveCollectContacts": "Collecter des contacts",
+  "promoObjectiveReceiveMessages": "Recevoir des messages",
+  "promoObjectiveWebsiteVisits": "Visites sur mon site",
+  "promoStepGoalTitle": "Choisissez votre objectif",
+  "promoStepDetailTitle": "Précisez votre objectif",
+  "promoStepPackTitle": "Choisissez votre pack",
+  "promoStepConfirmTitle": "Confirmation",
+  "promotePostTitle": "Promouvoir",
+  "promoGoalQuestion": "Quel est votre objectif ?",
+  "promoGoalSubtitle": "Sélectionnez l'objectif principal de votre promotion",
+  "promoSelectObjectiveFirst": "Veuillez d'abord sélectionner un objectif",
+  "promoDetailSubtitle": "Choisissez ce que vous souhaitez accomplir",
+  "promoPackTitle": "Choisissez votre pack",
+  "promoPackSubtitle": "Sélectionnez la durée et le budget de votre promotion",
+  "@promoReachBoost": {
+    "description": "Boost de portée",
+    "placeholders": {
+      "boost": {}
+    }
+  },
+  "promoReachBoost": "+{boost}% portée",
+  "@promoBoostDuration": {
+    "description": "Durée du boost",
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "promoBoostDuration": "{hours} h de boost",
+  "promoNonFollowersIncluded": "Non-abonnés inclus",
+  "promoDetailedStats": "Stats détaillées",
+  "popularLabel": "POPULAIRE",
+  "summaryTitle": "Récapitulatif",
+  "summaryObjectiveLabel": "Objectif",
+  "summaryPackLabel": "Pack",
+  "summaryDurationLabel": "Durée",
+  "@summaryDurationValue": {
+    "description": "Valeur de durée",
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "summaryDurationValue": "{hours} heures",
+  "summaryReachBoostLabel": "Boost portée",
+  "@summaryReachBoostValue": {
+    "description": "Valeur de boost",
+    "placeholders": {
+      "boost": {}
+    }
+  },
+  "summaryReachBoostValue": "+{boost}%",
+  "summaryTotalLabel": "Total",
+  "promoImportantInfoTitle": "Informations importantes",
+  "promoImportantInfoBody": "• Le boost démarrera immédiatement après le paiement\n• La durée du boost est garantie\n• Les statistiques seront disponibles en temps réel\n• Aucun remboursement possible après activation",
+  "termsPrefix": "J'accepte les ",
+  "termsPromotionLabel": "conditions générales de promotion",
+  "termsMiddle": " et je confirme que ma publication respecte les ",
+  "termsCommunityLabel": "règles de la communauté",
+  "processingLabel": "Traitement...",
+  "@payAmountLabel": {
+    "description": "Libellé paiement",
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "payAmountLabel": "Payer {amount}",
+  "payAction": "Payer",
+  "promotePostSuccess": "Publication promue avec succès !",
+  "unknownError": "Erreur inconnue",
+  "errorOccurredTitle": "Une erreur est survenue",
+  "retryLaterSubtitle": "Veuillez réessayer plus tard",
+  "verifiedAccountTooltip": "Compte vérifié",
+  "premiumAccountTooltip": "Compte Premium",
+  "openAction": "Ouvrir",
+  "myStatusLabel": "Mon statut",
+  "meLabel": "Moi",
+  "navFeedLabel": "Fil",
+  "navMessagesLabel": "Messages",
+  "navChatLabel": "Chat",
+  "navGroupsLabel": "Groupes",
+  "navProfileLabel": "Profil",
+  "pressToRecordLabel": "Appuyez pour enregistrer",
+  "@effectLabel": {
+    "description": "Libellé de l'effet vocal",
+    "placeholders": {
+      "effect": {}
+    }
+  },
+  "effectLabel": "Effet : {effect}"
+}

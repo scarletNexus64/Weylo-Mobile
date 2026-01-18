@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user.dart';
 import '../../models/conversation.dart';
@@ -146,6 +147,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
 
 
   Widget _buildUsersPanel() {
+    final l10n = AppLocalizations.of(context)!;
     final hasQuery = _searchQuery.isNotEmpty;
     final isLoading = hasQuery ? _isSearching : _isLoadingUsers;
     final users = hasQuery ? _searchResults : _defaultUsers;
@@ -158,15 +160,15 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
       return Center(
         child: Text(
           hasQuery
-              ? 'Aucun utilisateur trouvé'
-              : 'Aucun utilisateur disponible pour le moment',
+              ? l10n.noUsersFound
+              : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
       );
     }
 
-    final sections = _buildUserSections(users);
+    final sections = _buildUserSections(l10n, users);
     final sectionWidgets = <Widget>[];
 
     for (final section in sections) {
@@ -185,8 +187,8 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
       return Center(
         child: Text(
           hasQuery
-              ? 'Aucun utilisateur trouvé'
-              : 'Aucun utilisateur disponible pour le moment',
+              ? l10n.noUsersFound
+              : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
@@ -200,14 +202,15 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   Widget _buildUserTile(User user) {
+    final l10n = AppLocalizations.of(context)!;
     final index = _conversationIndex[user.username];
     final hasConversation = index?.hasConversation ?? false;
     final isIdentityRevealed = index?.isIdentityRevealed ?? false;
 
     final shouldHideInfo = !hasConversation || !isIdentityRevealed;
 
-    final title = shouldHideInfo ? 'Anonyme' : user.fullName;
-    final subtitle = shouldHideInfo ? 'Informations masquées' : '@${user.username}';
+    final title = shouldHideInfo ? l10n.anonymousUser : user.fullName;
+    final subtitle = shouldHideInfo ? l10n.maskedInfo : '@${user.username}';
     final avatarName = shouldHideInfo 
         ? (user.username.isNotEmpty ? user.username[0].toUpperCase() : '?')
         : user.fullName;
@@ -216,13 +219,13 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     late Color statusColor;
     
     if (!hasConversation) {
-      statusBadge = 'Nouveau';
+      statusBadge = l10n.statusNew;
       statusColor = Colors.blue;
     } else if (isIdentityRevealed) {
-      statusBadge = 'Révélée';
+      statusBadge = l10n.statusRevealed;
       statusColor = Colors.green;
     } else {
-      statusBadge = 'Anonyme';
+      statusBadge = l10n.statusAnonymous;
       statusColor = Colors.orange;
     }
 
@@ -335,7 +338,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     );
   }
 
-  List<_UserSection> _buildUserSections(List<User> users) {
+  List<_UserSection> _buildUserSections(AppLocalizations l10n, List<User> users) {
     final revealed = <User>[];
     final anonymous = <User>[];
     final withoutConversation = <User>[];
@@ -369,20 +372,20 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
 
     return [
       _UserSection(
-        title: 'Conversations révélées',
-        helper: 'Ils ont déjà dévoilé leur identité',
+        title: l10n.revealedConversations,
+        helper: l10n.revealedConversationsHelper,
         accentColor: Colors.green,
         users: revealed,
       ),
       _UserSection(
-        title: 'Conversations anonymes',
-        helper: 'Identité masquée malgré un échange',
+        title: l10n.anonymousConversations,
+        helper: l10n.anonymousConversationsHelper,
         accentColor: Colors.orange,
         users: anonymous,
       ),
       _UserSection(
-        title: 'Sans conversation',
-        helper: 'Pas encore échangé avec vous',
+        title: l10n.noConversation,
+        helper: l10n.noConversationHelper,
         accentColor: Colors.blue,
         users: withoutConversation,
       ),
@@ -419,18 +422,19 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   Future<void> _sendMessage() async {
+    final l10n = AppLocalizations.of(context)!;
     final message = _messageController.text.trim();
 
     if (_selectedRecipient == null || _selectedRecipient!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner un destinataire')),
+        SnackBar(content: Text(l10n.selectRecipientError)),
       );
       return;
     }
 
     if (message.isEmpty && _selectedImage == null && _voiceFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez entrer un message')),
+        SnackBar(content: Text(l10n.enterMessageError)),
       );
       return;
     }
@@ -453,8 +457,8 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Message envoyé avec succès!'),
+          SnackBar(
+            content: Text(l10n.messageSentSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -466,7 +470,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur: ${e.toString()}'),
+          content: Text(l10n.errorMessage(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -475,9 +479,10 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedRecipient == null || _selectedRecipient!.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Envoyer un message')),
+        appBar: AppBar(title: Text(l10n.sendMessageTitle)),
         body: Column(
           children: [
             Padding(
@@ -486,7 +491,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Rechercher un utilisateur...',
+                  hintText: l10n.searchUserHint,
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -503,7 +508,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Nouveau message'),
+        title: Text(l10n.newMessageTitle),
         actions: [
           TextButton(
             onPressed: _isSending ? null : _sendMessage,
@@ -513,7 +518,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Envoyer'),
+                : Text(l10n.sendAction),
           ),
         ],
       ),
@@ -545,15 +550,15 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _isAnonymous ? 'Mode anonyme' : 'Mode public',
+                                _isAnonymous ? l10n.anonymousMode : l10n.publicMode,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
                                 _isAnonymous
-                                    ? 'Votre identité sera cachée'
-                                    : 'Votre nom sera visible',
+                                    ? l10n.anonymousModeSubtitle
+                                    : l10n.publicModeSubtitle,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[600],
@@ -581,7 +586,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                     controller: _messageController,
                     maxLines: 8,
                     decoration: InputDecoration(
-                      hintText: 'Écrivez votre message...',
+                      hintText: l10n.messageHint,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -651,13 +656,15 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Message vocal enregistré',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                Text(
+                                  l10n.voiceMessageRecorded,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 if (_selectedEffect != VoiceEffect.none)
                                   Text(
-                                    'Effet: ${VoiceEffectsService.getEffectName(_selectedEffect)}',
+                                    l10n.voiceEffectLabel(
+                                      VoiceEffectsService.getEffectName(_selectedEffect),
+                                    ),
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey[600],

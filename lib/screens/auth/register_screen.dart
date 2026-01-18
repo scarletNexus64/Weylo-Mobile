@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../providers/auth_provider.dart';
@@ -114,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (!_acceptTerms) {
       Helpers.showErrorSnackBar(
         context,
-        'Veuillez accepter les conditions d\'utilisation',
+        AppLocalizations.of(context)!.acceptTermsError,
       );
       return;
     }
@@ -146,6 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
+        final l10n = AppLocalizations.of(context)!;
         return LoadingOverlay(
           isLoading: authProvider.isLoading,
           child: Scaffold(
@@ -207,15 +209,16 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   String _getPageTitle() {
+    final l10n = AppLocalizations.of(context)!;
     switch (_currentPage) {
       case 0:
-        return 'Informations personnelles';
+        return l10n.registerPersonalInfoTitle;
       case 1:
-        return 'Votre compte';
+        return l10n.registerAccountInfoTitle;
       case 2:
-        return 'Sécurité';
+        return l10n.registerSecurityTitle;
       default:
-        return 'Inscription';
+        return l10n.registerTitle;
     }
   }
 
@@ -244,7 +247,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Étape ${_currentPage + 1} sur 3',
+            AppLocalizations.of(context)!.registerStepLabel(_currentPage + 1, 3),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -307,7 +310,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 ),
 
                 Text(
-                  'Comment vous appelez-vous ?',
+                  AppLocalizations.of(context)!.registerNameQuestion,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -315,7 +318,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Entrez votre prénom et nom pour personnaliser votre profil',
+                  AppLocalizations.of(context)!.registerNameSubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -325,16 +328,16 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                 CustomTextField(
                   controller: _firstNameController,
-                  label: 'Prénom *',
-                  hintText: 'Entrez votre prénom',
+                  label: AppLocalizations.of(context)!.firstNameLabelRequired,
+                  hintText: AppLocalizations.of(context)!.firstNameHint,
                   prefixIcon: Icons.person_outline,
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Le prénom est requis';
+                      return AppLocalizations.of(context)!.firstNameRequired;
                     }
                     if (value.length < 2) {
-                      return 'Le prénom doit contenir au moins 2 caractères';
+                      return AppLocalizations.of(context)!.firstNameTooShort;
                     }
                     return null;
                   },
@@ -343,8 +346,8 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                 CustomTextField(
                   controller: _lastNameController,
-                  label: 'Nom (optionnel)',
-                  hintText: 'Entrez votre nom',
+                  label: AppLocalizations.of(context)!.lastNameLabelOptional,
+                  hintText: AppLocalizations.of(context)!.lastNameHint,
                   prefixIcon: Icons.person_outline,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _nextPage(),
@@ -352,7 +355,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 const SizedBox(height: 32),
 
                 CustomButton(
-                  text: 'Continuer',
+                  text: AppLocalizations.of(context)!.continueAction,
                   onPressed: _nextPage,
                   suffixIcon: Icons.arrow_forward,
                 ),
@@ -398,7 +401,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 ),
 
                 Text(
-                  'Créez votre identité',
+                  AppLocalizations.of(context)!.registerIdentityTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -406,7 +409,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Choisissez un nom d\'utilisateur unique et ajoutez vos coordonnées',
+                  AppLocalizations.of(context)!.registerIdentitySubtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -416,16 +419,16 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                 CustomTextField(
                   controller: _usernameController,
-                  label: 'Nom d\'utilisateur *',
-                  hintText: 'Choisissez un nom unique',
+                  label: AppLocalizations.of(context)!.usernameLabelRequired,
+                  hintText: AppLocalizations.of(context)!.usernameHint,
                   prefixIcon: Icons.alternate_email,
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Le nom d\'utilisateur est requis';
+                      return AppLocalizations.of(context)!.usernameRequired;
                     }
                     if (!Helpers.isValidUsername(value)) {
-                      return 'Utilisez 3-20 caractères (lettres, chiffres, _)';
+                      return AppLocalizations.of(context)!.usernameInvalid;
                     }
                     return null;
                   },
@@ -434,15 +437,15 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                 CustomTextField(
                   controller: _emailController,
-                  label: 'Email (optionnel)',
-                  hintText: 'Entrez votre email',
+                  label: AppLocalizations.of(context)!.emailLabelOptional,
+                  hintText: AppLocalizations.of(context)!.emailHint,
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
                       if (!Helpers.isValidEmail(value)) {
-                        return 'Email invalide';
+                        return AppLocalizations.of(context)!.emailInvalid;
                       }
                     }
                     return null;
@@ -452,8 +455,8 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                 CustomTextField(
                   controller: _phoneController,
-                  label: 'Téléphone (optionnel)',
-                  hintText: '6XXXXXXXX',
+                  label: AppLocalizations.of(context)!.phoneLabelOptional,
+                  hintText: AppLocalizations.of(context)!.phoneHint,
                   prefixIcon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.done,
@@ -461,7 +464,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
                       if (!Helpers.isValidPhone(value)) {
-                        return 'Numéro de téléphone invalide';
+                        return AppLocalizations.of(context)!.phoneInvalid;
                       }
                     }
                     return null;
@@ -470,7 +473,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 const SizedBox(height: 32),
 
                 CustomButton(
-                  text: 'Continuer',
+                  text: AppLocalizations.of(context)!.continueAction,
                   onPressed: _nextPage,
                   suffixIcon: Icons.arrow_forward,
                 ),
@@ -518,7 +521,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
 
                     Text(
-                      'Sécurisez votre compte',
+                      AppLocalizations.of(context)!.registerSecureTitle,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -526,7 +529,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Créez un code PIN à 4 chiffres pour protéger votre compte',
+                      AppLocalizations.of(context)!.registerSecureSubtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -536,8 +539,8 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                     CustomTextField(
                       controller: _passwordController,
-                      label: 'Code PIN *',
-                      hintText: 'Créez un code à 4 chiffres',
+                      label: AppLocalizations.of(context)!.pinLabelRequired,
+                      hintText: AppLocalizations.of(context)!.pinCreateHint,
                       keyboardType: TextInputType.number,
                       maxLength: 4,
                       prefixIcon: Icons.lock_outline,
@@ -555,10 +558,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Le code est requis';
+                          return AppLocalizations.of(context)!.pinRequired;
                         }
-                        if (value.length != 4 || !RegExp(r'^\d{4}$').hasMatch(value)) {
-                          return 'Le code doit contenir exactement 4 chiffres';
+                        if (value.length != 4 || !RegExp(r'^\\d{4}$').hasMatch(value)) {
+                          return AppLocalizations.of(context)!.pinInvalid;
                         }
                         return null;
                       },
@@ -567,8 +570,8 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                     CustomTextField(
                       controller: _confirmPasswordController,
-                      label: 'Confirmer le code *',
-                      hintText: 'Confirmez votre code PIN',
+                      label: AppLocalizations.of(context)!.pinConfirmLabelRequired,
+                      hintText: AppLocalizations.of(context)!.pinConfirmHint,
                       keyboardType: TextInputType.number,
                       maxLength: 4,
                       prefixIcon: Icons.lock_outline,
@@ -587,10 +590,10 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez confirmer votre code';
+                          return AppLocalizations.of(context)!.pinConfirmRequired;
                         }
                         if (value != _passwordController.text) {
-                          return 'Les codes ne correspondent pas';
+                          return AppLocalizations.of(context)!.pinMismatch;
                         }
                         return null;
                       },
@@ -619,17 +622,17 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 text: TextSpan(
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   children: [
-                                    const TextSpan(text: 'J\'accepte les '),
+                                    TextSpan(text: AppLocalizations.of(context)!.acceptTermsPrefix),
                                     TextSpan(
-                                      text: 'conditions d\'utilisation',
+                                      text: AppLocalizations.of(context)!.acceptTermsLink,
                                       style: TextStyle(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    const TextSpan(text: ' et la '),
+                                    TextSpan(text: AppLocalizations.of(context)!.acceptPrivacyMiddle),
                                     TextSpan(
-                                      text: 'politique de confidentialité',
+                                      text: AppLocalizations.of(context)!.acceptPrivacyLink,
                                       style: TextStyle(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.w600,
@@ -646,7 +649,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     const SizedBox(height: 32),
 
                     CustomButton(
-                      text: 'Créer mon compte',
+                      text: AppLocalizations.of(context)!.createMyAccount,
                       onPressed: _nextPage,
                       isLoading: authProvider.isLoading,
                     ),
@@ -657,12 +660,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Vous avez déjà un compte ? ',
+                          AppLocalizations.of(context)!.alreadyHaveAccount,
                           style: TextStyle(color: AppColors.textSecondary),
                         ),
                         TextButton(
                           onPressed: () => context.pop(),
-                          child: const Text('Se connecter'),
+                          child: Text(AppLocalizations.of(context)!.loginLink),
                         ),
                       ],
                     ),

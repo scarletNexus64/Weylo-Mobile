@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../voice_effects_service.dart';
 import '../voice/voice_recorder_widget.dart';
@@ -46,6 +47,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
   }
 
   Widget _buildCollapsedInput() {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
@@ -64,9 +66,9 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
         ),
         child: Row(
           children: [
-            const Text(
-              'Répondre à la story...',
-              style: TextStyle(
+            Text(
+              l10n.storyReplyPlaceholder,
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 14,
               ),
@@ -94,6 +96,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
   }
 
   Widget _buildExpandedInput() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -111,9 +114,9 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
                   icon: const Icon(Icons.close),
                   onPressed: widget.onClose,
                 ),
-                const Text(
-                  'Répondre',
-                  style: TextStyle(
+                Text(
+                  l10n.replyAction,
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -149,7 +152,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _isAnonymous ? 'Anonyme' : 'Visible',
+                          _isAnonymous ? l10n.userAnonymous : l10n.visibleLabel,
                           style: TextStyle(
                             fontSize: 12,
                             color:
@@ -210,7 +213,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: const Text('Envoyer'),
+                    child: Text(l10n.sendAction),
                   ),
               ],
             ),
@@ -221,6 +224,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
   }
 
   Widget _buildTextInput() {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: TextField(
@@ -229,7 +233,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
         minLines: 1,
         onChanged: (_) => setState(() {}),
         decoration: InputDecoration(
-          hintText: 'Écrivez votre réponse...',
+          hintText: l10n.storyReplyHint,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,

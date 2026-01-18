@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/confession.dart';
 import '../../services/confession_service.dart';
@@ -116,15 +117,16 @@ class _ConfessionsScreenState extends State<ConfessionsScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Confessions'),
+        title: Text(l10n.confessionsTitle),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Public'),
-            Tab(text: 'Reçues'),
-            Tab(text: 'Envoyées'),
+          tabs: [
+            Tab(text: l10n.visibilityPublic),
+            Tab(text: l10n.receivedTab),
+            Tab(text: l10n.sentTab),
           ],
         ),
       ),
@@ -154,20 +156,21 @@ class _ConfessionsScreenState extends State<ConfessionsScreen> with SingleTicker
     bool isSent = false,
     bool enableLoadMore = false,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     if (confessions.isEmpty) {
       return EmptyState(
         icon: Icons.favorite_outline,
         title: isReceived
-            ? 'Aucune confession reçue'
+            ? l10n.noConfessionsReceivedTitle
             : isSent
-                ? 'Aucune confession envoyée'
-                : 'Aucune confession',
+                ? l10n.noConfessionsSentTitle
+                : l10n.noConfessionsTitle,
         subtitle: isReceived
-            ? 'Les confessions qui vous sont adressées apparaîtront ici'
+            ? l10n.noConfessionsReceivedSubtitle
             : isSent
-                ? 'Vos confessions apparaîtront ici'
-                : 'Soyez le premier à poster une confession',
-        buttonText: 'Créer une confession',
+                ? l10n.noConfessionsSentSubtitle
+                : l10n.noConfessionsSubtitle,
+        buttonText: l10n.createConfessionAction,
         onButtonPressed: () => context.push('/create-confession'),
       );
     }

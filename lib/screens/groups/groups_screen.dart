@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/group.dart';
@@ -77,22 +78,23 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
   }
 
   void _showJoinDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Rejoindre un groupe'),
+        title: Text(l10n.joinGroupTitle),
         content: TextField(
           controller: _inviteCodeController,
-          decoration: const InputDecoration(
-            hintText: 'Entrez le code d\'invitation',
-            prefixIcon: Icon(Icons.link),
+          decoration: InputDecoration(
+            hintText: l10n.inviteCodeHint,
+            prefixIcon: const Icon(Icons.link),
           ),
           textCapitalization: TextCapitalization.characters,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -103,16 +105,16 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                 await _groupService.joinGroup(code);
                 if (mounted) {
                   Navigator.pop(context);
-                  Helpers.showSuccessSnackBar(context, 'Vous avez rejoint le groupe !');
+                  Helpers.showSuccessSnackBar(context, l10n.joinGroupSuccess);
                   _loadData();
                 }
               } catch (e) {
-                Helpers.showErrorSnackBar(context, 'Code d\'invitation invalide');
+                Helpers.showErrorSnackBar(context, l10n.invalidInviteCode);
               }
 
               _inviteCodeController.clear();
             },
-            child: const Text('Rejoindre'),
+            child: Text(l10n.joinAction),
           ),
         ],
       ),
@@ -121,21 +123,22 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Groupes'),
+        title: Text(l10n.groupsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.link),
             onPressed: _showJoinDialog,
-            tooltip: 'Rejoindre avec un code',
+            tooltip: l10n.joinWithCodeTooltip,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Mes groupes'),
-            Tab(text: 'Découvrir'),
+          tabs: [
+            Tab(text: l10n.myGroupsTab),
+            Tab(text: l10n.discoverTab),
           ],
         ),
       ),
@@ -172,14 +175,15 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
     bool isDiscover = false,
     required RefreshController controller,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     if (groups.isEmpty) {
       return EmptyState(
         icon: Icons.group_outlined,
-        title: isMyGroups ? 'Aucun groupe' : 'Aucun groupe à découvrir',
+        title: isMyGroups ? l10n.noGroupsTitle : l10n.noGroupsDiscoverTitle,
         subtitle: isMyGroups
-            ? 'Créez ou rejoignez un groupe pour commencer'
-            : 'Revenez plus tard pour découvrir de nouveaux groupes',
-        buttonText: isMyGroups ? 'Créer un groupe' : null,
+            ? l10n.noGroupsSubtitle
+            : l10n.noGroupsDiscoverSubtitle,
+        buttonText: isMyGroups ? l10n.createGroupAction : null,
         onButtonPressed: isMyGroups ? () => context.push('/create-group') : null,
       );
     }
@@ -209,10 +213,11 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
   }
 
   void _showJoinGroupDialog(Group group) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Rejoindre ${group.name}'),
+        title: Text(l10n.joinGroupNameTitle(group.name)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,13 +226,13 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
               Text(group.description!),
               const SizedBox(height: 12),
             ],
-            Text('${group.membersCount}/${group.maxMembers} membres'),
+            Text(l10n.groupMembersCount(group.membersCount, group.maxMembers)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -235,14 +240,14 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
                 await _groupService.joinGroup(group.inviteCode);
                 if (mounted) {
                   Navigator.pop(context);
-                  Helpers.showSuccessSnackBar(context, 'Vous avez rejoint le groupe !');
+                  Helpers.showSuccessSnackBar(context, l10n.joinGroupSuccess);
                   _loadData();
                 }
               } catch (e) {
-                Helpers.showErrorSnackBar(context, 'Impossible de rejoindre le groupe');
+                Helpers.showErrorSnackBar(context, l10n.joinGroupError);
               }
             },
-            child: const Text('Rejoindre'),
+            child: Text(l10n.joinAction),
           ),
         ],
       ),
@@ -263,6 +268,7 @@ class _GroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -322,9 +328,9 @@ class _GroupCard extends StatelessWidget {
                               color: AppColors.success.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
-                              'Public',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.visibilityPublic,
+                              style: const TextStyle(
                                 fontSize: 10,
                                 color: AppColors.success,
                                 fontWeight: FontWeight.w500,

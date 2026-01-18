@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/gift.dart';
 import '../../gift_service.dart';
@@ -92,6 +93,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
   }
 
   Future<void> _sendGift() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedGift == null) return;
 
     setState(() {
@@ -129,7 +131,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
         _isSending = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: ${e.toString()}')),
+        SnackBar(content: Text(l10n.errorMessage(e.toString()))),
       );
     }
   }
@@ -147,6 +149,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
   }
 
   Widget _buildSuccessView() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -158,16 +161,19 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
             repeat: false,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Cadeau envoyé !',
-            style: TextStyle(
+          Text(
+            l10n.giftSentTitle,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Votre ${_selectedGift?.name} a été envoyé à ${widget.recipientUsername}',
+            l10n.giftSentMessage(
+              _selectedGift?.name ?? '',
+              widget.recipientUsername,
+            ),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey[600],
@@ -179,6 +185,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
   }
 
   Widget _buildGiftSelector() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         // Header
@@ -192,7 +199,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
               ),
               Expanded(
                 child: Text(
-                  'Envoyer un cadeau à ${widget.recipientUsername}',
+                  l10n.sendGiftToUser(widget.recipientUsername),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
@@ -361,7 +368,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
                     },
                     activeColor: AppColors.secondary,
                   ),
-                  const Text('Envoyer anonymement'),
+                  Text(l10n.sendAnonymouslyLabel),
                   const Spacer(),
                   if (_selectedGift != null)
                     Text(
@@ -410,8 +417,8 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
                             )
                           : Text(
                               _selectedGift != null
-                                  ? 'Envoyer ${_selectedGift!.name}'
-                                  : 'Sélectionnez un cadeau',
+                                  ? l10n.sendGiftAction(_selectedGift!.name)
+                                  : l10n.selectGiftLabel,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/theme/app_colors.dart';
@@ -78,7 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
         widget.initialReplyContent!.isNotEmpty &&
         widget.initialSentContent == null) {
       _pendingReplyPreview = _ReplyPreviewData(
-        title: widget.initialReplyTitle ?? 'Message anonyme',
+        title: widget.initialReplyTitle ?? '',
         content: widget.initialReplyContent!,
       );
     }
@@ -149,6 +150,7 @@ class _ChatScreenState extends State<ChatScreen> {
           widget.initialSentContent != null &&
           widget.initialReplyContent!.isNotEmpty &&
           widget.initialSentContent!.isNotEmpty) {
+        final l10n = AppLocalizations.of(context)!;
         final match = _messages.firstWhere(
           (message) => message.senderId == currentUserId &&
               message.content == widget.initialSentContent,
@@ -163,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
         if (match.id != -1) {
           setState(() {
             _localReplyPreview[match.id] = _ReplyPreviewData(
-              title: widget.initialReplyTitle ?? 'Message anonyme',
+              title: widget.initialReplyTitle ?? l10n.anonymousMessage,
               content: widget.initialReplyContent!,
             );
           });
@@ -250,8 +252,9 @@ class _ChatScreenState extends State<ChatScreen> {
       await _audioPlayer.play();
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lecture audio: $e')),
+          SnackBar(content: Text(l10n.audioPlaybackError(e.toString()))),
         );
       }
     } finally {
@@ -277,8 +280,9 @@ class _ChatScreenState extends State<ChatScreen> {
       await controller.initialize();
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lecture vidéo: $e')),
+          SnackBar(content: Text(l10n.videoPlaybackError(e.toString()))),
         );
       }
       await controller.dispose();
@@ -417,7 +421,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.image_outlined),
-              title: const Text('Image'),
+              title: Text(AppLocalizations.of(sheetContext)!.attachmentImage),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _pickImage();
@@ -425,7 +429,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.videocam_outlined),
-              title: const Text('Vidéo'),
+              title: Text(AppLocalizations.of(sheetContext)!.attachmentVideo),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _pickVideo();
@@ -481,7 +485,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _scrollToBottom();
     } catch (e) {
       debugPrint('[ChatScreen] Message send failed -> error: $e');
-      Helpers.showErrorSnackBar(context, 'Erreur lors de l\'envoi du message');
+      Helpers.showErrorSnackBar(context, AppLocalizations.of(context)!.chatSendError);
     } finally {
       setState(() {
         _isSending = false;
@@ -491,6 +495,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUserId = context.read<AuthProvider>().user?.id ?? 0;
     final otherUser = _conversation?.getOtherParticipant(currentUserId);
 
@@ -524,7 +529,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           children: [
                             Flexible(
                               child: Text(
-                                _conversation?.getDisplayName(currentUserId) ?? 'Utilisateur',
+                                _conversation?.getDisplayName(currentUserId) ?? l10n.userFallback,
                                 style: const TextStyle(fontSize: 16),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -540,7 +545,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                         if (_conversation?.streakCount != null && _conversation!.streakCount > 0)
                           Text(
-                            '${_conversation!.streakCount} jours de streak',
+                            l10n.streakDays(_conversation!.streakCount),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                       ],
@@ -553,12 +558,12 @@ class _ChatScreenState extends State<ChatScreen> {
             IconButton(
               icon: const Icon(Icons.visibility),
               onPressed: () => _showRevealDialog(),
-              tooltip: 'Révéler l\'identité',
+              tooltip: l10n.revealIdentityTitle,
             ),
           IconButton(
             icon: const Icon(Icons.card_giftcard),
             onPressed: () => context.push('/send-gift/${widget.conversationId}'),
-            tooltip: 'Envoyer un cadeau',
+            tooltip: l10n.sendGift,
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
@@ -579,8 +584,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   Expanded(
                     child: _messages.isEmpty
-                        ? const Center(
-                            child: Text('Aucun message. Commencez la conversation !'),
+                        ? Center(
+                            child: Text(l10n.chatEmpty),
                           )
                         : ListView.builder(
                             controller: _scrollController,
@@ -679,17 +684,17 @@ class _ChatScreenState extends State<ChatScreen> {
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.videocam, size: 28, color: Colors.grey[700]),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Vidéo sélectionnée',
-                                  style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.videocam, size: 28, color: Colors.grey[700]),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      l10n.videoSelected,
+                                      style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
                           ),
                           Positioned(
                             top: 6,
@@ -726,9 +731,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           children: [
                             const Icon(Icons.mic, color: AppColors.primary),
                             const SizedBox(width: 12),
-                            const Expanded(
+                            Expanded(
                               child: Text(
-                                'Message vocal enregistré',
+                                l10n.voiceMessageRecorded,
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -768,9 +773,12 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildReplyPreview() {
+    final l10n = AppLocalizations.of(context)!;
     final preview = _pendingReplyPreview;
     final isChatReply = _replyTo != null;
-    final title = isChatReply ? 'Répondre à' : (preview?.title ?? 'Réponse');
+    final title = isChatReply
+        ? l10n.replyTo
+        : (preview?.title.isNotEmpty == true ? preview!.title : l10n.anonymousMessage);
     final content = isChatReply ? _replyTo!.content : (preview?.content ?? '');
 
     return Container(
@@ -868,7 +876,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: TextField(
               controller: _messageController,
               decoration: InputDecoration(
-                hintText: 'Message...',
+                hintText: AppLocalizations.of(context)!.messageHintShort,
                 prefixIcon: IconButton(
                   icon: Icon(
                     Icons.mic_outlined,
@@ -925,46 +933,46 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   String _getMessageStatusLabel(ChatMessage message, bool isMe) {
+    final l10n = AppLocalizations.of(context)!;
     if (!isMe) return '';
     if (_isSending &&
         _pendingMessageContent != null &&
         message.content == _pendingMessageContent) {
-      return 'En cours';
+      return l10n.statusSending;
     }
 
     final status = _messageDeliveryStatus[message.id];
     if (status != null) {
       return _statusText(status);
     }
-    return message.isRead ? 'Lu' : 'Non lu';
+    return message.isRead ? l10n.statusRead : l10n.statusUnread;
   }
 
   String _statusText(MessageDeliveryStatus status) {
+    final l10n = AppLocalizations.of(context)!;
     switch (status) {
       case MessageDeliveryStatus.sending:
-        return 'En cours';
+        return l10n.statusSending;
       case MessageDeliveryStatus.sent:
-        return 'Envoyé';
+        return l10n.statusSent;
       case MessageDeliveryStatus.read:
-        return 'Lu';
+        return l10n.statusRead;
       case MessageDeliveryStatus.failed:
-        return 'Erreur';
+        return l10n.statusFailed;
     }
   }
 
   void _showRevealDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Révéler l\'identité'),
-        content: const Text(
-          'Voulez-vous payer pour révéler l\'identité de cette personne ? '
-          'Cette action coûte 450 FCFA.',
-        ),
+        title: Text(l10n.revealIdentityTitle),
+        content: Text(l10n.revealIdentityPrompt('450')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -987,7 +995,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     _conversation = resolvedConversation;
                   });
                   await context.read<AuthProvider>().refreshUser();
-                  Helpers.showSuccessSnackBar(context, 'Identité révélée !');
+                  Helpers.showSuccessSnackBar(context, l10n.revealIdentitySuccess);
                 }
               } catch (e) {
                 if (mounted) {
@@ -1000,7 +1008,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
               }
             },
-            child: const Text('Révéler'),
+            child: Text(l10n.revealIdentityAction),
           ),
         ],
       ),
@@ -1023,7 +1031,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.card_giftcard),
-              title: const Text('Envoyer un cadeau'),
+              title: Text(AppLocalizations.of(sheetContext)!.sendGift),
               onTap: () {
                 Navigator.pop(sheetContext);
                 context.push('/send-gift/${widget.conversationId}');
@@ -1031,7 +1039,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.block),
-              title: const Text('Bloquer'),
+              title: Text(AppLocalizations.of(sheetContext)!.blockUser),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _showBlockDialog(otherUser?.username ?? '');
@@ -1039,7 +1047,10 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.delete_outline, color: AppColors.error),
-              title: const Text('Supprimer la conversation', style: TextStyle(color: AppColors.error)),
+              title: Text(
+                AppLocalizations.of(sheetContext)!.deleteConversation,
+                style: const TextStyle(color: AppColors.error),
+              ),
               onTap: () {
                 Navigator.pop(sheetContext);
                 _showDeleteConversationDialog();
@@ -1057,22 +1068,22 @@ class _ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Bloquer cet utilisateur'),
-        content: Text(
-          'Voulez-vous vraiment bloquer cet utilisateur ?\n\n'
-          'Vous ne recevrez plus de messages de sa part.',
-        ),
+        title: Text(AppLocalizations.of(dialogContext)!.blockUserTitle),
+        content: Text(AppLocalizations.of(dialogContext)!.blockUserConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(dialogContext)!.cancel),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(dialogContext);
               // TODO: Implémenter le blocage via UserService
               if (mounted) {
-                Helpers.showSuccessSnackBar(context, 'Utilisateur bloqué');
+                Helpers.showSuccessSnackBar(
+                  context,
+                  AppLocalizations.of(context)!.userBlocked,
+                );
                 if (context.canPop()) {
                   context.pop();
                 } else {
@@ -1081,7 +1092,7 @@ class _ChatScreenState extends State<ChatScreen> {
               }
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Bloquer'),
+            child: Text(AppLocalizations.of(dialogContext)!.blockUser),
           ),
         ],
       ),
@@ -1092,15 +1103,12 @@ class _ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Supprimer la conversation'),
-        content: const Text(
-          'Êtes-vous sûr de vouloir supprimer cette conversation ?\n\n'
-          'Cette action est irréversible.',
-        ),
+        title: Text(AppLocalizations.of(dialogContext)!.deleteConversation),
+        content: Text(AppLocalizations.of(dialogContext)!.deleteConversationConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(dialogContext)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -1108,7 +1116,10 @@ class _ChatScreenState extends State<ChatScreen> {
               try {
                 await _chatService.deleteConversation(widget.conversationId);
                 if (mounted) {
-                  Helpers.showSuccessSnackBar(context, 'Conversation supprimée');
+                  Helpers.showSuccessSnackBar(
+                    context,
+                    AppLocalizations.of(context)!.conversationDeleted,
+                  );
                   if (context.canPop()) {
                     context.pop();
                   } else {
@@ -1117,12 +1128,15 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
               } catch (e) {
                 if (mounted) {
-                  Helpers.showErrorSnackBar(context, 'Erreur lors de la suppression');
+                  Helpers.showErrorSnackBar(
+                    context,
+                    AppLocalizations.of(context)!.conversationDeleteError,
+                  );
                 }
               }
             },
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Supprimer'),
+            child: Text(AppLocalizations.of(dialogContext)!.deleteAction),
           ),
         ],
       ),
@@ -1347,7 +1361,7 @@ class _MessageBubble extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.reply),
-              title: const Text('Répondre'),
+              title: Text(AppLocalizations.of(sheetContext)!.reply),
               onTap: () {
                 Navigator.pop(sheetContext);
                 onReply?.call();
@@ -1355,12 +1369,12 @@ class _MessageBubble extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.copy),
-              title: const Text('Copier'),
+              title: Text(AppLocalizations.of(sheetContext)!.copyAction),
               onTap: () {
                 Clipboard.setData(ClipboardData(text: message.content));
                 Navigator.pop(sheetContext);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Message copié')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.messageCopied)),
                 );
               },
             ),

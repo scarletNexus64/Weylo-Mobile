@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../../l10n/app_localizations.dart';
 import 'dart:typed_data';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../core/constants/api_constants.dart';
@@ -92,6 +93,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer2<AuthProvider, ProfileProvider>(
       builder: (context, authProvider, profileProvider, child) {
         final user = authProvider.user;
@@ -134,10 +136,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                         labelColor: AppColors.secondary,
                         unselectedLabelColor: Colors.grey,
                         indicatorColor: AppColors.primary,
-                        tabs: const [
-                          Tab(icon: Icon(Icons.grid_on), text: 'Posts'),
-                          Tab(icon: Icon(Icons.favorite_border), text: 'Likes'),
-                          Tab(icon: Icon(Icons.card_giftcard), text: 'Cadeaux'),
+                        tabs: [
+                          Tab(icon: const Icon(Icons.grid_on), text: l10n.profilePostsTab),
+                          Tab(icon: const Icon(Icons.favorite_border), text: l10n.profileLikesTab),
+                          Tab(icon: const Icon(Icons.card_giftcard), text: l10n.profileGiftsTab),
                         ],
                       ),
                     ),
@@ -160,6 +162,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   }
 
   Widget _buildProfileHeader(user, ProfileProvider profileProvider) {
+    final l10n = AppLocalizations.of(context)!;
     final profileUser = profileProvider.profileUser ?? user;
 
     return Container(
@@ -236,16 +239,16 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   children: [
                     _buildStatColumn(
                       '${profileUser.confessionsCount ?? profileProvider.userConfessions.length}',
-                      'Posts',
+                      l10n.profilePostsTab,
                     ),
                     _buildStatColumn(
                       '${profileUser.followersCount}',
-                      'Abonnés',
+                      l10n.profileFollowers,
                       onTap: () => _showFollowersList(),
                     ),
                     _buildStatColumn(
                       '${profileUser.followingCount}',
-                      'Suivis',
+                      l10n.profileFollowing,
                       onTap: () => _showFollowingList(),
                     ),
                   ],
@@ -303,8 +306,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   child: Center(
                     child: ShaderMask(
                       shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
-                      child: const Text(
-                        'Modifier le profil',
+                      child: Text(
+                        l10n.profileEditProfile,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -339,14 +342,14 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   _shareProfile();
                 },
                 borderRadius: BorderRadius.circular(8),
-                child: const Center(
+                child: Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.share, size: 18, color: Colors.white),
-                      SizedBox(width: 8),
+                      const Icon(Icons.share, size: 18, color: Colors.white),
+                      const SizedBox(width: 8),
                       Text(
-                        'Partager le profil',
+                        l10n.profileShareProfile,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -388,25 +391,26 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   }
 
   Widget _buildPostsTab(ProfileProvider profileProvider) {
+    final l10n = AppLocalizations.of(context)!;
     final confessions = profileProvider.userConfessions;
 
     if (confessions.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.camera_alt_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.camera_alt_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              'Aucune publication',
+              l10n.profileNoPostsTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Partagez votre première publication!',
+              l10n.profileNoPostsSubtitle,
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -527,6 +531,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     Confession confession,
     ProfileProvider profileProvider,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
@@ -539,8 +544,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
                   child: const Icon(Icons.trending_up, color: Colors.white),
                 ),
-                title: const Text('Promouvoir'),
-                subtitle: const Text('Augmentez la visibilité de ce post'),
+                title: Text(l10n.profilePromote),
+                subtitle: Text(l10n.profilePromoteSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
                   PromotePostModal.show(
@@ -554,18 +559,20 @@ class _MyProfileScreenState extends State<MyProfileScreen>
               ),
               ListTile(
                 leading: const Icon(Icons.share_outlined),
-                title: const Text('Partager'),
+                title: Text(l10n.profileShare),
                 onTap: () {
                   Navigator.pop(ctx);
                   Share.share(
-                    'Découvre ce post sur Weylo: ${ApiConstants.baseUrl.replaceFirst(RegExp(r"/api/v1/?$"), "")}/post/${confession.id}',
-                    subject: 'Post Weylo',
+                    l10n.profileSharePostMessage(
+                      '${ApiConstants.baseUrl.replaceFirst(RegExp(r"/api/v1/?$"), "")}/post/${confession.id}',
+                    ),
+                    subject: l10n.profileSharePostSubject,
                   );
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                title: const Text('Supprimer', style: TextStyle(color: AppColors.error)),
+                title: Text(l10n.profileDelete, style: const TextStyle(color: AppColors.error)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _confirmDelete(context, confession, profileProvider);
@@ -583,15 +590,16 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     Confession confession,
     ProfileProvider profileProvider,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer la publication'),
-        content: const Text('Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.'),
+        title: Text(l10n.profileDeletePostTitle),
+        content: Text(l10n.profileDeletePostConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -602,8 +610,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 await profileProvider.loadOwnConfessions();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Publication supprimée'),
+                    SnackBar(
+                      content: Text(l10n.profileDeletePostSuccess),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -612,14 +620,14 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Erreur: ${e.toString()}'),
+                      content: Text(l10n.errorMessage(e.toString())),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Supprimer', style: TextStyle(color: AppColors.error)),
+            child: Text(l10n.profileDelete, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -705,6 +713,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   Widget _buildLikesTab() {
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
+        final l10n = AppLocalizations.of(context)!;
         final likedConfessions = profileProvider.likedConfessions;
 
         if (profileProvider.isLoading && likedConfessions.isEmpty) {
@@ -712,22 +721,22 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         }
 
         if (likedConfessions.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.favorite_border, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
+                const Icon(Icons.favorite_border, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
                 Text(
-                  'Aucun like',
+                  l10n.profileNoLikesTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  'Les posts que vous aimez apparaîtront ici',
+                  l10n.profileNoLikesSubtitle,
                   style: TextStyle(color: Colors.grey),
                 ),
               ],
@@ -757,27 +766,28 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   }
 
   Widget _buildGiftsTab() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoadingGifts) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_receivedGifts.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.card_giftcard_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.card_giftcard_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              'Aucun cadeau reçu',
+              l10n.profileNoGiftsTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Les cadeaux que vous recevez apparaîtront ici',
+              l10n.profileNoGiftsSubtitle,
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -792,13 +802,14 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         itemCount: _receivedGifts.length,
         itemBuilder: (context, index) {
           final transaction = _receivedGifts[index];
-          return _buildGiftCard(transaction);
+          return _buildGiftCard(context, transaction);
         },
       ),
     );
   }
 
-  Widget _buildGiftCard(GiftTransaction transaction) {
+  Widget _buildGiftCard(BuildContext context, GiftTransaction transaction) {
+    final l10n = AppLocalizations.of(context)!;
     final gift = transaction.gift;
     final sender = transaction.sender;
 
@@ -847,7 +858,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    gift?.name ?? 'Cadeau',
+                    gift?.name ?? l10n.giftDefaultName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -856,8 +867,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   const SizedBox(height: 4),
                   Text(
                     sender != null
-                        ? 'De @${sender.username}'
-                        : 'Cadeau anonyme',
+                        ? l10n.giftFromUser(sender.username)
+                        : l10n.giftAnonymous,
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -893,7 +904,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _formatDate(transaction.createdAt),
+                  _formatDate(context, transaction.createdAt),
                   style: TextStyle(
                     color: Colors.grey[500],
                     fontSize: 11,
@@ -907,16 +918,17 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final diff = now.difference(date);
 
     if (diff.inMinutes < 60) {
-      return 'Il y a ${diff.inMinutes}m';
+      return l10n.timeAgoMinutes(diff.inMinutes);
     } else if (diff.inHours < 24) {
-      return 'Il y a ${diff.inHours}h';
+      return l10n.timeAgoHours(diff.inHours);
     } else if (diff.inDays < 7) {
-      return 'Il y a ${diff.inDays}j';
+      return l10n.timeAgoDays(diff.inDays);
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
@@ -947,6 +959,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
         final webLink = 'https://weylo.app/${user.username}';
         final appLink = 'weylo://m/${user.username}';
 
@@ -965,8 +978,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Partager votre lien anonyme',
+                Text(
+                  l10n.shareProfileTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -974,7 +987,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Choisissez comment partager votre lien',
+                  l10n.shareProfileSubtitle,
                   style: TextStyle(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 24),
@@ -989,8 +1002,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                     ),
                     child: const Icon(Icons.qr_code, color: AppColors.primary),
                   ),
-                  title: const Text('Afficher le QR Code'),
-                  subtitle: const Text('Idéal pour les tests locaux'),
+                  title: Text(l10n.shareQrCodeTitle),
+                  subtitle: Text(l10n.shareQrCodeSubtitle),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -1009,14 +1022,14 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                     ),
                     child: const Icon(Icons.language, color: Colors.blue),
                   ),
-                  title: const Text('Partager le lien web'),
+                  title: Text(l10n.shareWebLinkTitle),
                   subtitle: Text(webLink, style: const TextStyle(fontSize: 12)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.pop(ctx);
                     Share.share(
-                      'Envoyez-moi un message anonyme sur Weylo! $webLink',
-                      subject: 'Mon profil Weylo',
+                      l10n.shareWebLinkMessage(webLink),
+                      subject: l10n.shareWebLinkSubject,
                     );
                   },
                 ),
@@ -1032,15 +1045,15 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                     ),
                     child: const Icon(Icons.copy, color: Colors.orange),
                   ),
-                  title: const Text('Copier le lien app'),
+                  title: Text(l10n.shareAppLinkTitle),
                   subtitle: Text(appLink, style: const TextStyle(fontSize: 12)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.pop(ctx);
                     Clipboard.setData(ClipboardData(text: appLink));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Lien copié dans le presse-papier'),
+                      SnackBar(
+                        content: Text(l10n.copyToClipboardSuccess),
                         backgroundColor: Colors.green,
                       ),
                     );
@@ -1058,7 +1071,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Scannez ce QR Code'),
+        title: Text(AppLocalizations.of(ctx)!.scanQrTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1100,7 +1113,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Fermer'),
+            child: Text(AppLocalizations.of(ctx)!.close),
           ),
         ],
       ),
