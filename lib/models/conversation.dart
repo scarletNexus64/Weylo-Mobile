@@ -169,6 +169,7 @@ class ChatMessage {
   final int senderId;
   final String content;
   final String? type;
+  final String? mediaUrl;
   final int? replyToId;
   final bool isRead;
   final User? sender;
@@ -182,6 +183,7 @@ class ChatMessage {
     required this.senderId,
     required this.content,
     this.type = 'text',
+    this.mediaUrl,
     this.replyToId,
     this.isRead = false,
     this.sender,
@@ -192,6 +194,9 @@ class ChatMessage {
 
   bool get isGift => type == 'gift';
   bool get isSystem => type == 'system';
+  bool get hasImage => type == 'image' && mediaUrl != null && mediaUrl!.isNotEmpty;
+  bool get hasVoice => type == 'voice' && mediaUrl != null && mediaUrl!.isNotEmpty;
+  bool get hasVideo => type == 'video' && mediaUrl != null && mediaUrl!.isNotEmpty;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     // Support multiple API field names for sender ID
@@ -209,6 +214,7 @@ class ChatMessage {
       senderId: senderId,
       content: json['content'] ?? '',
       type: json['type'] ?? 'text',
+      mediaUrl: json['media_full_url'] ?? json['media_url'] ?? json['mediaUrl'],
       replyToId: json['reply_to_id'] ?? json['replyToId'],
       isRead: json['is_read'] ?? json['isRead'] ?? false,
       sender: json['sender'] != null ? User.fromJson(json['sender']) : null,
@@ -231,6 +237,7 @@ class ChatMessage {
       'sender_id': senderId,
       'content': content,
       'type': type,
+      'media_url': mediaUrl,
       'reply_to_id': replyToId,
       'is_read': isRead,
       'created_at': createdAt.toIso8601String(),

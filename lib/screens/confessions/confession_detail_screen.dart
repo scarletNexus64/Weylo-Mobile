@@ -4,11 +4,14 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:video_player/video_player.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/confession.dart';
 import '../../services/confession_service.dart';
 import '../../services/widgets/common/avatar_widget.dart';
+import '../../services/widgets/common/link_text.dart';
 
 class ConfessionDetailScreen extends StatefulWidget {
   final int confessionId;
@@ -27,10 +30,14 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
 
   Confession? _confession;
   List<ConfessionComment> _comments = [];
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
+  bool _videoInitError = false;
   bool _isLoading = true;
   bool _isLoadingComments = false;
   bool _isSendingComment = false;
   File? _selectedCommentImage;
+  ConfessionComment? _replyToComment;
   String? _error;
 
   @override
@@ -43,6 +50,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   void dispose() {
     _commentController.dispose();
     _scrollController.dispose();
+    _videoController?.dispose();
     super.dispose();
   }
 
@@ -60,6 +68,15 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         _isLoading = false;
       });
 
+      if (confession.hasVideo) {
+        _initVideoPlayer(confession.videoUrl);
+      } else {
+        _videoController?.dispose();
+        _videoController = null;
+        _isVideoInitialized = false;
+        _videoInitError = false;
+      }
+
       _loadComments();
     } catch (e) {
       setState(() {
@@ -67,6 +84,62 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  String _resolveMediaUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final cleaned = url.replaceAll('\\', '/');
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    final baseUri = Uri.parse(base);
+
+    if (cleaned.startsWith('http')) {
+      final mediaUri = Uri.parse(cleaned);
+      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
+        final rewritten = mediaUri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        );
+        return Uri.encodeFull(rewritten.toString());
+      }
+      return Uri.encodeFull(cleaned);
+    }
+    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
+
+    if (cleaned.startsWith('/storage/')) {
+      return Uri.encodeFull('$base$cleaned');
+    }
+    if (cleaned.startsWith('storage/')) {
+      return Uri.encodeFull('$base/$cleaned');
+    }
+    return Uri.encodeFull('$base/storage/$cleaned');
+  }
+
+  void _initVideoPlayer(String? url) {
+    final resolvedUrl = _resolveMediaUrl(url);
+    if (resolvedUrl.isEmpty) {
+      setState(() {
+        _isVideoInitialized = false;
+        _videoInitError = true;
+      });
+      return;
+    }
+
+    _videoController?.dispose();
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(resolvedUrl))
+      ..initialize().then((_) {
+        if (!mounted) return;
+        setState(() {
+          _isVideoInitialized = true;
+          _videoInitError = false;
+        });
+      }).catchError((_) {
+        if (!mounted) return;
+        setState(() {
+          _isVideoInitialized = false;
+          _videoInitError = true;
+        });
+      });
   }
 
   Future<void> _loadComments() async {
@@ -95,11 +168,13 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         widget.confessionId,
         content,
         image: _selectedCommentImage,
+        parentId: _replyToComment?.id,
       );
 
       _commentController.clear();
       setState(() {
         _selectedCommentImage = null;
+        _replyToComment = null;
       });
 
       setState(() {
@@ -230,6 +305,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
 
   Widget _buildConfessionCard() {
     final confession = _confession!;
+    final imageUrl = _resolveMediaUrl(confession.imageUrl);
+    final hasImage = confession.hasImage && imageUrl.isNotEmpty;
+    final hasVideo = confession.hasVideo;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -305,18 +383,27 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
 
           // Content
           if (confession.content.isNotEmpty)
-            Text(
-              confession.content,
+            LinkText(
+              text: confession.content,
               style: const TextStyle(fontSize: 16, height: 1.5),
+              linkStyle: const TextStyle(
+                fontSize: 16,
+                height: 1.5,
+                color: AppColors.primary,
+                decoration: TextDecoration.underline,
+              ),
+              showPreview: true,
+              previewBackgroundColor: Colors.black.withOpacity(0.04),
+              previewTextColor: AppColors.textPrimary,
             ),
 
           // Image
-          if (confession.hasImage) ...[
+          if (hasImage) ...[
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: CachedNetworkImage(
-                imageUrl: confession.imageUrl!,
+                imageUrl: imageUrl,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
@@ -332,6 +419,50 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   ),
                 ),
               ),
+            ),
+          ],
+
+          if (hasVideo) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _isVideoInitialized && _videoController != null
+                  ? AspectRatio(
+                      aspectRatio: _videoController!.value.aspectRatio,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          VideoPlayer(_videoController!),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (_videoController!.value.isPlaying) {
+                                  _videoController!.pause();
+                                } else {
+                                  _videoController!.play();
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              _videoController!.value.isPlaying
+                                  ? Icons.pause_circle_filled
+                                  : Icons.play_circle_filled,
+                              size: 56,
+                              color: Colors.white.withOpacity(0.85),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      height: 200,
+                      color: Colors.grey[200],
+                      child: Center(
+                        child: _videoInitError
+                            ? const Icon(Icons.error_outline, color: Colors.grey)
+                            : const CircularProgressIndicator(),
+                      ),
+                    ),
             ),
           ],
 
@@ -603,6 +734,52 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
+                if (comment.parent != null)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 32,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                comment.parent?.user?.fullName ?? 'Anonyme',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                comment.parent?.content ?? '',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (comment.content.isNotEmpty)
                   Text(
                     comment.content,
@@ -632,6 +809,22 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                     ),
                   ),
                 ],
+                const SizedBox(height: 6),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _replyToComment = comment;
+                    });
+                  },
+                  child: Text(
+                    'Répondre',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -661,6 +854,60 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (_replyToComment != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 3,
+                    height: 36,
+                    margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _replyToComment?.user?.fullName ?? 'Anonyme',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _replyToComment?.content ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 18),
+                    onPressed: () {
+                      setState(() {
+                        _replyToComment = null;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
           if (_selectedCommentImage != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),

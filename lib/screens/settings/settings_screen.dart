@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/helpers.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 
@@ -14,6 +15,7 @@ class SettingsScreen extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final currentLanguage = authProvider.currentUser?.settings?.language ?? 'fr';
     final languageLabel = currentLanguage == 'fr' ? 'Français' : 'English';
+    final user = authProvider.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -23,10 +25,28 @@ class SettingsScreen extends StatelessWidget {
         children: [
           // Account section
           _buildSectionHeader('Compte'),
+          if (user != null)
+            _buildSettingItem(
+              icon: Icons.badge_outlined,
+              title: 'Informations du compte',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AccountInfoScreen(user: user),
+                  ),
+                );
+              },
+            ),
           _buildSettingItem(
             icon: Icons.person_outline,
             title: 'Modifier le profil',
             onTap: () => context.push('/edit-profile'),
+          ),
+          _buildSettingItem(
+            icon: Icons.account_balance_wallet_outlined,
+            title: 'Portefeuille',
+            onTap: () => context.push('/wallet'),
           ),
           _buildSettingItem(
             icon: Icons.lock_outline,
@@ -156,6 +176,13 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  Widget _buildUserInfoCard(BuildContext context, user) {
+    return UserInfoCard(
+      user: user,
+      onEdit: () => context.push('/edit-profile'),
     );
   }
 
@@ -290,6 +317,140 @@ class SettingsScreen extends StatelessWidget {
             child: const Text(
               'Dconnexion',
               style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AccountInfoScreen extends StatelessWidget {
+  final dynamic user;
+
+  const AccountInfoScreen({super.key, required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Informations du compte'),
+      ),
+      body: ListView(
+        children: [
+          const SizedBox(height: 8),
+          UserInfoCard(
+            user: user,
+            onEdit: () => context.push('/edit-profile'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class UserInfoCard extends StatelessWidget {
+  final dynamic user;
+  final VoidCallback? onEdit;
+
+  const UserInfoCard({super.key, required this.user, this.onEdit});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            _buildInfoRow(
+              context,
+              'Prénom',
+              user.firstName,
+              isEditable: true,
+            ),
+            if (user.lastName != null && user.lastName!.isNotEmpty)
+              _buildInfoRow(
+                context,
+                'Nom',
+                user.lastName,
+                isEditable: true,
+              ),
+            _buildInfoRow(context, 'Nom d\'utilisateur', '@${user.username}'),
+            if (user.email != null && user.email!.isNotEmpty)
+              _buildInfoRow(context, 'Email', user.email),
+            if (user.phone != null && user.phone!.isNotEmpty)
+              _buildInfoRow(context, 'Téléphone', user.phone),
+            _buildInfoRow(
+              context,
+              'Bio',
+              (user.bio != null && user.bio!.isNotEmpty)
+                  ? user.bio
+                  : 'Non renseignée',
+              isEditable: true,
+            ),
+            if (user.createdAt != null)
+              _buildInfoRow(
+                context,
+                'Date d\'inscription',
+                Helpers.formatDate(user.createdAt!),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isEditable = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 5,
+            child: GestureDetector(
+              onTap: isEditable ? onEdit : null,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      value,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (isEditable) ...[
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.edit,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ],

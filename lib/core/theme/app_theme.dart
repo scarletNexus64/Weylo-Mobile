@@ -19,58 +19,64 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme().copyWith(
-        displayLarge: GoogleFonts.poppins(
+      iconTheme: const IconThemeData(
+        weight: 700,
+      ),
+      primaryIconTheme: const IconThemeData(
+        weight: 700,
+      ),
+      textTheme: GoogleFonts.robotoTextTheme().copyWith(
+        displayLarge: GoogleFonts.roboto(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        displayMedium: GoogleFonts.poppins(
+        displayMedium: GoogleFonts.roboto(
           fontSize: 28,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        displaySmall: GoogleFonts.poppins(
+        displaySmall: GoogleFonts.roboto(
           fontSize: 24,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        headlineMedium: GoogleFonts.poppins(
+        headlineMedium: GoogleFonts.roboto(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        headlineSmall: GoogleFonts.poppins(
+        headlineSmall: GoogleFonts.roboto(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        titleLarge: GoogleFonts.poppins(
+        titleLarge: GoogleFonts.roboto(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        titleMedium: GoogleFonts.poppins(
+        titleMedium: GoogleFonts.roboto(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
         ),
-        bodyLarge: GoogleFonts.poppins(
+        bodyLarge: GoogleFonts.roboto(
           fontSize: 16,
           fontWeight: FontWeight.normal,
           color: AppColors.textPrimary,
         ),
-        bodyMedium: GoogleFonts.poppins(
+        bodyMedium: GoogleFonts.roboto(
           fontSize: 14,
           fontWeight: FontWeight.normal,
           color: AppColors.textPrimary,
         ),
-        bodySmall: GoogleFonts.poppins(
+        bodySmall: GoogleFonts.roboto(
           fontSize: 12,
           fontWeight: FontWeight.normal,
           color: AppColors.textSecondary,
         ),
-        labelLarge: GoogleFonts.poppins(
+        labelLarge: GoogleFonts.roboto(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
@@ -81,12 +87,15 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: GoogleFonts.roboto(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        iconTheme: const IconThemeData(
+          color: AppColors.textPrimary,
+          weight: 700,
+        ),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
@@ -107,7 +116,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: GoogleFonts.poppins(
+          textStyle: GoogleFonts.roboto(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -119,7 +128,7 @@ class AppTheme {
           side: const BorderSide(color: AppColors.primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: GoogleFonts.poppins(
+          textStyle: GoogleFonts.roboto(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -128,7 +137,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: GoogleFonts.poppins(
+          textStyle: GoogleFonts.roboto(
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -158,11 +167,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: GoogleFonts.poppins(
+        hintStyle: GoogleFonts.roboto(
           fontSize: 14,
           color: AppColors.textHint,
         ),
-        labelStyle: GoogleFonts.poppins(
+        labelStyle: GoogleFonts.roboto(
           fontSize: 14,
           color: AppColors.textSecondary,
         ),
@@ -175,7 +184,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.background,
         selectedColor: AppColors.primary.withOpacity(0.2),
-        labelStyle: GoogleFonts.poppins(fontSize: 12),
+        labelStyle: GoogleFonts.roboto(fontSize: 12),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
@@ -185,7 +194,7 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.textPrimary,
-        contentTextStyle: GoogleFonts.poppins(color: Colors.white),
+        contentTextStyle: GoogleFonts.roboto(color: Colors.white),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         behavior: SnackBarBehavior.floating,
       ),
@@ -208,58 +217,64 @@ class AppTheme {
         onSurface: AppColors.textPrimaryDark,
         onError: Colors.white,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.poppins(
+      iconTheme: const IconThemeData(
+        weight: 700,
+      ),
+      primaryIconTheme: const IconThemeData(
+        weight: 700,
+      ),
+      textTheme: GoogleFonts.robotoTextTheme(ThemeData.dark().textTheme).copyWith(
+        displayLarge: GoogleFonts.roboto(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryDark,
         ),
-        displayMedium: GoogleFonts.poppins(
+        displayMedium: GoogleFonts.roboto(
           fontSize: 28,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryDark,
         ),
-        displaySmall: GoogleFonts.poppins(
+        displaySmall: GoogleFonts.roboto(
           fontSize: 24,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimaryDark,
         ),
-        headlineMedium: GoogleFonts.poppins(
+        headlineMedium: GoogleFonts.roboto(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
-        headlineSmall: GoogleFonts.poppins(
+        headlineSmall: GoogleFonts.roboto(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
-        titleLarge: GoogleFonts.poppins(
+        titleLarge: GoogleFonts.roboto(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
-        titleMedium: GoogleFonts.poppins(
+        titleMedium: GoogleFonts.roboto(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimaryDark,
         ),
-        bodyLarge: GoogleFonts.poppins(
+        bodyLarge: GoogleFonts.roboto(
           fontSize: 16,
           fontWeight: FontWeight.normal,
           color: AppColors.textPrimaryDark,
         ),
-        bodyMedium: GoogleFonts.poppins(
+        bodyMedium: GoogleFonts.roboto(
           fontSize: 14,
           fontWeight: FontWeight.normal,
           color: AppColors.textPrimaryDark,
         ),
-        bodySmall: GoogleFonts.poppins(
+        bodySmall: GoogleFonts.roboto(
           fontSize: 12,
           fontWeight: FontWeight.normal,
           color: AppColors.textSecondaryDark,
         ),
-        labelLarge: GoogleFonts.poppins(
+        labelLarge: GoogleFonts.roboto(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimaryDark,
@@ -270,12 +285,15 @@ class AppTheme {
         centerTitle: true,
         backgroundColor: AppColors.surfaceDark,
         foregroundColor: AppColors.textPrimaryDark,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: GoogleFonts.roboto(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
-        iconTheme: const IconThemeData(color: AppColors.textPrimaryDark),
+        iconTheme: const IconThemeData(
+          color: AppColors.textPrimaryDark,
+          weight: 700,
+        ),
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surfaceDark,
@@ -296,7 +314,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: GoogleFonts.poppins(
+          textStyle: GoogleFonts.roboto(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -318,7 +336,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
-        hintStyle: GoogleFonts.poppins(
+        hintStyle: GoogleFonts.roboto(
           fontSize: 14,
           color: AppColors.textSecondaryDark,
         ),

@@ -24,6 +24,10 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
   WalletStats? _stats;
   bool _isLoading = true;
 
+  Future<void> _onRefresh() async {
+    await _loadData();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -72,144 +76,165 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
       ),
       body: _isLoading
           ? const LoadingWidget()
-          : Column(
-              children: [
-                // Balance Card
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Solde disponible',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        Helpers.formatCurrency(user?.walletBalance ?? 0),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
+          : RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: NestedScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    SliverToBoxAdapter(
+                      child: Column(
                         children: [
-                          Expanded(
-                            child: _ActionButton(
-                              icon: Icons.add,
-                              label: 'Déposer',
-                              onTap: () => _showDepositDialog(context),
+                          Container(
+                            margin: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              gradient: AppColors.primaryGradient,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.3),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'Solde disponible',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  Helpers.formatCurrency(user?.walletBalance ?? 0),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _ActionButton(
+                                        icon: Icons.add,
+                                        label: 'Déposer',
+                                        onTap: () => _showDepositDialog(context),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _ActionButton(
+                                        icon: Icons.arrow_upward,
+                                        label: 'Retirer',
+                                        onTap: () => _showWithdrawDialog(context),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _ActionButton(
-                              icon: Icons.arrow_upward,
-                              label: 'Retirer',
-                              onTap: () => _showWithdrawDialog(context),
+                          if (_stats != null)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                children: [
+                                  _StatItem(
+                                    label: 'Total dépôts',
+                                    value: Helpers.formatCurrency(_stats!.totalDeposits),
+                                    color: AppColors.success,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  _StatItem(
+                                    label: 'Total retraits',
+                                    value: Helpers.formatCurrency(_stats!.totalWithdrawals),
+                                    color: AppColors.warning,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          const SizedBox(height: 16),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                // Stats
-                if (_stats != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        _StatItem(
-                          label: 'Total dépôts',
-                          value: Helpers.formatCurrency(_stats!.totalDeposits),
-                          color: AppColors.success,
-                        ),
-                        const SizedBox(width: 12),
-                        _StatItem(
-                          label: 'Total retraits',
-                          value: Helpers.formatCurrency(_stats!.totalWithdrawals),
-                          color: AppColors.warning,
-                        ),
-                      ],
                     ),
-                  ),
-                const SizedBox(height: 16),
-                // Tabs
-                TabBar(
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _WalletTabBarDelegate(
+                        TabBar(
+                          controller: _tabController,
+                          tabs: const [
+                            Tab(text: 'Transactions'),
+                            Tab(text: 'Retraits'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ];
+                },
+                body: TabBarView(
                   controller: _tabController,
-                  tabs: const [
-                    Tab(text: 'Transactions'),
-                    Tab(text: 'Retraits'),
+                  children: [
+                    _buildTransactionsList(),
+                    _buildWithdrawalsList(),
                   ],
                 ),
-                // Tab Content
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildTransactionsList(),
-                      _buildWithdrawalsList(),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
     );
   }
 
   Widget _buildTransactionsList() {
-    if (_transactions.isEmpty) {
-      return const EmptyState(
-        icon: Icons.receipt_long_outlined,
-        title: 'Aucune transaction',
-        subtitle: 'Vos transactions apparaîtront ici',
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _transactions.length,
-      itemBuilder: (context, index) {
-        final transaction = _transactions[index];
-        return _TransactionTile(transaction: transaction);
-      },
-    );
+    return _transactions.isEmpty
+        ? ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: const [
+              EmptyState(
+                icon: Icons.receipt_long_outlined,
+                title: 'Aucune transaction',
+                subtitle: 'Vos transactions apparaîtront ici',
+              ),
+            ],
+          )
+        : ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            itemCount: _transactions.length,
+            itemBuilder: (context, index) {
+              final transaction = _transactions[index];
+              return _TransactionTile(transaction: transaction);
+            },
+          );
   }
 
   Widget _buildWithdrawalsList() {
-    if (_withdrawals.isEmpty) {
-      return const EmptyState(
-        icon: Icons.account_balance_outlined,
-        title: 'Aucun retrait',
-        subtitle: 'Vos demandes de retrait apparaîtront ici',
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _withdrawals.length,
-      itemBuilder: (context, index) {
-        final withdrawal = _withdrawals[index];
-        return _WithdrawalTile(withdrawal: withdrawal);
-      },
-    );
+    return _withdrawals.isEmpty
+        ? ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: const [
+              EmptyState(
+                icon: Icons.account_balance_outlined,
+                title: 'Aucun retrait',
+                subtitle: 'Vos demandes de retrait apparaîtront ici',
+              ),
+            ],
+          )
+        : ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            itemCount: _withdrawals.length,
+            itemBuilder: (context, index) {
+              final withdrawal = _withdrawals[index];
+              return _WithdrawalTile(withdrawal: withdrawal);
+            },
+          );
   }
 
   void _showDepositDialog(BuildContext context) {
@@ -616,5 +641,30 @@ class _WithdrawalTile extends StatelessWidget {
         isThreeLine: true,
       ),
     );
+  }
+}
+
+class _WalletTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+
+  _WalletTabBarDelegate(this.tabBar);
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _WalletTabBarDelegate oldDelegate) {
+    return oldDelegate.tabBar != tabBar;
   }
 }

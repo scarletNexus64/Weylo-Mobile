@@ -43,7 +43,7 @@ class ProfileProvider extends ChangeNotifier {
   bool get hasMoreFollowing => _hasMoreFollowing;
 
   /// Load user profile by username
-  Future<void> loadProfile(String username) async {
+  Future<void> loadProfile(String username, {bool loadConfessions = true}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -57,7 +57,7 @@ class ProfileProvider extends ChangeNotifier {
       _userConfessions = [];
 
       // Load user's confessions using username directly (not ID)
-      if (_profileUser != null) {
+      if (_profileUser != null && loadConfessions) {
         await loadUserConfessionsByUsername(_profileUser!.username);
       }
     } catch (e) {
@@ -141,6 +141,36 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
+  /// Load current user's own confessions (includes private/anonymous)
+  Future<void> loadOwnConfessions({bool loadMore = false}) async {
+    if (!_hasMoreConfessions && loadMore) return;
+
+    try {
+      final response = await _confessionService.getSentConfessions(
+        page: loadMore ? _confessionsPage : 1,
+      );
+
+      if (loadMore) {
+        _userConfessions.addAll(response.confessions);
+      } else {
+        _userConfessions = response.confessions;
+        _confessionsPage = 1;
+      }
+
+      if (kDebugMode) {
+        print('ProfileProvider: Loaded own confessions: ${response.confessions.length}');
+      }
+
+      _hasMoreConfessions = response.hasMore;
+      _confessionsPage++;
+      notifyListeners();
+    } catch (e) {
+      if (kDebugMode) {
+        print('ProfileProvider: Error loading own confessions: $e');
+      }
+    }
+  }
+
   /// Load liked confessions
   Future<void> loadLikedConfessions({bool loadMore = false}) async {
     if (!_hasMoreLiked && loadMore) return;
@@ -155,6 +185,10 @@ class ProfileProvider extends ChangeNotifier {
       } else {
         _likedConfessions = response.confessions;
         _likedPage = 1;
+      }
+
+      if (kDebugMode) {
+        print('ProfileProvider: Loaded liked confessions: ${response.confessions.length}');
       }
 
       _hasMoreLiked = response.hasMore;

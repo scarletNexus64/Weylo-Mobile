@@ -69,15 +69,29 @@ class Confession {
   }
 
   factory Confession.fromJson(Map<String, dynamic> json) {
+    final mediaType = json['media_type'] ?? json['mediaType'];
+    final mediaUrl = json['media_url'] ?? json['mediaUrl'];
+    final mediaFullUrl = json['media_full_url'] ?? json['mediaFullUrl'];
+    final isImageMedia = mediaType == 'image';
+    final isVideoMedia = mediaType == 'video';
+
     return Confession(
       id: json['id'] ?? 0,
       authorId: json['author_id'] ?? json['authorId'] ?? 0,
       recipientId: json['recipient_id'] ?? json['recipientId'],
       content: json['content'] ?? '',
       image: json['image'],
-      imageUrl: json['image_url'] ?? json['imageUrl'],
+      imageUrl: json['image_url'] ??
+          json['imageUrl'] ??
+          json['image_full_url'] ??
+          json['imageFullUrl'] ??
+          (isImageMedia ? (mediaFullUrl ?? mediaUrl) : null),
       video: json['video'],
-      videoUrl: json['video_url'] ?? json['videoUrl'],
+      videoUrl: json['video_url'] ??
+          json['videoUrl'] ??
+          json['video_full_url'] ??
+          json['videoFullUrl'] ??
+          (isVideoMedia ? (mediaFullUrl ?? mediaUrl) : null),
       type: json['type'] == 'private' ? ConfessionType.private : ConfessionType.public,
       status: _parseStatus(json['status']),
       isIdentityRevealed: json['is_identity_revealed'] ?? json['isIdentityRevealed'] ?? false,
@@ -172,6 +186,8 @@ class ConfessionComment {
   final int id;
   final int confessionId;
   final int userId;
+  final int? parentId;
+  final ConfessionCommentReply? parent;
   final String content;
   final String? mediaUrl;
   final String? mediaFullUrl;
@@ -183,6 +199,8 @@ class ConfessionComment {
     required this.id,
     required this.confessionId,
     required this.userId,
+    this.parentId,
+    this.parent,
     required this.content,
     this.mediaUrl,
     this.mediaFullUrl,
@@ -192,18 +210,74 @@ class ConfessionComment {
   });
 
   factory ConfessionComment.fromJson(Map<String, dynamic> json) {
+    User? parseCommentUser(dynamic author) {
+      if (author is! Map<String, dynamic>) return null;
+      if (author.containsKey('full_name') ||
+          author.containsKey('fullName') ||
+          author.containsKey('first_name') ||
+          author.containsKey('firstName')) {
+        return User.fromJson(author);
+      }
+      final name = author['name'] ?? author['username'] ?? '';
+      return User.fromJson({
+        'id': author['id'] ?? 0,
+        'full_name': name,
+        'username': author['username'] ?? '',
+        'avatar_url': author['avatar_url'],
+        'is_premium': author['is_premium'] ?? false,
+        'is_verified': author['is_verified'] ?? false,
+      });
+    }
+
     return ConfessionComment(
       id: json['id'] ?? 0,
       confessionId: json['confession_id'] ?? json['confessionId'] ?? 0,
       userId: json['user_id'] ?? json['userId'] ?? 0,
+      parentId: json['parent_id'] ?? json['parentId'],
+      parent: json['parent'] != null
+          ? ConfessionCommentReply.fromJson(json['parent'])
+          : null,
       content: json['content'] ?? '',
       mediaUrl: json['media_url'],
       mediaFullUrl: json['media_full_url'] ?? json['mediaFullUrl'],
       mediaType: json['media_type'] ?? json['mediaType'],
-      user: json['user'] != null ? User.fromJson(json['user']) : null,
+      user: parseCommentUser(json['user'] ?? json['author']),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : DateTime.now(),
+    );
+  }
+}
+
+class ConfessionCommentReply {
+  final int id;
+  final String content;
+  final bool isAnonymous;
+  final User? user;
+
+  ConfessionCommentReply({
+    required this.id,
+    required this.content,
+    required this.isAnonymous,
+    this.user,
+  });
+
+  factory ConfessionCommentReply.fromJson(Map<String, dynamic> json) {
+    final author = json['author'];
+    return ConfessionCommentReply(
+      id: json['id'] ?? 0,
+      content: json['content'] ?? '',
+      isAnonymous: json['is_anonymous'] ?? json['isAnonymous'] ?? false,
+      user: author != null
+          ? User.fromJson({
+              'id': author['id'] ?? 0,
+              'full_name': author['name'] ?? author['username'] ?? '',
+              'username': author['username'] ?? '',
+              'avatar_url': author['avatar_url'],
+              'is_premium': author['is_premium'] ?? false,
+              'is_verified': author['is_verified'] ?? false,
+            })
+          : null,
     );
   }
 }

@@ -5,11 +5,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'dart:typed_data';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/confession.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
+import '../../services/confession_service.dart';
 import '../../services/widgets/confessions/confession_card.dart';
 import '../../services/gift_service.dart';
+import '../../services/widgets/promotions/promote_post_modal.dart';
 import '../../models/gift.dart';
 import '../settings/settings_screen.dart';
 
@@ -26,6 +32,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   final GiftService _giftService = GiftService();
   List<GiftTransaction> _receivedGifts = [];
   bool _isLoadingGifts = false;
+  final Map<String, Future<Uint8List?>> _videoThumbnails = {};
 
   @override
   void initState() {
@@ -42,9 +49,20 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     final authProvider = context.read<AuthProvider>();
     if (authProvider.user != null) {
       final profileProvider = context.read<ProfileProvider>();
-      profileProvider.loadProfile(authProvider.user!.username);
+      profileProvider.loadProfile(authProvider.user!.username, loadConfessions: false);
       profileProvider.loadLikedConfessions();
+      profileProvider.loadOwnConfessions();
     }
+  }
+
+  Future<void> _onRefresh() async {
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.user == null) return;
+    final profileProvider = context.read<ProfileProvider>();
+    await profileProvider.loadProfile(authProvider.user!.username, loadConfessions: false);
+    await profileProvider.loadLikedConfessions();
+    await profileProvider.loadOwnConfessions();
+    await _loadReceivedGifts();
   }
 
   Future<void> _loadReceivedGifts() async {
@@ -56,11 +74,13 @@ class _MyProfileScreenState extends State<MyProfileScreen>
           _receivedGifts = gifts;
           _isLoadingGifts = false;
         });
+        debugPrint('MyProfile: Loaded gifts: ${gifts.length}');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingGifts = false);
       }
+      debugPrint('MyProfile: Error loading gifts: $e');
     }
   }
 
@@ -97,37 +117,41 @@ class _MyProfileScreenState extends State<MyProfileScreen>
               ),
             ],
           ),
-          body: NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverToBoxAdapter(
-                  child: _buildProfileHeader(user, profileProvider),
-                ),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _SliverTabBarDelegate(
-                    TabBar(
-                      controller: _tabController,
-                      labelColor: AppColors.secondary,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: AppColors.primary,
-                      tabs: const [
-                        Tab(icon: Icon(Icons.grid_on), text: 'Posts'),
-                        Tab(icon: Icon(Icons.favorite_border), text: 'Likes'),
-                        Tab(icon: Icon(Icons.card_giftcard), text: 'Cadeaux'),
-                      ],
+          body: RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: NestedScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverToBoxAdapter(
+                    child: _buildProfileHeader(user, profileProvider),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverTabBarDelegate(
+                      TabBar(
+                        controller: _tabController,
+                        labelColor: AppColors.secondary,
+                        unselectedLabelColor: Colors.grey,
+                        indicatorColor: AppColors.primary,
+                        tabs: const [
+                          Tab(icon: Icon(Icons.grid_on), text: 'Posts'),
+                          Tab(icon: Icon(Icons.favorite_border), text: 'Likes'),
+                          Tab(icon: Icon(Icons.card_giftcard), text: 'Cadeaux'),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ];
-            },
-            body: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildPostsTab(profileProvider),
-                _buildLikesTab(),
-                _buildGiftsTab(),
-              ],
+                ];
+              },
+              body: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildPostsTab(profileProvider),
+                  _buildLikesTab(),
+                  _buildGiftsTab(),
+                ],
+              ),
             ),
           ),
         );
@@ -390,22 +414,292 @@ class _MyProfileScreenState extends State<MyProfileScreen>
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8),
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       itemCount: confessions.length,
-      itemBuilder: (context, index) {
-        final confession = confessions[index];
-        return ConfessionCard(
-          confession: confession,
-          onTap: () {
-            context.push('/confessions/${confession.id}');
-          },
-          onComment: () {
-            context.push('/confessions/${confession.id}');
-          },
+      physics: const AlwaysScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.75,
+      ),
+      itemBuilder: (context, index) =>
+          _buildConfessionTile(confessions[index], profileProvider),
+    );
+  }
+
+  Widget _buildConfessionTile(Confession confession, ProfileProvider profileProvider) {
+    final imageUrl = _resolveMediaUrl(confession.imageUrl);
+    final videoUrl = _resolveMediaUrl(confession.videoUrl);
+    final hasImage = confession.hasImage && imageUrl.isNotEmpty;
+    final hasVideo = confession.hasVideo && videoUrl.isNotEmpty;
+
+    return InkWell(
+      onTap: () => context.push('/confession/${confession.id}'),
+      onLongPress: () => _showPostOptions(context, confession, profileProvider),
+      borderRadius: BorderRadius.circular(12),
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.black.withOpacity(0.05),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (hasImage)
+                CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, _) => _buildConfessionPlaceholder(hasVideo: hasVideo),
+                  errorWidget: (context, _, __) => _buildConfessionPlaceholder(hasVideo: hasVideo),
+                )
+              else if (hasVideo)
+                _buildVideoThumbnail(videoUrl)
+              else
+                _buildConfessionPlaceholder(hasVideo: hasVideo),
+              if (hasVideo)
+                const Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Icon(
+                      Icons.play_circle_fill,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              Positioned(
+                left: 6,
+                top: 6,
+                child: InkWell(
+                  onTap: () => _showPostOptions(context, confession, profileProvider),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.35),
+                      shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: const Icon(
+                      Icons.more_horiz,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ),
+              if (!hasImage)
+                Positioned(
+                  left: 10,
+                  right: 10,
+                  bottom: 10,
+                  child: Text(
+                    confession.content,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black45,
+                          blurRadius: 6,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPostOptions(
+    BuildContext context,
+    Confession confession,
+    ProfileProvider profileProvider,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: ShaderMask(
+                  shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                  child: const Icon(Icons.trending_up, color: Colors.white),
+                ),
+                title: const Text('Promouvoir'),
+                subtitle: const Text('Augmentez la visibilité de ce post'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  PromotePostModal.show(
+                    context,
+                    confessionId: confession.id,
+                    onPromoted: () {
+                      profileProvider.loadOwnConfessions();
+                    },
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share_outlined),
+                title: const Text('Partager'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Share.share(
+                    'Découvre ce post sur Weylo: ${ApiConstants.baseUrl.replaceFirst(RegExp(r"/api/v1/?$"), "")}/post/${confession.id}',
+                    subject: 'Post Weylo',
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                title: const Text('Supprimer', style: TextStyle(color: AppColors.error)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _confirmDelete(context, confession, profileProvider);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  void _confirmDelete(
+    BuildContext context,
+    Confession confession,
+    ProfileProvider profileProvider,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Supprimer la publication'),
+        content: const Text('Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                final confessionService = ConfessionService();
+                await confessionService.deleteConfession(confession.id);
+                await profileProvider.loadOwnConfessions();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Publication supprimée'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erreur: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Supprimer', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfessionPlaceholder({required bool hasVideo}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.15),
+            Colors.black.withOpacity(0.35),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          hasVideo ? Icons.videocam : Icons.notes,
+          color: Colors.white70,
+          size: 28,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoThumbnail(String url) {
+    final future = _videoThumbnails.putIfAbsent(
+      url,
+      () => VideoThumbnail.thumbnailData(
+        video: url,
+        imageFormat: ImageFormat.JPEG,
+        quality: 75,
+        maxWidth: 512,
+      ),
+    );
+
+    return FutureBuilder<Uint8List?>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+          return Image.memory(
+            snapshot.data!,
+            fit: BoxFit.cover,
+          );
+        }
+        return _buildConfessionPlaceholder(hasVideo: true);
+      },
+    );
+  }
+
+  String _resolveMediaUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final cleaned = url.replaceAll('\\', '/');
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    final baseUri = Uri.parse(base);
+
+    if (cleaned.startsWith('http')) {
+      final mediaUri = Uri.parse(cleaned);
+      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
+        final rewritten = mediaUri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        );
+        return Uri.encodeFull(rewritten.toString());
+      }
+      return Uri.encodeFull(cleaned);
+    }
+    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
+
+    if (cleaned.startsWith('/storage/')) {
+      return Uri.encodeFull('$base$cleaned');
+    }
+    if (cleaned.startsWith('storage/')) {
+      return Uri.encodeFull('$base/$cleaned');
+    }
+    return Uri.encodeFull('$base/storage/$cleaned');
   }
 
   Widget _buildLikesTab() {
@@ -444,19 +738,20 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         return ListView.builder(
           padding: const EdgeInsets.only(top: 8),
           itemCount: likedConfessions.length,
+          physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             final confession = likedConfessions[index];
             return ConfessionCard(
               confession: confession,
               onTap: () {
-                context.push('/confessions/${confession.id}');
-              },
-              onComment: () {
-                context.push('/confessions/${confession.id}');
-              },
-            );
+            context.push('/confession/${confession.id}');
+          },
+          onComment: () {
+            context.push('/confession/${confession.id}');
           },
         );
+      },
+    );
       },
     );
   }

@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:typed_data';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/confession.dart';
 import '../../models/user.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/gift_service.dart';
 import '../../services/user_service.dart';
-import '../../services/widgets/confessions/confession_card.dart';
 import '../../services/widgets/common/loading_overlay.dart';
 import '../messages/send_message_screen.dart';
 
@@ -25,6 +28,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final UserService _userService = UserService();
+  final Map<String, Future<Uint8List?>> _videoThumbnails = {};
 
   @override
   void initState() {
@@ -91,6 +95,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     return RefreshIndicator(
       onRefresh: _onRefresh,
       child: NestedScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           SliverAppBar(
@@ -454,22 +459,166 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8),
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       itemCount: confessions.length,
-      itemBuilder: (context, index) {
-        final confession = confessions[index];
-        return ConfessionCard(
-          confession: confession,
-          onTap: () {
-            context.push('/confessions/${confession.id}');
-          },
-          onComment: () {
-            context.push('/confessions/${confession.id}');
-          },
-        );
+      physics: const AlwaysScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.75,
+      ),
+      itemBuilder: (context, index) => _buildConfessionTile(confessions[index]),
+    );
+  }
+
+  Widget _buildConfessionTile(Confession confession) {
+    final imageUrl = _resolveMediaUrl(confession.imageUrl);
+    final videoUrl = _resolveMediaUrl(confession.videoUrl);
+    final hasImage = confession.hasImage && imageUrl.isNotEmpty;
+    final hasVideo = confession.hasVideo && videoUrl.isNotEmpty;
+
+    return InkWell(
+      onTap: () => context.push('/confession/${confession.id}'),
+      borderRadius: BorderRadius.circular(12),
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.black.withOpacity(0.05),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (hasImage)
+                CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, _) => _buildConfessionPlaceholder(hasVideo: hasVideo),
+                  errorWidget: (context, _, __) => _buildConfessionPlaceholder(hasVideo: hasVideo),
+                )
+              else if (hasVideo)
+                _buildVideoThumbnail(videoUrl)
+              else
+                _buildConfessionPlaceholder(hasVideo: hasVideo),
+              if (hasVideo)
+                const Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Icon(
+                      Icons.play_circle_fill,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              if (!hasImage)
+                Positioned(
+                  left: 10,
+                  right: 10,
+                  bottom: 10,
+                  child: Text(
+                    confession.content,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black45,
+                          blurRadius: 6,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfessionPlaceholder({required bool hasVideo}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withOpacity(0.15),
+            Colors.black.withOpacity(0.35),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          hasVideo ? Icons.videocam : Icons.notes,
+          color: Colors.white70,
+          size: 28,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoThumbnail(String url) {
+    final future = _videoThumbnails.putIfAbsent(
+      url,
+      () => VideoThumbnail.thumbnailData(
+        video: url,
+        imageFormat: ImageFormat.JPEG,
+        quality: 75,
+        maxWidth: 512,
+      ),
+    );
+
+    return FutureBuilder<Uint8List?>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+          return Image.memory(
+            snapshot.data!,
+            fit: BoxFit.cover,
+          );
+        }
+        return _buildConfessionPlaceholder(hasVideo: true);
       },
     );
+  }
+
+  String _resolveMediaUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final cleaned = url.replaceAll('\\', '/');
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    final baseUri = Uri.parse(base);
+
+    if (cleaned.startsWith('http')) {
+      final mediaUri = Uri.parse(cleaned);
+      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
+        final rewritten = mediaUri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        );
+        return Uri.encodeFull(rewritten.toString());
+      }
+      return Uri.encodeFull(cleaned);
+    }
+    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
+
+    if (cleaned.startsWith('/storage/')) {
+      return Uri.encodeFull('$base$cleaned');
+    }
+    if (cleaned.startsWith('storage/')) {
+      return Uri.encodeFull('$base/$cleaned');
+    }
+    return Uri.encodeFull('$base/storage/$cleaned');
   }
 
   Widget _buildGiftsTab() {

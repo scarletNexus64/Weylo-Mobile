@@ -47,6 +47,7 @@ dependencies:
   # Video
   video_player: ^2.8.3
   chewie: ^1.7.5
+  video_thumbnail: ^0.5.3
 
   # Notifications
   firebase_core: ^4.3.0
@@ -80,6 +81,9 @@ dependencies:
 
   # Emoji
   emoji_picker_flutter: ^4.4.0
+
+  # Visibility
+  visibility_detector: ^0.4.0+2
 
   # Audio Recording & Effects
   record: ^6.1.2

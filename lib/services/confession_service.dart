@@ -249,6 +249,8 @@ class ConfessionService {
     int confessionId,
     String content, {
     File? image,
+    bool isAnonymous = false,
+    int? parentId,
   }) async {
     if (image != null) {
       final filename = image.path.split('/').last;
@@ -274,6 +276,8 @@ class ConfessionService {
 
       final formData = FormData.fromMap({
         'content': content,
+        'is_anonymous': isAnonymous,
+        if (parentId != null) 'parent_id': parentId,
         'image': await MultipartFile.fromFile(
           image.path,
           filename: filename,
@@ -290,7 +294,11 @@ class ConfessionService {
 
     final response = await _apiClient.post(
       '${ApiConstants.confessions}/$confessionId/comments',
-      data: {'content': content},
+      data: {
+        'content': content,
+        'is_anonymous': isAnonymous,
+        if (parentId != null) 'parent_id': parentId,
+      },
     );
     return ConfessionComment.fromJson(response.data['comment'] ?? response.data);
   }

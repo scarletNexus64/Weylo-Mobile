@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import '../core/constants/api_constants.dart';
+import 'api_client.dart';
 import 'storage_service.dart';
 
 class PusherService {
@@ -11,6 +12,7 @@ class PusherService {
 
   PusherChannelsFlutter? _pusher;
   final StorageService _storage = StorageService();
+  final ApiClient _apiClient = ApiClient();
 
   final _messageController = StreamController<PusherEvent>.broadcast();
   final _connectionController = StreamController<String>.broadcast();
@@ -50,13 +52,14 @@ class PusherService {
         onMemberAdded: _onMemberAdded,
         onMemberRemoved: _onMemberRemoved,
         onAuthorizer: (String channelName, String socketId, dynamic options) async {
-          // Custom authorizer for private/presence channels
-          return {
-            'auth': token,
-            'channel_data': {
-              'user_id': userId ?? 'anonymous',
+          final response = await _apiClient.post(
+            ApiConstants.broadcastingAuth,
+            data: {
+              'socket_id': socketId,
+              'channel_name': channelName,
             },
-          };
+          );
+          return response.data;
         },
       );
 

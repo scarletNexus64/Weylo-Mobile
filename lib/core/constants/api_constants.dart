@@ -5,7 +5,7 @@ class ApiConstants {
   //static const String wsUrl = 'wss://10.0.2.2:8000'; // Local Development (Android Emulator)
 
   static const String baseUrl ='http://172.20.10.2:8000/api/v1'; // Local Development (Physical Device)
-  static const String wsUrl ='ws://172.20.10.2:8000'; // Local Development (Physical Device)
+  static const String wsUrl ='ws://172.20.10.2:6001'; // Local Development (Physical Device)
 
   // Reverb/Pusher Configuration
   // static const String reverbHost = 'weylo-adminpanel.space'; // Production

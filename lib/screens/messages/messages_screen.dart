@@ -21,7 +21,8 @@ class MessagesScreen extends StatefulWidget {
 class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final MessageService _messageService = MessageService();
-  final RefreshController _refreshController = RefreshController();
+  final RefreshController _receivedRefreshController = RefreshController();
+  final RefreshController _sentRefreshController = RefreshController();
 
   List<AnonymousMessage> _receivedMessages = [];
   List<AnonymousMessage> _sentMessages = [];
@@ -39,7 +40,8 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
   @override
   void dispose() {
     _tabController.dispose();
-    _refreshController.dispose();
+    _receivedRefreshController.dispose();
+    _sentRefreshController.dispose();
     super.dispose();
   }
 
@@ -70,9 +72,13 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
     }
   }
 
-  Future<void> _onRefresh() async {
+  Future<void> _onRefresh({required bool isReceived}) async {
     await _loadData();
-    _refreshController.refreshCompleted();
+    if (isReceived) {
+      _receivedRefreshController.refreshCompleted();
+    } else {
+      _sentRefreshController.refreshCompleted();
+    }
   }
 
   @override
@@ -164,47 +170,53 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
   }
 
   Widget _buildMessagesList(List<AnonymousMessage> messages, {required bool isReceived}) {
-    if (messages.isEmpty) {
-      return EmptyState(
-        icon: Icons.mail_outline,
-        title: isReceived ? 'Aucun message reçu' : 'Aucun message envoyé',
-        subtitle: isReceived
-            ? 'Partagez votre lien pour recevoir des messages anonymes'
-            : 'Envoyez votre premier message anonyme',
-        buttonText: isReceived ? 'Partager mon lien' : 'Envoyer un message',
-        onButtonPressed: () {
-          if (isReceived) {
-            final user = context.read<AuthProvider>().user;
-            if (user != null) {
-              final link = 'https://weylo.app/${user.username}';
-              Share.share(
-                'Envoyez-moi un message anonyme sur Weylo! $link',
-                subject: 'Mon lien Weylo',
-              );
-            }
-          } else {
-            context.push('/send-message');
+    final controller = isReceived ? _receivedRefreshController : _sentRefreshController;
+    final emptyState = EmptyState(
+      icon: Icons.mail_outline,
+      title: isReceived ? 'Aucun message reçu' : 'Aucun message envoyé',
+      subtitle: isReceived
+          ? 'Partagez votre lien pour recevoir des messages anonymes'
+          : 'Envoyez votre premier message anonyme',
+      buttonText: isReceived ? 'Partager mon lien' : 'Envoyer un message',
+      onButtonPressed: () {
+        if (isReceived) {
+          final user = context.read<AuthProvider>().user;
+          if (user != null) {
+            final link = 'https://weylo.app/${user.username}';
+            Share.share(
+              'Envoyez-moi un message anonyme sur Weylo! $link',
+              subject: 'Mon lien Weylo',
+            );
           }
-        },
-      );
-    }
+        } else {
+          context.push('/send-message');
+        }
+      },
+    );
 
     return SmartRefresher(
-      controller: _refreshController,
-      onRefresh: _onRefresh,
-      child: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: messages.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final message = messages[index];
-          return MessageCard(
-            message: message,
-            isReceived: isReceived,
-            onTap: () => context.push('/message/${message.id}'),
-          );
-        },
-      ),
+      controller: controller,
+      enablePullDown: true,
+      onRefresh: () => _onRefresh(isReceived: isReceived),
+      child: messages.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              children: [emptyState],
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: messages.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final message = messages[index];
+                return MessageCard(
+                  message: message,
+                  isReceived: isReceived,
+                  onTap: () => context.push('/message/${message.id}'),
+                );
+              },
+            ),
     );
   }
 }

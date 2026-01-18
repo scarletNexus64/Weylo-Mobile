@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:http_parser/http_parser.dart' as http_parser;
 import '../core/constants/api_constants.dart';
 import '../core/constants/app_constants.dart';
 import '../models/conversation.dart';
@@ -90,11 +93,115 @@ class ChatService {
 
   Future<ChatMessage> sendMessage(
     int conversationId, {
-    required String content,
+    String? content,
     int? replyToId,
+    File? image,
+    File? voice,
+    File? video,
   }) async {
-    final data = <String, dynamic>{'content': content};
-    if (replyToId != null) data['reply_to_id'] = replyToId;
+    final hasMedia = image != null || voice != null || video != null;
+    if (hasMedia) {
+      final formData = <String, dynamic>{};
+      if (content != null && content.isNotEmpty) {
+        formData['content'] = content;
+      }
+      if (replyToId != null) {
+        formData['reply_to_id'] = replyToId;
+      }
+      if (video != null) {
+        formData['type'] = 'video';
+      } else if (voice != null) {
+        formData['type'] = 'voice';
+      } else if (image != null) {
+        formData['type'] = 'image';
+      }
+      if (image != null) {
+        formData['image'] = await MultipartFile.fromFile(
+          image.path,
+          filename: image.path.split('/').last,
+        );
+      }
+      if (voice != null) {
+        final filename = voice.path.split('/').last;
+        final extension = filename.split('.').last.toLowerCase();
+        String contentType = 'audio/m4a';
+
+        switch (extension) {
+          case 'mp3':
+            contentType = 'audio/mpeg';
+            break;
+          case 'm4a':
+            contentType = 'audio/m4a';
+            break;
+          case 'aac':
+            contentType = 'audio/aac';
+            break;
+          case 'wav':
+            contentType = 'audio/wav';
+            break;
+          case 'ogg':
+            contentType = 'audio/ogg';
+            break;
+          case 'webm':
+            contentType = 'audio/webm';
+            break;
+        }
+
+        _log(
+          'Sending chat voice: $filename (ext=$extension, type=$contentType, path=${voice.path})',
+        );
+
+        formData['voice'] = await MultipartFile.fromFile(
+          voice.path,
+          filename: filename,
+          contentType: http_parser.MediaType.parse(contentType),
+        );
+      }
+      if (video != null) {
+        final filename = video.path.split('/').last;
+        final extension = filename.split('.').last.toLowerCase();
+        String contentType = 'video/mp4';
+
+        switch (extension) {
+          case 'mov':
+            contentType = 'video/quicktime';
+            break;
+          case 'avi':
+            contentType = 'video/x-msvideo';
+            break;
+          case 'mkv':
+            contentType = 'video/x-matroska';
+            break;
+          case 'webm':
+            contentType = 'video/webm';
+            break;
+          case 'mp4':
+          default:
+            contentType = 'video/mp4';
+            break;
+        }
+
+        formData['video'] = await MultipartFile.fromFile(
+          video.path,
+          filename: filename,
+          contentType: http_parser.MediaType.parse(contentType),
+        );
+      }
+
+      final response = await _apiClient.uploadFile(
+        '${ApiConstants.chatConversations}/$conversationId/messages',
+        data: FormData.fromMap(formData),
+      );
+      return ChatMessage.fromJson(response.data['message'] ?? response.data);
+    }
+
+    final data = <String, dynamic>{};
+    if (content != null && content.isNotEmpty) {
+      data['content'] = content;
+    }
+    if (replyToId != null) {
+      data['reply_to_id'] = replyToId;
+    }
 
     final response = await _apiClient.post(
       '${ApiConstants.chatConversations}/$conversationId/messages',

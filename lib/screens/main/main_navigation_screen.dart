@@ -7,7 +7,6 @@ import '../feed/feed_screen.dart';
 import '../messages/messages_screen.dart';
 import '../chat/conversations_screen.dart';
 import '../groups/groups_screen.dart';
-import '../wallet/wallet_screen.dart';
 import '../profile/my_profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -26,7 +25,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const MessagesScreen(),
     const ConversationsScreen(),
     const GroupsScreen(),
-    const WalletScreen(),
     const MyProfileScreen(),
   ];
 
@@ -111,14 +109,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 Expanded(
                   child: _buildNavItem(
                     index: 4,
-                    icon: Icons.account_balance_wallet_outlined,
-                    activeIcon: Icons.account_balance_wallet,
-                    label: 'Wallet',
-                  ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    index: 5,
                     icon: Icons.person_outline,
                     activeIcon: Icons.person,
                     label: 'Profil',
