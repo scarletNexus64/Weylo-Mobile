@@ -320,6 +320,13 @@ class ConfessionService {
     return ConfessionStats.fromJson(response.data);
   }
 
+  Future<int> markViewed(int confessionId) async {
+    final response = await _apiClient.post(
+      '${ApiConstants.confessions}/$confessionId/view',
+    );
+    return response.data['views_count'] ?? 0;
+  }
+
   Future<List<Confession>> searchConfessions(String query) async {
     try {
       final response = await _apiClient.get(

@@ -46,7 +46,10 @@ class _ConfessionCardState extends State<ConfessionCard> {
   bool _isVideoInitialized = false;
   bool _videoInitError = false;
   bool _isVideoVisible = false;
+  bool _isMuted = false;
   bool _isContentExpanded = false;
+  bool _hasReportedView = false;
+  final ConfessionService _confessionService = ConfessionService();
 
   @override
   void initState() {
@@ -58,6 +61,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
 
   @override
   void dispose() {
+    _videoController?.removeListener(_handleVideoProgress);
     _videoController?.dispose();
     super.dispose();
   }
@@ -76,11 +80,13 @@ class _ConfessionCardState extends State<ConfessionCard> {
     )..initialize().then((_) {
         if (!mounted) return;
         _videoController?.setLooping(true);
+        _videoController?.setVolume(_isMuted ? 0 : 1);
         if (_isVideoVisible) {
           _videoController?.play();
         } else {
           _videoController?.pause();
         }
+        _videoController?.addListener(_handleVideoProgress);
         setState(() {
           _isVideoInitialized = true;
           _videoInitError = false;
@@ -281,23 +287,25 @@ class _ConfessionCardState extends State<ConfessionCard> {
               ),
             // Image
             if (hasImage)
-              CachedNetworkImage(
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 420),
+              child: CachedNetworkImage(
                 imageUrl: imageUrl,
                 width: double.infinity,
-                height: 260,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
                   height: 260,
                   color: Colors.grey[200],
-                  child: const Center(
-                    child: CircularProgressIndicator(),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   ),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  height: 260,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(Icons.error_outline, color: Colors.grey),
+                  errorWidget: (context, url, error) => Container(
+                    height: 260,
+                    color: Colors.grey[200],
+                    child: const Center(
+                      child: Icon(Icons.error_outline, color: Colors.grey),
+                    ),
                   ),
                 ),
               ),
@@ -352,13 +360,13 @@ class _ConfessionCardState extends State<ConfessionCard> {
                     color: confession.isLiked ? AppColors.error : null,
                     onTap: widget.onLike,
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   _buildActionButton(
-                    icon: Icons.chat_bubble_outline,
+                    icon: Icons.mode_comment_outlined,
                     label: Helpers.formatNumber(confession.commentsCount),
                     onTap: widget.onComment,
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   _buildActionButton(
                     icon: Icons.visibility_outlined,
                     label: Helpers.formatNumber(confession.viewsCount),
@@ -369,9 +377,10 @@ class _ConfessionCardState extends State<ConfessionCard> {
                     const SizedBox(width: 8),
                   ] else
                     const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.share_outlined, size: 20),
-                    onPressed: widget.onShare,
+                  _buildActionButton(
+                    icon: Icons.share_outlined,
+                    label: 'Partager',
+                    onTap: widget.onShare,
                   ),
                 ],
               ),
@@ -468,6 +477,30 @@ class _ConfessionCardState extends State<ConfessionCard> {
                     color: Colors.white.withOpacity(0.85),
                   ),
                 ),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isMuted = !_isMuted;
+                        _videoController?.setVolume(_isMuted ? 0 : 1);
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.45),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _isMuted ? Icons.volume_off : Icons.volume_up,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -483,6 +516,29 @@ class _ConfessionCardState extends State<ConfessionCard> {
         ],
       ),
     );
+  }
+
+  void _handleVideoProgress() {
+    if (_hasReportedView) return;
+    if (!_isVideoVisible || !_isVideoInitialized || _videoController == null) return;
+    final duration = _videoController!.value.duration;
+    if (duration.inMilliseconds == 0) return;
+    final position = _videoController!.value.position;
+    final progress = position.inMilliseconds / duration.inMilliseconds;
+    if (progress >= 0.3) {
+      _hasReportedView = true;
+      _reportVideoView();
+    }
+  }
+
+  Future<void> _reportVideoView() async {
+    final currentUserId = context.read<AuthProvider>().user?.id ?? -1;
+    if (confession.authorId == currentUserId) {
+      return;
+    }
+    try {
+      await _confessionService.markViewed(confession.id);
+    } catch (_) {}
   }
 
   Widget _buildAuthorInfo(BuildContext context) {
@@ -561,14 +617,15 @@ class _ConfessionCardState extends State<ConfessionCard> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(18),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Row(
           children: [
             Icon(
               icon,
-              size: 20,
+              size: 18,
+              weight: 700,
               color: color ?? AppColors.textSecondary,
             ),
             const SizedBox(width: 6),
@@ -576,8 +633,8 @@ class _ConfessionCardState extends State<ConfessionCard> {
               label,
               style: TextStyle(
                 color: color ?? AppColors.textSecondary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

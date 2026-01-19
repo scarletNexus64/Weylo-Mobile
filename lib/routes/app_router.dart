@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -12,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import '../providers/auth_provider.dart';
 import '../services/story_service.dart';
 import '../services/user_service.dart';
@@ -33,6 +35,7 @@ import '../core/theme/app_colors.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/helpers.dart';
 import '../core/constants/api_constants.dart';
+import '../services/voice_effects_service.dart';
 import '../services/widgets/common/avatar_widget.dart';
 import '../services/widgets/common/link_text.dart';
 import '../screens/auth/login_screen.dart';
@@ -3343,6 +3346,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   File? _selectedImage;
   File? _selectedVideo;
   File? _voiceFile;
+  VoiceEffect? _selectedVoiceEffect;
   int? _playingMessageId;
   bool _isAudioLoading = false;
   String? _groupName;
@@ -3350,6 +3354,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   int? _currentUserId;
   Map<String, dynamic>? _replyToMessage;
   int? _editingMessageId;
+  final Map<String, Future<Uint8List?>> _videoThumbnails = {};
 
   // Colors for different users
   static const List<Color> _userColors = [
@@ -3434,7 +3439,11 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     return Uri.encodeFull('$base/storage/$cleaned');
   }
 
-  Future<void> _toggleVoicePlayback(int messageId, String mediaUrl) async {
+  Future<void> _toggleVoicePlayback(
+    int messageId,
+    String mediaUrl,
+    String? voiceEffect,
+  ) async {
     if (mediaUrl.isEmpty) return;
     try {
       debugPrint('[GroupChat] Play voice -> id=$messageId url=$mediaUrl');
@@ -3455,6 +3464,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             'Range': 'bytes=0-',
           },
         ),
+      );
+      await VoiceEffectsService.applyEffectToPlayer(
+        _audioPlayer,
+        VoiceEffectsService.stringToEffect(voiceEffect),
       );
       await _audioPlayer.play();
     } catch (e) {
@@ -3625,6 +3638,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   void _onVoiceRecorded(File file, dynamic effect) {
     setState(() {
       _voiceFile = file;
+      _selectedVoiceEffect = effect is VoiceEffect ? effect : VoiceEffect.none;
       _selectedImage = null;
       _selectedVideo = null;
       _showVoiceRecorder = false;
@@ -3676,6 +3690,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
         video: _selectedVideo,
         voice: voice,
         replyToId: replyToId,
+        voiceEffect: _selectedVoiceEffect != null
+            ? VoiceEffectsService.effectToString(_selectedVoiceEffect!)
+            : null,
       );
 
       _messageController.clear();
@@ -3683,6 +3700,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
         _selectedImage = null;
         _selectedVideo = null;
         _voiceFile = null;
+        _selectedVoiceEffect = null;
         _replyToMessage = null;
         _isSending = false;
       });
@@ -4213,25 +4231,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                           ),
                         ),
                       ),
-                    if (hasVideo)
-                      GestureDetector(
-                        onTap: () => _openVideoPlayer(mediaUrl),
-                        child: Container(
-                          height: 200,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.play_circle_fill,
-                              size: 56,
-                              color: isMe ? Colors.white : senderColor,
-                            ),
-                          ),
-                        ),
-                      ),
+                    if (hasVideo) _buildVideoPreview(mediaUrl, isMe, senderColor),
                     if (hasVoice)
                       Row(
                         children: [
@@ -4248,7 +4248,11 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                                         : Icons.play_circle_fill,
                                     color: isMe ? Colors.white : senderColor,
                                   ),
-                            onPressed: () => _toggleVoicePlayback(message['id'], mediaUrl),
+                            onPressed: () => _toggleVoicePlayback(
+                              message['id'],
+                              mediaUrl,
+                              message['voice_effect'],
+                            ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -4305,6 +4309,53 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       default:
         return 'Message';
     }
+  }
+
+  Widget _buildVideoPreview(String url, bool isMe, Color senderColor) {
+    final future = _videoThumbnails.putIfAbsent(
+      url,
+      () => VideoThumbnail.thumbnailData(
+        video: url,
+        imageFormat: ImageFormat.JPEG,
+        quality: 70,
+        maxWidth: 720,
+      ),
+    );
+
+    return GestureDetector(
+      onTap: () => _openVideoPlayer(url),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            FutureBuilder<Uint8List?>(
+              future: future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+                  return Image.memory(
+                    snapshot.data!,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  );
+                }
+                return Container(
+                  height: 200,
+                  width: double.infinity,
+                  color: Colors.grey[300],
+                );
+              },
+            ),
+            Icon(
+              Icons.play_circle_fill,
+              size: 56,
+              color: isMe ? Colors.white : senderColor,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showMessageOptions(Map<String, dynamic> message) {
@@ -5553,71 +5604,73 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                       const SizedBox(height: 16),
 
                       // Reply section
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.reply, size: 20, color: AppColors.primary),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Répondre une fois',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                      if ((_message?.recipientId ?? 0) ==
+                          (context.read<AuthProvider>().user?.id ?? 0))
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.reply, size: 20, color: AppColors.primary),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Répondre une fois',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Répondez à ce message pour démarrer une conversation dans le chat.',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                TextField(
+                                  controller: _replyController,
+                                  maxLines: 3,
+                                  decoration: InputDecoration(
+                                    hintText: 'Écrivez votre réponse...',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Répondez à ce message pour démarrer une conversation dans le chat.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.textSecondary,
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              TextField(
-                                controller: _replyController,
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  hintText: 'Écrivez votre réponse...',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: _isReplying ? null : _replyOnce,
+                                    icon: _isReplying
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Icon(Icons.send),
+                                    label: Text(_isReplying ? 'Envoi...' : 'Répondre et démarrer la conversation'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: _isReplying ? null : _replyOnce,
-                                  icon: _isReplying
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : const Icon(Icons.send),
-                                  label: Text(_isReplying ? 'Envoi...' : 'Répondre et démarrer la conversation'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                       ],
                     ),
                   ),
@@ -5626,10 +5679,10 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
   }
 
   Widget _buildAvatar() {
-    if (_message!.isIdentityRevealed && _message!.sender != null) {
+    if (_message!.sender?.avatar != null && _message!.sender!.avatar!.isNotEmpty) {
       return AvatarWidget(
         imageUrl: _message!.sender!.avatar,
-        name: _message!.sender!.fullName,
+        name: _message!.isIdentityRevealed ? _message!.sender!.fullName : null,
         size: 56,
       );
     }

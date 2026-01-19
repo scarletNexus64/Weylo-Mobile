@@ -677,11 +677,22 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
       case StoryType.video:
         if (_videoController != null && _videoController!.value.isInitialized) {
-          return Center(
-            child: AspectRatio(
-              aspectRatio: _videoController!.value.aspectRatio,
-              child: VideoPlayer(_videoController!),
-            ),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final size = _videoController!.value.size;
+              return SizedBox(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: VideoPlayer(_videoController!),
+                  ),
+                ),
+              );
+            },
           );
         }
         return const Center(

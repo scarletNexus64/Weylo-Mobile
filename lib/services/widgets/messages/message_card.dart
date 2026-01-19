@@ -132,10 +132,10 @@ class MessageCard extends StatelessWidget {
 
   Widget _buildAvatar() {
     if (isReceived) {
-      if (message.isIdentityRevealed && message.sender != null) {
+      if (message.sender?.avatar != null && message.sender!.avatar!.isNotEmpty) {
         return AvatarWidget(
           imageUrl: message.sender!.avatar,
-          name: message.sender!.fullName,
+          name: message.isIdentityRevealed ? message.sender!.fullName : null,
           size: 48,
         );
       }

@@ -170,6 +170,7 @@ class ChatMessage {
   final String content;
   final String? type;
   final String? mediaUrl;
+  final String? voiceEffect;
   final int? replyToId;
   final bool isRead;
   final User? sender;
@@ -184,6 +185,7 @@ class ChatMessage {
     required this.content,
     this.type = 'text',
     this.mediaUrl,
+    this.voiceEffect,
     this.replyToId,
     this.isRead = false,
     this.sender,
@@ -215,6 +217,7 @@ class ChatMessage {
       content: json['content'] ?? '',
       type: json['type'] ?? 'text',
       mediaUrl: json['media_full_url'] ?? json['media_url'] ?? json['mediaUrl'],
+      voiceEffect: json['voice_effect'] ?? json['voiceEffect'],
       replyToId: json['reply_to_id'] ?? json['replyToId'],
       isRead: json['is_read'] ?? json['isRead'] ?? false,
       sender: json['sender'] != null ? User.fromJson(json['sender']) : null,

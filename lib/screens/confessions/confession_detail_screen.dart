@@ -385,16 +385,24 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
           if (confession.content.isNotEmpty)
             LinkText(
               text: confession.content,
-              style: const TextStyle(fontSize: 16, height: 1.5),
-              linkStyle: const TextStyle(
-                fontSize: 16,
-                height: 1.5,
-                color: AppColors.primary,
-                decoration: TextDecoration.underline,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 16,
+                    height: 1.5,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
+                  ),
+              linkStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 16,
+                    height: 1.5,
+                    color: AppColors.primary,
+                    decoration: TextDecoration.underline,
+                  ),
               showPreview: true,
               previewBackgroundColor: Colors.black.withOpacity(0.04),
-              previewTextColor: AppColors.textPrimary,
+              previewTextColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimary,
             ),
 
           // Image
@@ -501,21 +509,20 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildActionButton(
+              _buildTwitterActionButton(
                 icon: confession.isLiked ? Icons.favorite : Icons.favorite_outline,
                 label: 'J\'aime',
                 color: confession.isLiked ? AppColors.error : null,
                 onTap: _toggleLike,
               ),
-              _buildActionButton(
-                icon: Icons.chat_bubble_outline,
+              _buildTwitterActionButton(
+                icon: Icons.mode_comment_outlined,
                 label: 'Commenter',
                 onTap: () {
-                  // Focus on comment input
                   FocusScope.of(context).requestFocus(FocusNode());
                 },
               ),
-              _buildActionButton(
+              _buildTwitterActionButton(
                 icon: Icons.share_outlined,
                 label: 'Partager',
                 onTap: _shareConfession,
@@ -523,6 +530,40 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTwitterActionButton({
+    required IconData icon,
+    required String label,
+    Color? color,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              weight: 700,
+              color: color ?? AppColors.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: color ?? AppColors.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

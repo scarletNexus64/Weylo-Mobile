@@ -98,6 +98,7 @@ class ChatService {
     File? image,
     File? voice,
     File? video,
+    String? voiceEffect,
   }) async {
     final hasMedia = image != null || voice != null || video != null;
     if (hasMedia) {
@@ -107,6 +108,9 @@ class ChatService {
       }
       if (replyToId != null) {
         formData['reply_to_id'] = replyToId;
+      }
+      if (voiceEffect != null && voiceEffect.isNotEmpty) {
+        formData['voice_effect'] = voiceEffect;
       }
       if (video != null) {
         formData['type'] = 'video';
@@ -201,6 +205,9 @@ class ChatService {
     }
     if (replyToId != null) {
       data['reply_to_id'] = replyToId;
+    }
+    if (voiceEffect != null && voiceEffect.isNotEmpty) {
+      data['voice_effect'] = voiceEffect;
     }
 
     final response = await _apiClient.post(

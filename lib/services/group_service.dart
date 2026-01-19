@@ -147,6 +147,7 @@ class GroupService {
     dynamic image,
     dynamic voice,
     dynamic video,
+    String? voiceEffect,
   }) async {
     // If there's media, use multipart form data
     if (image != null || voice != null || video != null) {
@@ -206,6 +207,9 @@ class GroupService {
           filename: filename,
           contentType: http_parser.MediaType.parse(contentType),
         );
+        if (voiceEffect != null && voiceEffect.isNotEmpty) {
+          formData['voice_effect'] = voiceEffect;
+        }
       }
       if (video != null) {
         final filename = video.path.split('/').last;

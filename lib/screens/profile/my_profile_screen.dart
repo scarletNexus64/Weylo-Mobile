@@ -557,8 +557,9 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 title: const Text('Partager'),
                 onTap: () {
                   Navigator.pop(ctx);
+                  final shareUrl = _buildPostShareUrl(confession.id);
                   Share.share(
-                    'Découvre ce post sur Weylo: ${ApiConstants.baseUrl.replaceFirst(RegExp(r"/api/v1/?$"), "")}/post/${confession.id}',
+                    'Découvre ce post sur Weylo: $shareUrl',
                     subject: 'Post Weylo',
                   );
                 },
@@ -700,6 +701,11 @@ class _MyProfileScreenState extends State<MyProfileScreen>
       return Uri.encodeFull('$base/$cleaned');
     }
     return Uri.encodeFull('$base/storage/$cleaned');
+  }
+
+  String _buildPostShareUrl(int confessionId) {
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    return '$base/post/$confessionId';
   }
 
   Widget _buildLikesTab() {

@@ -81,7 +81,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   Future<void> _pickVideo() async {
     final XFile? video = await _imagePicker.pickVideo(
       source: ImageSource.gallery,
-      maxDuration: const Duration(seconds: 30),
+      maxDuration: const Duration(seconds: 60),
     );
 
     if (video != null) {

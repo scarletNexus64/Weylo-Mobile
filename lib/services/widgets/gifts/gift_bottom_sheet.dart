@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/gift.dart';
 import '../../gift_service.dart';
@@ -288,21 +289,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (gift.imageUrl != null)
-                              CachedNetworkImage(
-                                imageUrl: gift.imageUrl!,
-                                width: 48,
-                                height: 48,
-                              )
-                            else
-                              ShaderMask(
-                                shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
-                                child: const Icon(
-                                  Icons.card_giftcard,
-                                  size: 48,
-                                  color: Colors.white,
-                                ),
-                              ),
+                            _buildGiftMedia(gift),
                             const SizedBox(height: 4),
                             Text(
                               gift.name,
@@ -427,5 +414,75 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
         ),
       ],
     );
+  }
+
+  Widget _buildGiftMedia(Gift gift) {
+    final animationUrl = _resolveGiftUrl(gift.animation);
+    final iconUrl = _resolveGiftUrl(gift.icon);
+
+    if (animationUrl.isNotEmpty) {
+      final lower = animationUrl.toLowerCase();
+      if (lower.endsWith('.json')) {
+        return Lottie.network(
+          animationUrl,
+          width: 56,
+          height: 56,
+          fit: BoxFit.contain,
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: animationUrl,
+        width: 56,
+        height: 56,
+        fit: BoxFit.contain,
+      );
+    }
+
+    if (iconUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: iconUrl,
+        width: 48,
+        height: 48,
+        fit: BoxFit.contain,
+      );
+    }
+
+    return ShaderMask(
+      shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+      child: const Icon(
+        Icons.card_giftcard,
+        size: 48,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  String _resolveGiftUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final cleaned = url.replaceAll('\\', '/');
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    final baseUri = Uri.parse(base);
+
+    if (cleaned.startsWith('http')) {
+      final mediaUri = Uri.parse(cleaned);
+      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
+        final rewritten = mediaUri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        );
+        return Uri.encodeFull(rewritten.toString());
+      }
+      return Uri.encodeFull(cleaned);
+    }
+    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
+
+    if (cleaned.startsWith('/storage/')) {
+      return Uri.encodeFull('$base$cleaned');
+    }
+    if (cleaned.startsWith('storage/')) {
+      return Uri.encodeFull('$base/$cleaned');
+    }
+    return Uri.encodeFull('$base/storage/$cleaned');
   }
 }

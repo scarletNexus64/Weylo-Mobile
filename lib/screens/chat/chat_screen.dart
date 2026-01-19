@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/theme/app_colors.dart';
@@ -19,6 +21,7 @@ import '../../services/websocket_service.dart';
 import '../../services/widgets/common/widgets.dart';
 import '../../services/widgets/common/link_text.dart';
 import '../../services/widgets/voice/voice_recorder_widget.dart';
+import '../../services/voice_effects_service.dart';
 
 enum MessageDeliveryStatus { sending, sent, read, failed }
 
@@ -68,6 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
   File? _selectedImage;
   File? _selectedVideo;
   File? _voiceFile;
+  VoiceEffect? _selectedVoiceEffect;
   int? _playingMessageId;
   bool _isAudioLoading = false;
 
@@ -225,7 +229,11 @@ class _ChatScreenState extends State<ChatScreen> {
     return Uri.encodeFull('$base/storage/$cleaned');
   }
 
-  Future<void> _toggleVoicePlayback(int messageId, String mediaUrl) async {
+  Future<void> _toggleVoicePlayback(
+    int messageId,
+    String mediaUrl,
+    String? voiceEffect,
+  ) async {
     if (mediaUrl.isEmpty) return;
     try {
       debugPrint('[ChatScreen] Play voice -> id=$messageId url=$mediaUrl');
@@ -246,6 +254,10 @@ class _ChatScreenState extends State<ChatScreen> {
             'Range': 'bytes=0-',
           },
         ),
+      );
+      await VoiceEffectsService.applyEffectToPlayer(
+        _audioPlayer,
+        VoiceEffectsService.stringToEffect(voiceEffect),
       );
       await _audioPlayer.play();
     } catch (e) {
@@ -363,6 +375,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _onVoiceRecorded(File file, dynamic effect) {
     setState(() {
       _voiceFile = file;
+      _selectedVoiceEffect = effect is VoiceEffect ? effect : VoiceEffect.none;
       _selectedImage = null;
       _selectedVideo = null;
       _showVoiceRecorder = false;
@@ -458,6 +471,9 @@ class _ChatScreenState extends State<ChatScreen> {
         image: _selectedImage,
         video: _selectedVideo,
         voice: _voiceFile,
+        voiceEffect: _selectedVoiceEffect != null
+            ? VoiceEffectsService.effectToString(_selectedVoiceEffect!)
+            : null,
       );
 
       debugPrint('[ChatScreen] Message sent -> id: ${message.id}, data: ${message.content}');
@@ -470,6 +486,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _selectedImage = null;
         _selectedVideo = null;
         _voiceFile = null;
+        _selectedVoiceEffect = null;
         _showVoiceRecorder = false;
       });
 
@@ -511,7 +528,8 @@ class _ChatScreenState extends State<ChatScreen> {
             : Row(
                 children: [
                   AvatarWidget(
-                    imageUrl: otherUser?.avatar,
+                    imageUrl: otherUser?.avatar ??
+                        'https://i.pravatar.cc/150?img=${(_conversation?.id ?? 1) % 70 + 1}',
                     name: otherUser?.fullName,
                     size: 36,
                   ),
@@ -618,7 +636,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                   localReply: localReply,
                                   isAudioLoading: _isAudioLoading,
                                   playingMessageId: _playingMessageId,
-                                  onPlayVoice: () => _toggleVoicePlayback(message.id, mediaUrl),
+                                  onPlayVoice: () => _toggleVoicePlayback(
+                                    message.id,
+                                    mediaUrl,
+                                    message.voiceEffect,
+                                  ),
                                   onOpenVideo: () => _openVideoPlayer(mediaUrl),
                                   onReply: () {
                                     setState(() {
@@ -1131,6 +1153,7 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _MessageBubble extends StatelessWidget {
+  static final Map<String, Future<Uint8List?>> _videoThumbCache = {};
   final ChatMessage message;
   final bool isMe;
   final String statusLabel;
@@ -1221,24 +1244,7 @@ class _MessageBubble extends StatelessWidget {
                   ),
                 ),
               if (message.hasVideo && (mediaUrl ?? '').isNotEmpty)
-                GestureDetector(
-                  onTap: onOpenVideo,
-                  child: Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.play_circle_fill,
-                        size: 56,
-                        color: isMe ? Colors.white : AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
+                _buildVideoPreview(context, mediaUrl!, isMe),
               if (message.hasVoice && (mediaUrl ?? '').isNotEmpty)
                 Row(
                   children: [
@@ -1333,6 +1339,53 @@ class _MessageBubble extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoPreview(BuildContext context, String url, bool isMe) {
+    final future = _videoThumbCache.putIfAbsent(
+      url,
+      () => VideoThumbnail.thumbnailData(
+        video: url,
+        imageFormat: ImageFormat.JPEG,
+        quality: 70,
+        maxWidth: 720,
+      ),
+    );
+
+    return GestureDetector(
+      onTap: onOpenVideo,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            FutureBuilder<Uint8List?>(
+              future: future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+                  return Image.memory(
+                    snapshot.data!,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  );
+                }
+                return Container(
+                  height: 200,
+                  width: double.infinity,
+                  color: Colors.grey[300],
+                );
+              },
+            ),
+            Icon(
+              Icons.play_circle_fill,
+              size: 56,
+              color: isMe ? Colors.white : AppColors.primary,
+            ),
+          ],
         ),
       ),
     );

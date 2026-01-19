@@ -123,6 +123,7 @@ class GroupMessage {
   final String content;
   final String type;
   final String? mediaUrl;
+  final String? voiceEffect;
   final int? replyToMessageId;
   final User? sender;
   final GroupMessage? replyToMessage;
@@ -135,6 +136,7 @@ class GroupMessage {
     required this.content,
     this.type = 'text',
     this.mediaUrl,
+    this.voiceEffect,
     this.replyToMessageId,
     this.sender,
     this.replyToMessage,
@@ -154,6 +156,7 @@ class GroupMessage {
       content: json['content'] ?? '',
       type: json['type'] ?? 'text',
       mediaUrl: json['media_full_url'] ?? json['media_url'] ?? json['mediaUrl'],
+      voiceEffect: json['voice_effect'] ?? json['voiceEffect'],
       replyToMessageId: json['reply_to_message_id'] ?? json['replyToMessageId'],
       sender: json['sender'] != null ? User.fromJson(json['sender']) : null,
       replyToMessage: json['reply_to_message'] != null
@@ -185,6 +188,7 @@ class GroupMessage {
       'content': content,
       'type': type,
       'media_url': mediaUrl,
+      'voice_effect': voiceEffect,
       'reply_to_message_id': replyToMessageId,
       if (sender != null) 'sender': sender!.toJson(),
       if (replyTo != null) 'reply_to_message': replyTo,

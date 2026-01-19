@@ -64,28 +64,28 @@ class _HomeScreenState extends State<HomeScreen> {
           unselectedItemColor: AppColors.textSecondary,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.mail_outline),
-              activeIcon: Icon(Icons.mail),
+              icon: Icon(Icons.mail_outline, weight: 700),
+              activeIcon: Icon(Icons.mail, weight: 700),
               label: 'Messages',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline),
-              activeIcon: Icon(Icons.favorite),
+              icon: Icon(Icons.favorite_outline, weight: 700),
+              activeIcon: Icon(Icons.favorite, weight: 700),
               label: 'Confessions',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              activeIcon: Icon(Icons.chat_bubble),
+              icon: Icon(Icons.chat_bubble_outline, weight: 700),
+              activeIcon: Icon(Icons.chat_bubble, weight: 700),
               label: 'Chat',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.group_outlined),
-              activeIcon: Icon(Icons.group),
+              icon: Icon(Icons.group_outlined, weight: 700),
+              activeIcon: Icon(Icons.group, weight: 700),
               label: 'Groupes',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
+              icon: Icon(Icons.person_outline, weight: 700),
+              activeIcon: Icon(Icons.person, weight: 700),
               label: 'Profil',
             ),
           ],
