@@ -81,7 +81,11 @@ class _PremiumSettingsScreenState extends State<PremiumSettingsScreen> {
               children: [
                 ListTile(
                   title: Text(l10n.statusLabel),
-                  subtitle: Text(_status?.isActive == true ? l10n.statusActive : l10n.statusInactive),
+                  subtitle: Text(
+                    _status?.isActive == true
+                        ? l10n.statusActive
+                        : l10n.statusInactive,
+                  ),
                   trailing: TextButton(
                     onPressed: () => context.push('/premium'),
                     child: Text(l10n.viewAction),

@@ -76,29 +76,30 @@ class _ConfessionCardState extends State<ConfessionCard> {
       });
       return;
     }
-    _videoController = VideoPlayerController.networkUrl(
-      Uri.parse(resolvedUrl),
-    )..initialize().then((_) {
-        if (!mounted) return;
-        _videoController?.setLooping(true);
-        _videoController?.setVolume(_isMuted ? 0 : 1);
-        if (_isVideoVisible) {
-          _videoController?.play();
-        } else {
-          _videoController?.pause();
-        }
-        _videoController?.addListener(_handleVideoProgress);
-        setState(() {
-          _isVideoInitialized = true;
-          _videoInitError = false;
-        });
-      }).catchError((_) {
-        if (!mounted) return;
-        setState(() {
-          _isVideoInitialized = false;
-          _videoInitError = true;
-        });
-      });
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(resolvedUrl))
+      ..initialize()
+          .then((_) {
+            if (!mounted) return;
+            _videoController?.setLooping(true);
+            _videoController?.setVolume(_isMuted ? 0 : 1);
+            if (_isVideoVisible) {
+              _videoController?.play();
+            } else {
+              _videoController?.pause();
+            }
+            _videoController?.addListener(_handleVideoProgress);
+            setState(() {
+              _isVideoInitialized = true;
+              _videoInitError = false;
+            });
+          })
+          .catchError((_) {
+            if (!mounted) return;
+            setState(() {
+              _isVideoInitialized = false;
+              _videoInitError = true;
+            });
+          });
   }
 
   String _resolveMediaUrl(String? url) {
@@ -154,7 +155,9 @@ class _ConfessionCardState extends State<ConfessionCard> {
                 children: [
                   // Photo toujours cliquable si l'auteur existe
                   GestureDetector(
-                    onTap: confession.author != null ? widget.onAuthorTap : null,
+                    onTap: confession.author != null
+                        ? widget.onAuthorTap
+                        : null,
                     child: _buildAvatar(),
                   ),
                   const SizedBox(width: 12),
@@ -164,7 +167,9 @@ class _ConfessionCardState extends State<ConfessionCard> {
                       children: [
                         // Photo toujours cliquable si l'auteur existe
                         GestureDetector(
-                          onTap: confession.author != null ? widget.onAuthorTap : null,
+                          onTap: confession.author != null
+                              ? widget.onAuthorTap
+                              : null,
                           child: _buildAuthorInfo(context),
                         ),
                         const SizedBox(height: 4),
@@ -177,7 +182,10 @@ class _ConfessionCardState extends State<ConfessionCard> {
                             if (confession.type == ConfessionType.private) ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.secondary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
@@ -206,7 +214,10 @@ class _ConfessionCardState extends State<ConfessionCard> {
                             if (confession.isAnonymous) ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: AppColors.primary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
@@ -250,17 +261,18 @@ class _ConfessionCardState extends State<ConfessionCard> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: LinkText(
                   text: confession.content,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 15,
-                        height: 1.5,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontSize: 15, height: 1.5),
                   linkStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 15,
-                        height: 1.5,
-                        color: AppColors.primary,
-                        decoration: TextDecoration.underline,
-                      ),
-                  maxLines: _shouldTruncateContent() && !_isContentExpanded ? 6 : null,
+                    fontSize: 15,
+                    height: 1.5,
+                    color: AppColors.primary,
+                    decoration: TextDecoration.underline,
+                  ),
+                  maxLines: _shouldTruncateContent() && !_isContentExpanded
+                      ? 6
+                      : null,
                   overflow: _shouldTruncateContent() && !_isContentExpanded
                       ? TextOverflow.ellipsis
                       : TextOverflow.visible,
@@ -279,7 +291,9 @@ class _ConfessionCardState extends State<ConfessionCard> {
                     });
                   },
                   child: Text(
-                    _isContentExpanded ? l10n.viewLessAction : l10n.viewMoreAction,
+                    _isContentExpanded
+                        ? l10n.viewLessAction
+                        : l10n.viewMoreAction,
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -291,16 +305,14 @@ class _ConfessionCardState extends State<ConfessionCard> {
             if (hasImage)
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 420),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 260,
-                  color: Colors.grey[200],
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 260,
+                    color: Colors.grey[200],
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
                   errorWidget: (context, url, error) => Container(
                     height: 260,
@@ -312,8 +324,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
                 ),
               ),
             // Video
-            if (confession.hasVideo)
-              _buildVideoSection(),
+            if (confession.hasVideo) _buildVideoSection(),
             // Recipient info if private
             if (confession.recipient != null)
               Padding(
@@ -340,10 +351,11 @@ class _ConfessionCardState extends State<ConfessionCard> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          l10n.confessionForUser(confession.recipient!.fullName),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
+                          l10n.confessionForUser(
+                            confession.recipient!.fullName,
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontWeight: FontWeight.w500),
                         ),
                       ),
                     ],
@@ -357,7 +369,9 @@ class _ConfessionCardState extends State<ConfessionCard> {
               child: Row(
                 children: [
                   _buildActionButton(
-                    icon: confession.isLiked ? Icons.favorite : Icons.favorite_outline,
+                    icon: confession.isLiked
+                        ? Icons.favorite
+                        : Icons.favorite_outline,
                     label: Helpers.formatNumber(confession.likesCount),
                     color: confession.isLiked ? AppColors.error : null,
                     onTap: widget.onLike,
@@ -399,7 +413,9 @@ class _ConfessionCardState extends State<ConfessionCard> {
     if (confession.author != null && confession.author!.avatar != null) {
       return AvatarWidget(
         imageUrl: confession.author!.avatar,
-        name: confession.shouldShowAuthor ? confession.author!.fullName : l10n.userAnonymous,
+        name: confession.shouldShowAuthor
+            ? confession.author!.fullName
+            : l10n.userAnonymous,
         size: 44,
       );
     }
@@ -412,11 +428,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
         shape: BoxShape.circle,
       ),
       child: const Center(
-        child: Icon(
-          Icons.person_off,
-          color: Colors.white,
-          size: 22,
-        ),
+        child: Icon(Icons.person_off, color: Colors.white, size: 22),
       ),
     );
   }
@@ -523,7 +535,8 @@ class _ConfessionCardState extends State<ConfessionCard> {
 
   void _handleVideoProgress() {
     if (_hasReportedView) return;
-    if (!_isVideoVisible || !_isVideoInitialized || _videoController == null) return;
+    if (!_isVideoVisible || !_isVideoInitialized || _videoController == null)
+      return;
     final duration = _videoController!.value.duration;
     if (duration.inMilliseconds == 0) return;
     final position = _videoController!.value.position;
@@ -551,9 +564,9 @@ class _ConfessionCardState extends State<ConfessionCard> {
         name: confession.author!.fullName,
         isPremium: confession.author!.isPremium,
         isVerified: confession.author!.isVerified,
-        textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
+        textStyle: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         badgeSize: 16,
       );
     }
@@ -594,11 +607,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.trending_up,
-              color: Colors.white,
-              size: 16,
-            ),
+            const Icon(Icons.trending_up, color: Colors.white, size: 16),
             const SizedBox(width: 4),
             Text(
               l10n.boostAction,
@@ -661,7 +670,8 @@ class _ConfessionCardState extends State<ConfessionCard> {
               if (isOwnPost)
                 ListTile(
                   leading: ShaderMask(
-                    shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                    shaderCallback: (bounds) =>
+                        AppColors.primaryGradient.createShader(bounds),
                     child: const Icon(Icons.trending_up, color: Colors.white),
                   ),
                   title: Text(l10n.profilePromote),
@@ -695,8 +705,14 @@ class _ConfessionCardState extends State<ConfessionCard> {
               ),
               if (isOwnPost)
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                  title: Text(l10n.deleteAction, style: const TextStyle(color: AppColors.error)),
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.error,
+                  ),
+                  title: Text(
+                    l10n.deleteAction,
+                    style: const TextStyle(color: AppColors.error),
+                  ),
                   onTap: () async {
                     Navigator.pop(ctx);
                     _confirmDelete(context);
@@ -756,7 +772,10 @@ class _ConfessionCardState extends State<ConfessionCard> {
                 }
               }
             },
-            child: Text(l10n.deleteAction, style: const TextStyle(color: AppColors.error)),
+            child: Text(
+              l10n.deleteAction,
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),

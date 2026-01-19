@@ -23,7 +23,9 @@ class WalletService {
 
   Future<double> getBalance() async {
     final response = await _apiClient.get(ApiConstants.wallet);
-    return _parseDouble(response.data['balance'] ?? response.data['wallet_balance']);
+    return _parseDouble(
+      response.data['balance'] ?? response.data['wallet_balance'],
+    );
   }
 
   // Alias for wallet provider
@@ -50,7 +52,9 @@ class WalletService {
       ApiConstants.walletTransactions,
       queryParameters: {'page': page},
     );
-    final data = _safeList(response.data['transactions'] ?? response.data['data']);
+    final data = _safeList(
+      response.data['transactions'] ?? response.data['data'],
+    );
     return data.map((t) => WalletTransaction.fromJson(t)).toList();
   }
 
@@ -71,10 +75,7 @@ class WalletService {
   }) async {
     final response = await _apiClient.post(
       ApiConstants.walletDeposit,
-      data: {
-        'amount': amount,
-        'provider': provider,
-      },
+      data: {'amount': amount, 'provider': provider},
     );
     return DepositInitResponse.fromJson(response.data);
   }
@@ -100,17 +101,23 @@ class WalletService {
       ApiConstants.walletWithdrawals,
       queryParameters: {'page': page},
     );
-    final data = _safeList(response.data['withdrawals'] ?? response.data['data']);
+    final data = _safeList(
+      response.data['withdrawals'] ?? response.data['data'],
+    );
     return data.map((w) => Withdrawal.fromJson(w)).toList();
   }
 
   Future<Withdrawal> getWithdrawal(int id) async {
-    final response = await _apiClient.get('${ApiConstants.walletWithdrawals}/$id');
+    final response = await _apiClient.get(
+      '${ApiConstants.walletWithdrawals}/$id',
+    );
     return Withdrawal.fromJson(response.data['withdrawal'] ?? response.data);
   }
 
   Future<bool> cancelWithdrawal(int id) async {
-    final response = await _apiClient.delete('${ApiConstants.walletWithdrawals}/$id');
+    final response = await _apiClient.delete(
+      '${ApiConstants.walletWithdrawals}/$id',
+    );
     return response.data['success'] ?? true;
   }
 }

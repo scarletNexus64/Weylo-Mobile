@@ -68,7 +68,8 @@ class AppRouter {
       refreshListenable: authProvider,
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
-        final isAuthRoute = state.matchedLocation == '/login' ||
+        final isAuthRoute =
+            state.matchedLocation == '/login' ||
             state.matchedLocation == '/register' ||
             state.matchedLocation == '/forgot-password';
 
@@ -114,10 +115,7 @@ class AppRouter {
         ),
 
         // Legacy home route (redirects to main)
-        GoRoute(
-          path: '/home',
-          redirect: (_, __) => '/',
-        ),
+        GoRoute(path: '/home', redirect: (_, __) => '/'),
 
         // User Profile (public + deep link support)
         GoRoute(
@@ -198,7 +196,8 @@ class AppRouter {
           path: '/send-gift/:conversationId',
           name: 'send-gift',
           builder: (context, state) {
-            final id = int.tryParse(state.pathParameters['conversationId'] ?? '') ?? 0;
+            final id =
+                int.tryParse(state.pathParameters['conversationId'] ?? '') ?? 0;
             return SendGiftScreen(conversationId: id);
           },
         ),
@@ -267,7 +266,9 @@ class AppRouter {
           name: 'message-detail',
           builder: (context, state) {
             final id = state.pathParameters['id'] ?? '';
-            return _AnonymousMessageDetailScreen(messageId: int.tryParse(id) ?? 0);
+            return _AnonymousMessageDetailScreen(
+              messageId: int.tryParse(id) ?? 0,
+            );
           },
         ),
 
@@ -374,10 +375,7 @@ class AppRouter {
           name: 'groups',
           builder: (context, state) => const GroupsScreen(),
         ),
-        GoRoute(
-          path: '/group',
-          redirect: (_, __) => '/groups',
-        ),
+        GoRoute(path: '/group', redirect: (_, __) => '/groups'),
         GoRoute(
           path: '/group/:id',
           name: 'group',
@@ -445,7 +443,11 @@ class AppRouter {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.grey),
               const SizedBox(height: 16),
-              Text(AppLocalizations.of(context)!.pageNotFound(state.uri.toString())),
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!.pageNotFound(state.uri.toString()),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.go('/'),
@@ -504,9 +506,8 @@ class _NewChatScreenState extends State<_NewChatScreen> {
       final results = await Future.wait([usersFuture, convsFuture]);
       final users = results[0] as List<User>;
       final conversations = results[1] as List<Conversation>;
-      final conversationIndex = await _chatService.getConversationsIndexByUsername(
-        conversations: conversations,
-      );
+      final conversationIndex = await _chatService
+          .getConversationsIndexByUsername(conversations: conversations);
 
       if (!mounted) return;
       setState(() {
@@ -556,7 +557,10 @@ class _NewChatScreenState extends State<_NewChatScreen> {
       if (!mounted) return;
       context.go('/chat/${conversation.id}');
     } catch (e) {
-      Helpers.showErrorSnackBar(context, AppLocalizations.of(context)!.startConversationError);
+      Helpers.showErrorSnackBar(
+        context,
+        AppLocalizations.of(context)!.startConversationError,
+      );
     } finally {
       if (!mounted) return;
       setState(() => _startingConversationIds.remove(user.id));
@@ -567,9 +571,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.newChatTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.newChatTitle)),
       body: Column(
         children: [
           Padding(
@@ -608,9 +610,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
     if (usersToShow.isEmpty) {
       return Center(
         child: Text(
-          showSearchResults
-              ? l10n.noUsersFound
-              : l10n.noUsersAvailable,
+          showSearchResults ? l10n.noUsersFound : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
@@ -635,9 +635,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
     if (sectionWidgets.isEmpty) {
       return Center(
         child: Text(
-          showSearchResults
-              ? l10n.noUsersFound
-              : l10n.noUsersAvailable,
+          showSearchResults ? l10n.noUsersFound : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
@@ -695,7 +693,9 @@ class _NewChatScreenState extends State<_NewChatScreen> {
             ),
             child: Icon(
               hasConversation
-                  ? (isIdentityRevealed ? Icons.visibility : Icons.visibility_off)
+                  ? (isIdentityRevealed
+                        ? Icons.visibility
+                        : Icons.visibility_off)
                   : Icons.person_outline,
               size: 12,
               color: Colors.white,
@@ -770,10 +770,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
               const Spacer(),
               Text(
                 '${section.users.length}',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
@@ -782,10 +779,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 section.helper,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ),
         ],
@@ -793,7 +787,10 @@ class _NewChatScreenState extends State<_NewChatScreen> {
     );
   }
 
-  List<_UserSection> _buildUserSections(AppLocalizations l10n, List<User> users) {
+  List<_UserSection> _buildUserSections(
+    AppLocalizations l10n,
+    List<User> users,
+  ) {
     final revealed = <User>[];
     final anonymous = <User>[];
     final withoutConversation = <User>[];
@@ -816,10 +813,10 @@ class _NewChatScreenState extends State<_NewChatScreen> {
     }
 
     void sortByName(List<User> list) => list.sort(
-          (a, b) => _userDisplayName(a)
-              .toLowerCase()
-              .compareTo(_userDisplayName(b).toLowerCase()),
-        );
+      (a, b) => _userDisplayName(
+        a,
+      ).toLowerCase().compareTo(_userDisplayName(b).toLowerCase()),
+    );
 
     sortByName(revealed);
     sortByName(anonymous);
@@ -873,7 +870,8 @@ class _CreateConfessionScreen extends StatefulWidget {
   const _CreateConfessionScreen();
 
   @override
-  State<_CreateConfessionScreen> createState() => _CreateConfessionScreenState();
+  State<_CreateConfessionScreen> createState() =>
+      _CreateConfessionScreenState();
 }
 
 class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
@@ -950,7 +948,9 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
     // Validate that there's either content or media
     if (content.isEmpty && _selectedImage == null && _selectedVideo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.addContentOrMediaError)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.addContentOrMediaError),
+        ),
       );
       return;
     }
@@ -969,7 +969,9 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.postCreatedSuccess)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.postCreatedSuccess),
+          ),
         );
       }
     } catch (e) {
@@ -977,7 +979,11 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.postCreateError(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.postCreateError(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -1036,7 +1042,11 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.video_library, size: 48, color: Colors.grey[600]),
+                                  Icon(
+                                    Icons.video_library,
+                                    size: 48,
+                                    color: Colors.grey[600],
+                                  ),
                                   const SizedBox(height: 8),
                                   Text(
                                     l10n.videoSelected,
@@ -1168,10 +1178,18 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
         notificationsEnabled: currentSettings?.notificationsEnabled ?? true,
         emailNotifications: currentSettings?.emailNotifications ?? true,
         pushNotifications: currentSettings?.pushNotifications ?? true,
-        showOnlineStatus: setting == 'showOnlineStatus' ? value : (currentSettings?.showOnlineStatus ?? true),
-        allowAnonymousMessages: setting == 'allowMessages' ? value : (currentSettings?.allowAnonymousMessages ?? true),
-        showNameOnPosts: setting == 'showNameOnPosts' ? value : (currentSettings?.showNameOnPosts ?? true),
-        showPhotoOnPosts: setting == 'showPhotoOnPosts' ? value : (currentSettings?.showPhotoOnPosts ?? true),
+        showOnlineStatus: setting == 'showOnlineStatus'
+            ? value
+            : (currentSettings?.showOnlineStatus ?? true),
+        allowAnonymousMessages: setting == 'allowMessages'
+            ? value
+            : (currentSettings?.allowAnonymousMessages ?? true),
+        showNameOnPosts: setting == 'showNameOnPosts'
+            ? value
+            : (currentSettings?.showNameOnPosts ?? true),
+        showPhotoOnPosts: setting == 'showPhotoOnPosts'
+            ? value
+            : (currentSettings?.showPhotoOnPosts ?? true),
         language: currentSettings?.language ?? 'fr',
         theme: currentSettings?.theme ?? 'system',
       );
@@ -1192,7 +1210,9 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.settingsUpdated)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.settingsUpdated),
+          ),
         );
       }
     } catch (e) {
@@ -1201,7 +1221,11 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
         // Revert the local state if update failed
         await _loadSettings();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     } finally {
@@ -1217,13 +1241,21 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
       setState(() => _blockedUsers.removeWhere((u) => u.id == user.id));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.userUnblocked(user.username))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.userUnblocked(user.username),
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -1247,8 +1279,13 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                   const Icon(Icons.block),
                   const SizedBox(width: 12),
                   Text(
-                    AppLocalizations.of(context)!.blockedUsersWithCount(_blockedUsers.length),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    AppLocalizations.of(
+                      context,
+                    )!.blockedUsersWithCount(_blockedUsers.length),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -1260,7 +1297,11 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.check_circle_outline, size: 64, color: Colors.grey),
+                          const Icon(
+                            Icons.check_circle_outline,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(height: 16),
                           Text(AppLocalizations.of(context)!.noBlockedUsers),
                         ],
@@ -1288,7 +1329,9 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                               Navigator.pop(context);
                               _unblockUser(user);
                             },
-                            child: Text(AppLocalizations.of(context)!.unblockAction),
+                            child: Text(
+                              AppLocalizations.of(context)!.unblockAction,
+                            ),
                           ),
                         );
                       },
@@ -1328,7 +1371,9 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
               ),
               SwitchListTile(
                 title: Text(AppLocalizations.of(context)!.showNameOnPostsTitle),
-                subtitle: Text(AppLocalizations.of(context)!.showNameOnPostsSubtitle),
+                subtitle: Text(
+                  AppLocalizations.of(context)!.showNameOnPostsSubtitle,
+                ),
                 value: _showNameOnPosts,
                 onChanged: (value) {
                   setState(() => _showNameOnPosts = value);
@@ -1336,8 +1381,12 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 },
               ),
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.showPhotoOnPostsTitle),
-                subtitle: Text(AppLocalizations.of(context)!.showPhotoOnPostsSubtitle),
+                title: Text(
+                  AppLocalizations.of(context)!.showPhotoOnPostsTitle,
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(context)!.showPhotoOnPostsSubtitle,
+                ),
                 value: _showPhotoOnPosts,
                 onChanged: (value) {
                   setState(() => _showPhotoOnPosts = value);
@@ -1357,8 +1406,12 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 ),
               ),
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.showOnlineStatusTitle),
-                subtitle: Text(AppLocalizations.of(context)!.showOnlineStatusSubtitle),
+                title: Text(
+                  AppLocalizations.of(context)!.showOnlineStatusTitle,
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(context)!.showOnlineStatusSubtitle,
+                ),
                 value: _showOnlineStatus,
                 onChanged: (value) {
                   setState(() => _showOnlineStatus = value);
@@ -1366,8 +1419,12 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 },
               ),
               SwitchListTile(
-                title: Text(AppLocalizations.of(context)!.allowAnonymousMessagesTitle),
-                subtitle: Text(AppLocalizations.of(context)!.allowAnonymousMessagesSubtitle),
+                title: Text(
+                  AppLocalizations.of(context)!.allowAnonymousMessagesTitle,
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(context)!.allowAnonymousMessagesSubtitle,
+                ),
                 value: _allowMessages,
                 onChanged: (value) {
                   setState(() => _allowMessages = value);
@@ -1389,7 +1446,11 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
               ListTile(
                 leading: const Icon(Icons.block),
                 title: Text(AppLocalizations.of(context)!.blockedUsersTitle),
-                subtitle: Text(AppLocalizations.of(context)!.blockedUsersCount(_blockedUsers.length)),
+                subtitle: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.blockedUsersCount(_blockedUsers.length),
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: _showBlockedUsersSheet,
               ),
@@ -1399,7 +1460,9 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                   AppLocalizations.of(context)!.deleteAccountTitle,
                   style: const TextStyle(color: Colors.red),
                 ),
-                subtitle: Text(AppLocalizations.of(context)!.deleteAccountSubtitle),
+                subtitle: Text(
+                  AppLocalizations.of(context)!.deleteAccountSubtitle,
+                ),
                 onTap: () => _showDeleteAccountDialog(),
               ),
             ],
@@ -1437,7 +1500,13 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.errorMessage(e.toString()),
+                      ),
+                    ),
                   );
                 }
               }
@@ -1473,10 +1542,7 @@ class _LegalScreen extends StatelessWidget {
               style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
             const SizedBox(height: 16),
-            Text(
-              l10n.legalIntro,
-              style: const TextStyle(fontSize: 14),
-            ),
+            Text(l10n.legalIntro, style: const TextStyle(fontSize: 14)),
             const SizedBox(height: 16),
             Text(
               l10n.legalBody,
@@ -1514,10 +1580,7 @@ class _HelpScreen extends StatelessWidget {
             l10n.faqRevealIdentityQuestion,
             l10n.faqRevealIdentityAnswer,
           ),
-          _buildFAQItem(
-            l10n.faqShareLinkQuestion,
-            l10n.faqShareLinkAnswer,
-          ),
+          _buildFAQItem(l10n.faqShareLinkQuestion, l10n.faqShareLinkAnswer),
           _buildFAQItem(
             l10n.faqContactSupportQuestion,
             l10n.faqContactSupportAnswer,
@@ -1552,7 +1615,10 @@ class _HelpScreen extends StatelessWidget {
 
   Widget _buildFAQItem(String question, String answer) {
     return ExpansionTile(
-      title: Text(question, style: const TextStyle(fontWeight: FontWeight.w500)),
+      title: Text(
+        question,
+        style: const TextStyle(fontWeight: FontWeight.w500),
+      ),
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
@@ -1601,7 +1667,10 @@ class _AboutScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 l10n.appName,
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1741,14 +1810,20 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
           _isUploadingAvatar = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.profilePhotoUpdated)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.profilePhotoUpdated),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isUploadingAvatar = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -1769,14 +1844,20 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
           _isUploadingAvatar = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.profilePhotoDeleted)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.profilePhotoDeleted),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isUploadingAvatar = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -1791,7 +1872,9 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
       final userService = UserService();
       final updatedUser = await userService.updateProfile(
         firstName: _firstNameController.text,
-        lastName: _lastNameController.text.isNotEmpty ? _lastNameController.text : null,
+        lastName: _lastNameController.text.isNotEmpty
+            ? _lastNameController.text
+            : null,
         bio: _bioController.text.isNotEmpty ? _bioController.text : null,
       );
 
@@ -1809,7 +1892,11 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -1856,15 +1943,15 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                       child: _isUploadingAvatar
                           ? const CircularProgressIndicator(color: Colors.white)
                           : _avatarUrl == null
-                              ? Text(
-                                  user?.initials ?? '?',
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                )
-                              : null,
+                          ? Text(
+                              user?.initials ?? '?',
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            )
+                          : null,
                     ),
                     Positioned(
                       bottom: 0,
@@ -1877,7 +1964,11 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                           ),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -1971,7 +2062,9 @@ class _PremiumScreenState extends State<_PremiumScreen> {
       await _loadPremiumStatus();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.premiumActivated)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.premiumActivated),
+          ),
         );
         // Update user in auth provider
         final authProvider = context.read<AuthProvider>();
@@ -1982,7 +2075,11 @@ class _PremiumScreenState extends State<_PremiumScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     } finally {
@@ -2014,7 +2111,11 @@ class _PremiumScreenState extends State<_PremiumScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -2061,7 +2162,8 @@ class _PremiumScreenState extends State<_PremiumScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    if (_passStatus?.daysRemaining != null && _passStatus!.daysRemaining > 0) ...[
+                    if (_passStatus?.daysRemaining != null &&
+                        _passStatus!.daysRemaining > 0) ...[
                       const SizedBox(height: 4),
                       Text(
                         l10n.premiumDaysRemaining(_passStatus!.daysRemaining),
@@ -2114,10 +2216,26 @@ class _PremiumScreenState extends State<_PremiumScreen> {
             ],
             const SizedBox(height: 24),
             // Features
-            _buildFeature(Icons.visibility, l10n.featureRevealTitle, l10n.featureRevealSubtitle),
-            _buildFeature(Icons.verified, l10n.featureBadgeTitle, l10n.featureBadgeSubtitle),
-            _buildFeature(Icons.block, l10n.featureNoAdsTitle, l10n.featureNoAdsSubtitle),
-            _buildFeature(Icons.analytics, l10n.featureStatsTitle, l10n.featureStatsSubtitle),
+            _buildFeature(
+              Icons.visibility,
+              l10n.featureRevealTitle,
+              l10n.featureRevealSubtitle,
+            ),
+            _buildFeature(
+              Icons.verified,
+              l10n.featureBadgeTitle,
+              l10n.featureBadgeSubtitle,
+            ),
+            _buildFeature(
+              Icons.block,
+              l10n.featureNoAdsTitle,
+              l10n.featureNoAdsSubtitle,
+            ),
+            _buildFeature(
+              Icons.analytics,
+              l10n.featureStatsTitle,
+              l10n.featureStatsSubtitle,
+            ),
             const SizedBox(height: 24),
             // Pricing (only for non-premium users)
             if (!isPremium && _passStatus?.isActive != true) ...[
@@ -2241,13 +2359,21 @@ class _NotificationsScreenState extends State<_NotificationsScreen> {
       _loadNotifications();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.notificationsMarkedRead)),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.notificationsMarkedRead,
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -2283,65 +2409,68 @@ class _NotificationsScreenState extends State<_NotificationsScreen> {
       appBar: AppBar(
         title: Text(l10n.notifications),
         actions: [
-          TextButton(
-            onPressed: _markAllAsRead,
-            child: Text(l10n.markAllRead),
-          ),
+          TextButton(onPressed: _markAllAsRead, child: Text(l10n.markAllRead)),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _notifications.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.notifications_off, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(l10n.noNotifications),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.notifications_off,
+                    size: 64,
+                    color: Colors.grey,
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => _loadNotifications(),
-                  child: ListView.separated(
-                    itemCount: _notifications.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final notif = _notifications[index];
-                      return ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: notif.isRead
-                                ? Colors.grey.withOpacity(0.1)
-                                : AppColors.primary.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _getNotificationIcon(notif.type),
-                            color: notif.isRead ? Colors.grey : AppColors.primary,
-                          ),
-                        ),
-                        title: Text(
-                          notif.title,
-                          style: TextStyle(
-                            fontWeight: notif.isRead ? FontWeight.normal : FontWeight.bold,
-                          ),
-                        ),
-                        subtitle: Text(notif.body),
-                        trailing: Text(
-                          _formatTime(notif.createdAt),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        onTap: () {
-                          _markAsRead(notif);
-                          _handleNotificationTap(notif);
-                        },
-                      );
+                  const SizedBox(height: 16),
+                  Text(l10n.noNotifications),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: () => _loadNotifications(),
+              child: ListView.separated(
+                itemCount: _notifications.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final notif = _notifications[index];
+                  return ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: notif.isRead
+                            ? Colors.grey.withOpacity(0.1)
+                            : AppColors.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getNotificationIcon(notif.type),
+                        color: notif.isRead ? Colors.grey : AppColors.primary,
+                      ),
+                    ),
+                    title: Text(
+                      notif.title,
+                      style: TextStyle(
+                        fontWeight: notif.isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(notif.body),
+                    trailing: Text(
+                      _formatTime(notif.createdAt),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    onTap: () {
+                      _markAsRead(notif);
+                      _handleNotificationTap(notif);
                     },
-                  ),
-                ),
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -2476,7 +2605,8 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
           items.add(
             StoryItem.text(
               title: story.content ?? '',
-              backgroundColor: _parseColor(story.backgroundColor) ?? const Color(0xFF6366F1),
+              backgroundColor:
+                  _parseColor(story.backgroundColor) ?? const Color(0xFF6366F1),
               duration: Duration(seconds: story.duration),
             ),
           );
@@ -2550,7 +2680,9 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
     if (colorString == null) return null;
     try {
       if (colorString.startsWith('#')) {
-        return Color(int.parse(colorString.substring(1), radix: 16) + 0xFF000000);
+        return Color(
+          int.parse(colorString.substring(1), radix: 16) + 0xFF000000,
+        );
       }
     } catch (_) {}
     return null;
@@ -2561,9 +2693,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
 
@@ -2662,38 +2792,52 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
               storyId: _currentStory?.id ?? 0,
               isExpanded: _isReplying,
               onTap: _toggleReplyMode,
-              onSend: (content, {isAnonymous = true, voiceFile, voiceEffect}) async {
-                final story = _currentStory;
-                if (story == null) return;
-                try {
-                  if (voiceFile != null) {
-                    await _replyService.sendVoiceReply(
-                      storyId: story.id,
-                      audioFile: voiceFile,
-                      voiceEffect: voiceEffect,
-                      isAnonymous: isAnonymous,
-                    );
-                  } else {
-                    await _replyService.sendTextReply(
-                      storyId: story.id,
-                      content: content,
-                      isAnonymous: isAnonymous,
-                    );
-                  }
-                  _toggleReplyMode();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.storyReplySent)),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.storyReplyError)),
-                    );
-                  }
-                }
-              },
+              onSend:
+                  (
+                    content, {
+                    isAnonymous = true,
+                    voiceFile,
+                    voiceEffect,
+                  }) async {
+                    final story = _currentStory;
+                    if (story == null) return;
+                    try {
+                      if (voiceFile != null) {
+                        await _replyService.sendVoiceReply(
+                          storyId: story.id,
+                          audioFile: voiceFile,
+                          voiceEffect: voiceEffect,
+                          isAnonymous: isAnonymous,
+                        );
+                      } else {
+                        await _replyService.sendTextReply(
+                          storyId: story.id,
+                          content: content,
+                          isAnonymous: isAnonymous,
+                        );
+                      }
+                      _toggleReplyMode();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(context)!.storyReplySent,
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(context)!.storyReplyError,
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
               onClose: _toggleReplyMode,
             ),
           ),
@@ -2756,7 +2900,8 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
           items.add(
             StoryItem.text(
               title: story.content ?? '',
-              backgroundColor: _parseColor(story.backgroundColor) ?? const Color(0xFF6366F1),
+              backgroundColor:
+                  _parseColor(story.backgroundColor) ?? const Color(0xFF6366F1),
               duration: Duration(seconds: story.duration),
             ),
           );
@@ -2809,7 +2954,9 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
     if (colorString == null) return null;
     try {
       if (colorString.startsWith('#')) {
-        return Color(int.parse(colorString.substring(1), radix: 16) + 0xFF000000);
+        return Color(
+          int.parse(colorString.substring(1), radix: 16) + 0xFF000000,
+        );
       }
     } catch (_) {}
     return null;
@@ -2854,7 +3001,11 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -2867,9 +3018,7 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
 
@@ -2972,9 +3121,12 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (_stories.isNotEmpty && _currentIndex < _stories.length)
+                      if (_stories.isNotEmpty &&
+                          _currentIndex < _stories.length)
                         Text(
-                          AppLocalizations.of(context)!.viewsCount(_stories[_currentIndex].viewsCount),
+                          AppLocalizations.of(
+                            context,
+                          )!.viewsCount(_stories[_currentIndex].viewsCount),
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 12,
@@ -3002,7 +3154,11 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
                 const SizedBox(width: 24),
                 // Add new story
                 IconButton(
-                  icon: const Icon(Icons.add_circle, color: Colors.white, size: 32),
+                  icon: const Icon(
+                    Icons.add_circle,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                     context.push('/create-story');
@@ -3050,18 +3206,23 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
             ),
             const SizedBox(height: 16),
             if (story.viewers != null && story.viewers!.isNotEmpty)
-              ...story.viewers!.map((viewer) => ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: viewer.user?.avatar != null
-                      ? CachedNetworkImageProvider(viewer.user!.avatar!)
-                      : null,
-                  child: viewer.user?.avatar == null
-                      ? Text(viewer.user?.initials ?? '?')
-                      : null,
+              ...story.viewers!.map(
+                (viewer) => ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: viewer.user?.avatar != null
+                        ? CachedNetworkImageProvider(viewer.user!.avatar!)
+                        : null,
+                    child: viewer.user?.avatar == null
+                        ? Text(viewer.user?.initials ?? '?')
+                        : null,
+                  ),
+                  title: Text(
+                    viewer.user?.fullName ??
+                        AppLocalizations.of(context)!.userFallback,
+                  ),
+                  subtitle: Text('@${viewer.user?.username ?? ''}'),
                 ),
-                title: Text(viewer.user?.fullName ?? AppLocalizations.of(context)!.userFallback),
-                subtitle: Text('@${viewer.user?.username ?? ''}'),
-              ))
+              )
             else
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -3108,7 +3269,8 @@ class _FollowersScreenState extends State<_FollowersScreen> {
         page: loadMore ? _page : 1,
       );
 
-      final List<dynamic> data = response['data']['data'] ?? response['data'] ?? [];
+      final List<dynamic> data =
+          response['data']['data'] ?? response['data'] ?? [];
       final newFollowers = data.map((json) => User.fromJson(json)).toList();
 
       setState(() {
@@ -3137,7 +3299,11 @@ class _FollowersScreenState extends State<_FollowersScreen> {
       _loadFollowers();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.errorMessage(e.toString()),
+          ),
+        ),
       );
     }
   }
@@ -3150,26 +3316,33 @@ class _FollowersScreenState extends State<_FollowersScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _followers.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(l10n.noFollowers, style: const TextStyle(color: Colors.grey)),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: Colors.grey,
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => _loadFollowers(),
-                  child: ListView.builder(
-                    itemCount: _followers.length,
-                    itemBuilder: (context, index) {
-                      final user = _followers[index];
-                      return _buildUserTile(user);
-                    },
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.noFollowers,
+                    style: const TextStyle(color: Colors.grey),
                   ),
-                ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: () => _loadFollowers(),
+              child: ListView.builder(
+                itemCount: _followers.length,
+                itemBuilder: (context, index) {
+                  final user = _followers[index];
+                  return _buildUserTile(user);
+                },
+              ),
+            ),
     );
   }
 
@@ -3185,7 +3358,10 @@ class _FollowersScreenState extends State<_FollowersScreen> {
             ? CachedNetworkImageProvider(user.avatar!)
             : null,
         child: user.avatar == null
-            ? Text(user.initials, style: const TextStyle(color: AppColors.primary))
+            ? Text(
+                user.initials,
+                style: const TextStyle(color: AppColors.primary),
+              )
             : null,
       ),
       title: Text(user.fullName),
@@ -3195,10 +3371,16 @@ class _FollowersScreenState extends State<_FollowersScreen> {
           : OutlinedButton(
               onPressed: () => _toggleFollow(user),
               style: OutlinedButton.styleFrom(
-                backgroundColor: user.isFollowing == true ? null : AppColors.primary,
-                foregroundColor: user.isFollowing == true ? AppColors.primary : Colors.white,
+                backgroundColor: user.isFollowing == true
+                    ? null
+                    : AppColors.primary,
+                foregroundColor: user.isFollowing == true
+                    ? AppColors.primary
+                    : Colors.white,
               ),
-              child: Text(user.isFollowing == true ? l10n.followed : l10n.follow),
+              child: Text(
+                user.isFollowing == true ? l10n.followed : l10n.follow,
+              ),
             ),
       onTap: () => context.push('/u/${user.username}'),
     );
@@ -3237,7 +3419,8 @@ class _FollowingScreenState extends State<_FollowingScreen> {
         page: loadMore ? _page : 1,
       );
 
-      final List<dynamic> data = response['data']['data'] ?? response['data'] ?? [];
+      final List<dynamic> data =
+          response['data']['data'] ?? response['data'] ?? [];
       final newFollowing = data.map((json) => User.fromJson(json)).toList();
 
       setState(() {
@@ -3266,7 +3449,11 @@ class _FollowingScreenState extends State<_FollowingScreen> {
       _loadFollowing();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.errorMessage(e.toString()),
+          ),
+        ),
       );
     }
   }
@@ -3279,26 +3466,33 @@ class _FollowingScreenState extends State<_FollowingScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _following.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(l10n.noFollowing, style: const TextStyle(color: Colors.grey)),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: Colors.grey,
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: () => _loadFollowing(),
-                  child: ListView.builder(
-                    itemCount: _following.length,
-                    itemBuilder: (context, index) {
-                      final user = _following[index];
-                      return _buildUserTile(user);
-                    },
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.noFollowing,
+                    style: const TextStyle(color: Colors.grey),
                   ),
-                ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: () => _loadFollowing(),
+              child: ListView.builder(
+                itemCount: _following.length,
+                itemBuilder: (context, index) {
+                  final user = _following[index];
+                  return _buildUserTile(user);
+                },
+              ),
+            ),
     );
   }
 
@@ -3314,7 +3508,10 @@ class _FollowingScreenState extends State<_FollowingScreen> {
             ? CachedNetworkImageProvider(user.avatar!)
             : null,
         child: user.avatar == null
-            ? Text(user.initials, style: const TextStyle(color: AppColors.primary))
+            ? Text(
+                user.initials,
+                style: const TextStyle(color: AppColors.primary),
+              )
             : null,
       ),
       title: Text(user.fullName),
@@ -3324,10 +3521,16 @@ class _FollowingScreenState extends State<_FollowingScreen> {
           : OutlinedButton(
               onPressed: () => _toggleFollow(user),
               style: OutlinedButton.styleFrom(
-                backgroundColor: user.isFollowing == true ? null : AppColors.primary,
-                foregroundColor: user.isFollowing == true ? AppColors.primary : Colors.white,
+                backgroundColor: user.isFollowing == true
+                    ? null
+                    : AppColors.primary,
+                foregroundColor: user.isFollowing == true
+                    ? AppColors.primary
+                    : Colors.white,
               ),
-              child: Text(user.isFollowing == true ? l10n.followed : l10n.follow),
+              child: Text(
+                user.isFollowing == true ? l10n.followed : l10n.follow,
+              ),
             ),
       onTap: () => context.push('/u/${user.username}'),
     );
@@ -3409,7 +3612,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
 
   Future<void> _loadGroup() async {
     try {
-      final group = await _groupService.getGroup(int.tryParse(widget.groupId) ?? 0);
+      final group = await _groupService.getGroup(
+        int.tryParse(widget.groupId) ?? 0,
+      );
       // Get current user ID from auth provider
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       setState(() {
@@ -3471,10 +3676,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       await _audioPlayer.setAudioSource(
         AudioSource.uri(
           Uri.parse(mediaUrl),
-          headers: const {
-            'Accept': '*/*',
-            'Range': 'bytes=0-',
-          },
+          headers: const {'Accept': '*/*', 'Range': 'bytes=0-'},
         ),
       );
       await VoiceEffectsService.applyEffectToPlayer(
@@ -3485,7 +3687,11 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.audioPlaybackError(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.audioPlaybackError(e.toString()),
+            ),
+          ),
         );
       }
     } finally {
@@ -3502,17 +3708,18 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     debugPrint('[GroupChat] Open video -> url=$mediaUrl');
     final controller = VideoPlayerController.networkUrl(
       Uri.parse(mediaUrl),
-      httpHeaders: const {
-        'Accept': '*/*',
-        'Range': 'bytes=0-',
-      },
+      httpHeaders: const {'Accept': '*/*', 'Range': 'bytes=0-'},
     );
     try {
       await controller.initialize();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.videoPlaybackError(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.videoPlaybackError(e.toString()),
+            ),
+          ),
         );
       }
       await controller.dispose();
@@ -3565,12 +3772,16 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final currentUserId = authProvider.user?.id;
 
-      final result = await _groupService.getMessages(int.tryParse(widget.groupId) ?? 0);
+      final result = await _groupService.getMessages(
+        int.tryParse(widget.groupId) ?? 0,
+      );
       setState(() {
         _messages = result.messages.map((m) {
           final json = m.toJson();
           // Add is_mine field for message bubbles
-          json['is_mine'] = json['sender_id'] == currentUserId || json['user_id'] == currentUserId;
+          json['is_mine'] =
+              json['sender_id'] == currentUserId ||
+              json['user_id'] == currentUserId;
           return json;
         }).toList();
         _isLoading = false;
@@ -3661,7 +3872,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
 
-    if (content.isEmpty && _selectedImage == null && _selectedVideo == null && _voiceFile == null) {
+    if (content.isEmpty &&
+        _selectedImage == null &&
+        _selectedVideo == null &&
+        _voiceFile == null) {
       return;
     }
 
@@ -3693,7 +3907,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       // Handle reply
       final replyToId = _replyToMessage?['id'];
 
-      final voice = (_selectedImage != null || _selectedVideo != null) ? null : _voiceFile;
+      final voice = (_selectedImage != null || _selectedVideo != null)
+          ? null
+          : _voiceFile;
 
       await _groupService.sendMessage(
         groupId: int.tryParse(widget.groupId) ?? 0,
@@ -3724,13 +3940,18 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       });
       if (mounted) {
         final errorMessage = _extractErrorMessage(e);
-        final voiceInfo = _voiceFile != null ? _voiceDebugInfo(_voiceFile!) : null;
+        final voiceInfo = _voiceFile != null
+            ? _voiceDebugInfo(_voiceFile!)
+            : null;
         final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               voiceInfo != null
-                  ? l10n.errorWithDebug(l10n.errorMessage(errorMessage), voiceInfo)
+                  ? l10n.errorWithDebug(
+                      l10n.errorMessage(errorMessage),
+                      voiceInfo,
+                    )
                   : l10n.errorMessage(errorMessage),
             ),
           ),
@@ -3750,9 +3971,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             Container(
               width: 36,
               height: 36,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-              ),
+              decoration: const BoxDecoration(shape: BoxShape.circle),
               child: _group?.avatarUrl != null
                   ? ClipOval(
                       child: CachedNetworkImage(
@@ -3766,7 +3985,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                       radius: 18,
                       backgroundColor: AppColors.primary.withOpacity(0.15),
                       child: Text(
-                        (_groupName ?? l10n.groupTitleFallback).substring(0, 1).toUpperCase(),
+                        (_groupName ?? l10n.groupTitleFallback)
+                            .substring(0, 1)
+                            .toUpperCase(),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w700,
@@ -3785,7 +4006,8 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                       l10n.membersCount(_group!.membersCount),
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).textTheme.bodySmall?.color ??
+                        color:
+                            Theme.of(context).textTheme.bodySmall?.color ??
                             AppColors.textSecondary,
                       ),
                     ),
@@ -3818,323 +4040,374 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
         ),
         child: Column(
           children: [
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _messages.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.groupEmptyTitle,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.groupEmptySubtitle,
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _messages.length,
-                        itemBuilder: (context, index) {
-                          final message = _messages[index];
-                          return Dismissible(
-                            key: ValueKey('group_message_${message['id']}_${message['created_at'] ?? index}'),
-                            direction: DismissDirection.startToEnd,
-                            background: Container(
-                              alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.only(left: 16),
-                              color: AppColors.primary.withOpacity(0.08),
-                              child: const Icon(Icons.reply, color: AppColors.primary),
-                            ),
-                            confirmDismiss: (_) async {
-                              setState(() {
-                                _replyToMessage = message;
-                              });
-                              return false;
-                            },
-                            child: _buildMessageBubble(message),
-                          );
-                        },
-                      ),
-          ),
-
-          // Selected image preview
-          if (_selectedImage != null)
-            Container(
-              padding: const EdgeInsets.all(8),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      _selectedImage!,
-                      height: 100,
-                      width: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedImage = null),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.close, size: 16, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (_selectedVideo != null)
-            Container(
-              padding: const EdgeInsets.all(8),
-              child: Stack(
-                children: [
-                  Container(
-                    height: 100,
-                    width: 160,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.videocam, size: 28, color: Colors.grey[700]),
-                        const SizedBox(height: 4),
-                        Text(
-                          l10n.videoSelected,
-                          style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedVideo = null),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.close, size: 16, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-          // Voice recorder
-          if (_showVoiceRecorder)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              child: VoiceRecorderWidget(
-                onRecordingComplete: _onVoiceRecorded,
-                showEffectSelector: true,
-              ),
-            ),
-
-          // Reply preview
-          if (_replyToMessage != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                border: Border(
-                  top: BorderSide(color: Colors.grey[300]!),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.replyToUser(
-                            _replyToMessage!['sender']?['full_name'] ?? l10n.userFallback,
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _messages.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.chat_bubble_outline,
+                            size: 64,
+                            color: Colors.grey,
                           ),
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.groupEmptyTitle,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          _replyToMessage!['content'] ?? '',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.groupEmptySubtitle,
+                            style: const TextStyle(color: Colors.grey),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20),
-                    onPressed: () {
-                      setState(() {
-                        _replyToMessage = null;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-          // Editing indicator
-          if (_editingMessageId != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.1),
-                border: Border(
-                  top: BorderSide(color: Colors.amber[300]!),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.edit, color: Colors.amber, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l10n.messageEditMode,
-                      style: const TextStyle(
-                        color: Colors.amber,
-                        fontWeight: FontWeight.w500,
+                        ],
                       ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) {
+                        final message = _messages[index];
+                        return Dismissible(
+                          key: ValueKey(
+                            'group_message_${message['id']}_${message['created_at'] ?? index}',
+                          ),
+                          direction: DismissDirection.startToEnd,
+                          background: Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 16),
+                            color: AppColors.primary.withOpacity(0.08),
+                            child: const Icon(
+                              Icons.reply,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          confirmDismiss: (_) async {
+                            setState(() {
+                              _replyToMessage = message;
+                            });
+                            return false;
+                          },
+                          child: _buildMessageBubble(message),
+                        );
+                      },
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20, color: Colors.amber),
-                    onPressed: () {
-                      setState(() {
-                        _editingMessageId = null;
-                        _messageController.clear();
-                      });
-                    },
-                  ),
-                ],
-              ),
             ),
 
-          // Input area
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
+            // Selected image preview
+            if (_selectedImage != null)
+              Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.85),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, -2),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        _selectedImage!,
+                        height: 100,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedImage = null),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                child: SafeArea(
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.image,
-                          color: _selectedImage != null ? AppColors.primary : Colors.grey,
-                        ),
-                        onPressed: _pickImage,
+              ),
+            if (_selectedVideo != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 100,
+                      width: 160,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.videocam,
-                          color: _selectedVideo != null ? AppColors.primary : Colors.grey,
-                        ),
-                        onPressed: _pickVideo,
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.mic,
-                          color: _showVoiceRecorder ? AppColors.primary : Colors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _showVoiceRecorder = !_showVoiceRecorder;
-                          });
-                        },
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          decoration: InputDecoration(
-                            hintText: _editingMessageId != null
-                                ? l10n.editMessageHint
-                                : l10n.messageInputHint,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(24),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey.withOpacity(0.1),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.videocam,
+                            size: 28,
+                            color: Colors.grey[700],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.videoSelected,
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 12,
                             ),
                           ),
-                          onSubmitted: (_) => _sendMessage(),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedVideo = null),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      _isSending
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.send, color: AppColors.primary),
-                              onPressed: _sendMessage,
+                    ),
+                  ],
+                ),
+              ),
+
+            // Voice recorder
+            if (_showVoiceRecorder)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                ),
+                child: VoiceRecorderWidget(
+                  onRecordingComplete: _onVoiceRecorded,
+                  showEffectSelector: true,
+                ),
+              ),
+
+            // Reply preview
+            if (_replyToMessage != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  border: Border(top: BorderSide(color: Colors.grey[300]!)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.replyToUser(
+                              _replyToMessage!['sender']?['full_name'] ??
+                                  l10n.userFallback,
                             ),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            _replyToMessage!['content'] ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 20),
+                      onPressed: () {
+                        setState(() {
+                          _replyToMessage = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+            // Editing indicator
+            if (_editingMessageId != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  border: Border(top: BorderSide(color: Colors.amber[300]!)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit, color: Colors.amber, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.messageEditMode,
+                        style: const TextStyle(
+                          color: Colors.amber,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close,
+                        size: 20,
+                        color: Colors.amber,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _editingMessageId = null;
+                          _messageController.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+            // Input area
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withOpacity(0.85),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -2),
+                      ),
                     ],
+                  ),
+                  child: SafeArea(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.image,
+                            color: _selectedImage != null
+                                ? AppColors.primary
+                                : Colors.grey,
+                          ),
+                          onPressed: _pickImage,
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.videocam,
+                            color: _selectedVideo != null
+                                ? AppColors.primary
+                                : Colors.grey,
+                          ),
+                          onPressed: _pickVideo,
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.mic,
+                            color: _showVoiceRecorder
+                                ? AppColors.primary
+                                : Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _showVoiceRecorder = !_showVoiceRecorder;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _messageController,
+                            decoration: InputDecoration(
+                              hintText: _editingMessageId != null
+                                  ? l10n.editMessageHint
+                                  : l10n.messageInputHint,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.withOpacity(0.1),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                            ),
+                            onSubmitted: (_) => _sendMessage(),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _isSending
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : IconButton(
+                                icon: const Icon(
+                                  Icons.send,
+                                  color: AppColors.primary,
+                                ),
+                                onPressed: _sendMessage,
+                              ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           ],
         ),
       ),
@@ -4154,7 +4427,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     final replyTo = message['reply_to_message'];
     final sender = message['sender'] as Map<String, dynamic>?;
     final senderName =
-        sender?['full_name'] ?? sender?['username'] ?? AppLocalizations.of(context)!.userFallback;
+        sender?['full_name'] ??
+        sender?['username'] ??
+        AppLocalizations.of(context)!.userFallback;
     final senderAvatar = sender?['avatar'] ?? sender?['avatar_url'];
 
     return GestureDetector(
@@ -4206,7 +4481,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: isMe ? Colors.white.withOpacity(0.2) : Colors.grey[300],
+                          color: isMe
+                              ? Colors.white.withOpacity(0.2)
+                              : Colors.grey[300],
                           borderRadius: BorderRadius.circular(8),
                           border: Border(
                             left: BorderSide(
@@ -4236,30 +4513,41 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                           placeholder: (context, url) => Container(
                             height: 200,
                             color: Colors.grey[300],
-                            child: const Center(child: CircularProgressIndicator()),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           ),
                           errorWidget: (context, url, error) => Container(
                             height: 200,
                             color: Colors.grey[300],
                             child: const Center(
-                              child: Icon(Icons.broken_image_outlined, color: Colors.grey),
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    if (hasVideo) _buildVideoPreview(mediaUrl, isMe, senderColor),
+                    if (hasVideo)
+                      _buildVideoPreview(mediaUrl, isMe, senderColor),
                     if (hasVoice)
                       Row(
                         children: [
                           IconButton(
-                            icon: _isAudioLoading && _playingMessageId == message['id']
+                            icon:
+                                _isAudioLoading &&
+                                    _playingMessageId == message['id']
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   )
                                 : Icon(
-                                    _playingMessageId == message['id'] && _audioPlayer.playing
+                                    _playingMessageId == message['id'] &&
+                                            _audioPlayer.playing
                                         ? Icons.pause_circle_filled
                                         : Icons.play_circle_fill,
                                     color: isMe ? Colors.white : senderColor,
@@ -4282,7 +4570,8 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                           ),
                         ],
                       ),
-                    if (message['content'] != null && message['content'].isNotEmpty)
+                    if (message['content'] != null &&
+                        message['content'].isNotEmpty)
                       LinkText(
                         text: message['content'],
                         style: TextStyle(
@@ -4349,7 +4638,8 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             FutureBuilder<Uint8List?>(
               future: future,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.data != null) {
                   return Image.memory(
                     snapshot.data!,
                     width: double.infinity,
@@ -4422,10 +4712,14 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               leading: const Icon(Icons.copy),
               title: Text(AppLocalizations.of(context)!.copyAction),
               onTap: () {
-                Clipboard.setData(ClipboardData(text: message['content'] ?? ''));
+                Clipboard.setData(
+                  ClipboardData(text: message['content'] ?? ''),
+                );
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.messageCopied)),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.messageCopied),
+                  ),
                 );
               },
             ),
@@ -4458,11 +4752,17 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   _messages.removeWhere((m) => m['id'] == messageId);
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.messageDeleted)),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.messageDeleted),
+                  ),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context)!.errorMessage(e.toString()),
+                    ),
+                  ),
                 );
               }
             },
@@ -4476,7 +4776,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
 
   String _voiceDebugInfo(File voice) {
     final filename = voice.path.split('/').last;
-    final extension = filename.contains('.') ? filename.split('.').last.toLowerCase() : '';
+    final extension = filename.contains('.')
+        ? filename.split('.').last.toLowerCase()
+        : '';
     String contentType = 'audio/m4a';
     String signature = 'unknown';
 
@@ -4558,7 +4860,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           groupId: int.tryParse(widget.groupId) ?? 0,
           groupService: _groupService,
           scrollController: scrollController,
-          isAdmin: _group != null && _currentUserId != null && _group!.creatorId == _currentUserId,
+          isAdmin:
+              _group != null &&
+              _currentUserId != null &&
+              _group!.creatorId == _currentUserId,
           onMemberRemoved: () => _loadGroup(),
         ),
       ),
@@ -4566,7 +4871,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   }
 
   void _showOptions() {
-    final isAdmin = _group != null && _currentUserId != null && _group!.creatorId == _currentUserId;
+    final isAdmin =
+        _group != null &&
+        _currentUserId != null &&
+        _group!.creatorId == _currentUserId;
 
     showModalBottomSheet(
       context: context,
@@ -4586,7 +4894,11 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     Clipboard.setData(ClipboardData(text: _group!.inviteCode));
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.inviteCodeCopied)),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.inviteCodeCopied,
+                        ),
+                      ),
                     );
                   }
                 },
@@ -4633,11 +4945,19 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     );
                     await _loadGroup();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.newInviteCode(newCode))),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.newInviteCode(newCode),
+                        ),
+                      ),
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.regenerateInviteError)),
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!.regenerateInviteError,
+                        ),
+                      ),
                     );
                   }
                 },
@@ -4686,16 +5006,24 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           TextButton(
             onPressed: () async {
               try {
-                await _groupService.deleteGroup(int.tryParse(widget.groupId) ?? 0);
+                await _groupService.deleteGroup(
+                  int.tryParse(widget.groupId) ?? 0,
+                );
                 Navigator.pop(context);
                 context.go('/groups');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.groupDeleted)),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.groupDeleted),
+                  ),
                 );
               } catch (e) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context)!.errorMessage(e.toString()),
+                    ),
+                  ),
                 );
               }
             },
@@ -4756,7 +5084,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               Clipboard.setData(ClipboardData(text: _group!.inviteCode));
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.inviteCodeCopied)),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.inviteCodeCopied),
+                ),
               );
             },
           ),
@@ -4789,19 +5119,28 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   : Center(
                       child: Text(
                         _group?.name.substring(0, 1).toUpperCase() ?? 'G',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(_group?.name ?? AppLocalizations.of(context)!.groupTitleFallback)),
+            Expanded(
+              child: Text(
+                _group?.name ??
+                    AppLocalizations.of(context)!.groupTitleFallback,
+              ),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_group?.description != null && _group!.description!.isNotEmpty) ...[
+            if (_group?.description != null &&
+                _group!.description!.isNotEmpty) ...[
               Text(
                 AppLocalizations.of(context)!.descriptionLabel,
                 style: const TextStyle(fontWeight: FontWeight.bold),
@@ -4852,7 +5191,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
 
   void _showEditGroupDialog() {
     final nameController = TextEditingController(text: _group?.name ?? '');
-    final descriptionController = TextEditingController(text: _group?.description ?? '');
+    final descriptionController = TextEditingController(
+      text: _group?.description ?? '',
+    );
     final maxMembersController = TextEditingController(
       text: (_group?.maxMembers ?? AppConstants.maxGroupMembers).toString(),
     );
@@ -4876,7 +5217,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                         if (avatarFile != null) {
                           backgroundImage = FileImage(avatarFile!);
                         } else if (_group?.avatarUrl != null) {
-                          backgroundImage = CachedNetworkImageProvider(_group!.avatarUrl!);
+                          backgroundImage = CachedNetworkImageProvider(
+                            _group!.avatarUrl!,
+                          );
                         }
 
                         return CircleAvatar(
@@ -4905,7 +5248,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                         }
                       },
                       icon: const Icon(Icons.photo_camera),
-                      label: Text(AppLocalizations.of(context)!.changeGroupLogo),
+                      label: Text(
+                        AppLocalizations.of(context)!.changeGroupLogo,
+                      ),
                     ),
                   ],
                 ),
@@ -4938,7 +5283,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                 const SizedBox(height: 16),
                 SwitchListTile(
                   title: Text(AppLocalizations.of(context)!.publicGroup),
-                  subtitle: Text(AppLocalizations.of(context)!.publicGroupSubtitle),
+                  subtitle: Text(
+                    AppLocalizations.of(context)!.publicGroupSubtitle,
+                  ),
                   value: isPublic,
                   onChanged: (value) {
                     setDialogState(() {
@@ -4957,7 +5304,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  final maxMembers = int.tryParse(maxMembersController.text.trim());
+                  final maxMembers = int.tryParse(
+                    maxMembersController.text.trim(),
+                  );
                   await _groupService.updateGroup(
                     int.tryParse(widget.groupId) ?? 0,
                     name: nameController.text,
@@ -4969,11 +5318,19 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   Navigator.pop(context);
                   _loadGroup();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.groupUpdated)),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context)!.groupUpdated),
+                    ),
                   );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.errorMessage(e.toString()),
+                      ),
+                    ),
                   );
                 }
               },
@@ -4999,16 +5356,26 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           TextButton(
             onPressed: () async {
               try {
-                await _groupService.leaveGroup(int.tryParse(widget.groupId) ?? 0);
+                await _groupService.leaveGroup(
+                  int.tryParse(widget.groupId) ?? 0,
+                );
                 Navigator.pop(context);
                 context.go('/groups');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.leftGroupSuccess)),
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context)!.leftGroupSuccess,
+                    ),
+                  ),
                 );
               } catch (e) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+                  SnackBar(
+                    content: Text(
+                      AppLocalizations.of(context)!.errorMessage(e.toString()),
+                    ),
+                  ),
                 );
               }
             },
@@ -5099,7 +5466,10 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.groupMembersTitle,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const Spacer(),
                 Text(
@@ -5115,31 +5485,39 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
-                            const SizedBox(height: 16),
-                            Text(AppLocalizations.of(context)!.errorMessage(_error ?? '')),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: _loadMembers,
-                              child: Text(AppLocalizations.of(context)!.retry),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.grey,
                         ),
-                      )
-                    : _members.isEmpty
-                        ? Center(child: Text(AppLocalizations.of(context)!.noMembers))
-                        : ListView.builder(
-                            controller: widget.scrollController,
-                            itemCount: _members.length,
-                            itemBuilder: (context, index) {
-                              final member = _members[index];
-                              return _buildMemberTile(member);
-                            },
-                          ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppLocalizations.of(
+                            context,
+                          )!.errorMessage(_error ?? ''),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadMembers,
+                          child: Text(AppLocalizations.of(context)!.retry),
+                        ),
+                      ],
+                    ),
+                  )
+                : _members.isEmpty
+                ? Center(child: Text(AppLocalizations.of(context)!.noMembers))
+                : ListView.builder(
+                    controller: widget.scrollController,
+                    itemCount: _members.length,
+                    itemBuilder: (context, index) {
+                      final member = _members[index];
+                      return _buildMemberTile(member);
+                    },
+                  ),
           ),
         ],
       ),
@@ -5148,7 +5526,8 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
 
   Widget _buildMemberTile(GroupMember member) {
     final isAdmin = member.role == 'admin' || member.role == 'creator';
-    final displayName = member.user?.fullName ?? AppLocalizations.of(context)!.anonymousUser;
+    final displayName =
+        member.user?.fullName ?? AppLocalizations.of(context)!.anonymousUser;
     final initial = member.user?.initials ?? 'A';
 
     return ListTile(
@@ -5193,8 +5572,14 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text(AppLocalizations.of(context)!.removeMemberTitle),
-                      content: Text(AppLocalizations.of(context)!.removeMemberConfirm(displayName)),
+                      title: Text(
+                        AppLocalizations.of(context)!.removeMemberTitle,
+                      ),
+                      content: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.removeMemberConfirm(displayName),
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -5202,8 +5587,12 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          style: TextButton.styleFrom(foregroundColor: Colors.red),
-                          child: Text(AppLocalizations.of(context)!.removeAction),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.red,
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context)!.removeAction,
+                          ),
                         ),
                       ],
                     ),
@@ -5211,15 +5600,28 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
 
                   if (confirm == true) {
                     try {
-                      await widget.groupService.removeMember(widget.groupId, member.id);
+                      await widget.groupService.removeMember(
+                        widget.groupId,
+                        member.id,
+                      );
                       _loadMembers();
                       widget.onMemberRemoved();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.memberRemoved)),
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.memberRemoved,
+                          ),
+                        ),
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+                        SnackBar(
+                          content: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.errorMessage(e.toString()),
+                          ),
+                        ),
                       );
                     }
                   }
@@ -5230,7 +5632,11 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
                   value: 'remove',
                   child: Row(
                     children: [
-                      const Icon(Icons.person_remove, color: Colors.red, size: 20),
+                      const Icon(
+                        Icons.person_remove,
+                        color: Colors.red,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         AppLocalizations.of(context)!.removeAction,
@@ -5254,10 +5660,12 @@ class _AnonymousMessageDetailScreen extends StatefulWidget {
   const _AnonymousMessageDetailScreen({required this.messageId});
 
   @override
-  State<_AnonymousMessageDetailScreen> createState() => _AnonymousMessageDetailScreenState();
+  State<_AnonymousMessageDetailScreen> createState() =>
+      _AnonymousMessageDetailScreenState();
 }
 
-class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailScreen> {
+class _AnonymousMessageDetailScreenState
+    extends State<_AnonymousMessageDetailScreen> {
   final MessageService _messageService = MessageService();
   final ChatService _chatService = ChatService();
   AnonymousMessage? _message;
@@ -5295,7 +5703,11 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
     }
@@ -5309,7 +5721,9 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.revealIdentityTitle),
-        content: Text(AppLocalizations.of(context)!.revealIdentityCreditsPrompt),
+        content: Text(
+          AppLocalizations.of(context)!.revealIdentityCreditsPrompt,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -5317,9 +5731,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(AppLocalizations.of(context)!.revealIdentityAction),
           ),
         ],
@@ -5333,7 +5745,9 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
     });
 
     try {
-      final revealedMessage = await _messageService.revealIdentity(widget.messageId);
+      final revealedMessage = await _messageService.revealIdentity(
+        widget.messageId,
+      );
       setState(() {
         _message = revealedMessage;
         _isRevealing = false;
@@ -5354,7 +5768,9 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorMessage(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -5365,7 +5781,9 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
   Future<void> _replyOnce() async {
     if (_message == null || _replyController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.enterMessageError)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.enterMessageError),
+        ),
       );
       return;
     }
@@ -5379,7 +5797,9 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       final result = await _messageService.startConversation(widget.messageId);
       final conversation = result['conversation'] ?? result['data'];
       final conversationId = conversation is Map
-          ? (conversation['id'] ?? conversation['conversation_id'] ?? conversation['conversationId'])
+          ? (conversation['id'] ??
+                conversation['conversation_id'] ??
+                conversation['conversationId'])
           : (result['conversation_id'] ?? result['conversationId']);
 
       setState(() {
@@ -5391,12 +5811,11 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
         if (conversationId != null) {
           final sentContent = _replyController.text.trim();
           final replyContent = _message?.content ?? '';
-          await _chatService.sendMessage(
-            conversationId,
-            content: sentContent,
-          );
+          await _chatService.sendMessage(conversationId, content: sentContent);
           _replyController.clear();
-          final replyTitle = Uri.encodeComponent(AppLocalizations.of(context)!.anonymousMessage);
+          final replyTitle = Uri.encodeComponent(
+            AppLocalizations.of(context)!.anonymousMessage,
+          );
           final replyEncoded = Uri.encodeComponent(replyContent);
           final sentEncoded = Uri.encodeComponent(sentContent);
           context.go(
@@ -5421,7 +5840,9 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorMessage(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -5453,9 +5874,16 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                   value: 'delete',
                   child: Row(
                     children: [
-                      const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                      const Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: Colors.red,
+                      ),
                       const SizedBox(width: 8),
-                      Text(l10n.deleteAction, style: const TextStyle(color: Colors.red)),
+                      Text(
+                        l10n.deleteAction,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ],
                   ),
                 ),
@@ -5484,238 +5912,265 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _message == null
-              ? Center(child: Text(l10n.messageNotFound))
-              : Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/fond.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                      // Sender info card
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              _buildAvatar(),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (_message!.isIdentityRevealed && _message!.sender != null)
-                                      Text(
-                                        _message!.sender!.fullName,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    else
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.person_off, size: 18, color: AppColors.textSecondary),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            l10n.anonymousSender,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          Helpers.getTimeAgo(_message!.createdAt),
-                                          style: const TextStyle(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const Spacer(),
-                                        if (!_message!.isIdentityRevealed)
-                                          IconButton(
-                                            tooltip: l10n.revealIdentityTitle,
-                                            onPressed: _isRevealing ? null : _revealIdentity,
-                                            icon: _isRevealing
-                                                ? const SizedBox(
-                                                    width: 18,
-                                                    height: 18,
-                                                    child: CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                    ),
-                                                  )
-                                                : const Icon(Icons.visibility),
-                                            color: AppColors.primary,
-                                          ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Message content
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.messageLabel,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _message!.content,
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      if (_message!.isIdentityRevealed)
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.success),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.check_circle, color: AppColors.success),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+          ? Center(child: Text(l10n.messageNotFound))
+          : Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/fond.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Sender info card
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            _buildAvatar(),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_message!.isIdentityRevealed &&
+                                      _message!.sender != null)
                                     Text(
-                                      l10n.identityRevealedTitle,
-                                      style: TextStyle(
-                                        color: AppColors.success,
+                                      _message!.sender!.fullName,
+                                      style: const TextStyle(
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                    )
+                                  else
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.person_off,
+                                          size: 18,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          l10n.anonymousSender,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      l10n.sentByUser(_message!.sender?.fullName ?? l10n.userFallback),
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (_message!.sender != null)
-                                IconButton(
-                                  icon: const Icon(Icons.person),
-                                  onPressed: () {
-                                    context.push('/u/${_message!.sender!.username}');
-                                  },
-                                ),
-                            ],
-                          ),
-                        ),
-
-                      const SizedBox(height: 16),
-
-                      // Reply section
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.reply, size: 20, color: AppColors.primary),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Répondre une fois',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        Helpers.getTimeAgo(_message!.createdAt),
+                                        style: const TextStyle(
+                                          color: AppColors.textSecondary,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      if (!_message!.isIdentityRevealed)
+                                        IconButton(
+                                          tooltip: l10n.revealIdentityTitle,
+                                          onPressed: _isRevealing
+                                              ? null
+                                              : _revealIdentity,
+                                          icon: _isRevealing
+                                              ? const SizedBox(
+                                                  width: 18,
+                                                  height: 18,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                )
+                                              : const Icon(Icons.visibility),
+                                          color: AppColors.primary,
+                                        ),
+                                    ],
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Répondez à ce message pour démarrer une conversation dans le chat.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              TextField(
-                                controller: _replyController,
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  hintText: 'Écrivez votre réponse...',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: _isReplying ? null : _replyOnce,
-                                  icon: _isReplying
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : const Icon(Icons.send),
-                                  label: Text(_isReplying ? 'Envoi...' : 'Répondre et démarrer la conversation'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                      ],
                     ),
-                  ),
+
+                    const SizedBox(height: 16),
+
+                    // Message content
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.messageLabel,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _message!.content,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    if (_message!.isIdentityRevealed)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.success),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              color: AppColors.success,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.identityRevealedTitle,
+                                    style: TextStyle(
+                                      color: AppColors.success,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    l10n.sentByUser(
+                                      _message!.sender?.fullName ??
+                                          l10n.userFallback,
+                                    ),
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_message!.sender != null)
+                              IconButton(
+                                icon: const Icon(Icons.person),
+                                onPressed: () {
+                                  context.push(
+                                    '/u/${_message!.sender!.username}',
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: 16),
+
+                    // Reply section
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.reply,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Répondre une fois',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Répondez à ce message pour démarrer une conversation dans le chat.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _replyController,
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                hintText: 'Écrivez votre réponse...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _isReplying ? null : _replyOnce,
+                                icon: _isReplying
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.send),
+                                label: Text(
+                                  _isReplying
+                                      ? 'Envoi...'
+                                      : 'Répondre et démarrer la conversation',
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
     );
   }
 
   Widget _buildAvatar() {
-    if (_message!.sender?.avatar != null && _message!.sender!.avatar!.isNotEmpty) {
+    if (_message!.sender?.avatar != null &&
+        _message!.sender!.avatar!.isNotEmpty) {
       return AvatarWidget(
         imageUrl: _message!.sender!.avatar,
         name: _message!.isIdentityRevealed ? _message!.sender!.fullName : null,

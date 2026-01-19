@@ -11,7 +11,10 @@ class PromotionService {
   }
 
   /// Promote a confession/post
-  Future<Map<String, dynamic>> promotePost(int confessionId, int durationHours) async {
+  Future<Map<String, dynamic>> promotePost(
+    int confessionId,
+    int durationHours,
+  ) async {
     final response = await _api.post(
       ApiConstants.promoteConfession(confessionId),
       data: {'duration_hours': durationHours},
@@ -30,7 +33,9 @@ class PromotionService {
 
   /// Cancel a promotion
   Future<Map<String, dynamic>> cancelPromotion(int promotionId) async {
-    final response = await _api.delete(ApiConstants.cancelPromotion(promotionId));
+    final response = await _api.delete(
+      ApiConstants.cancelPromotion(promotionId),
+    );
     return response.data;
   }
 

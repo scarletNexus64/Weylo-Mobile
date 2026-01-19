@@ -63,7 +63,9 @@ class FeedProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _confessionService.getConfessions(page: _currentPage);
+      final response = await _confessionService.getConfessions(
+        page: _currentPage,
+      );
 
       if (refresh) {
         _confessions = response.confessions;

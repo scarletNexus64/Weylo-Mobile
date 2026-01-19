@@ -82,8 +82,10 @@ class Conversation {
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
       id: json['id'] ?? 0,
-      participantOneId: json['participant_one_id'] ?? json['participantOneId'] ?? 0,
-      participantTwoId: json['participant_two_id'] ?? json['participantTwoId'] ?? 0,
+      participantOneId:
+          json['participant_one_id'] ?? json['participantOneId'] ?? 0,
+      participantTwoId:
+          json['participant_two_id'] ?? json['participantTwoId'] ?? 0,
       streakCount: json['streak_count'] ?? json['streakCount'] ?? 0,
       flameLevel: _parseFlameLevel(json['flame_level'] ?? json['flameLevel']),
       messageCount: json['message_count'] ?? json['messageCount'] ?? 0,
@@ -99,13 +101,14 @@ class Conversation {
       otherParticipant: json['other_participant'] != null
           ? User.fromJson(json['other_participant'])
           : json['otherParticipant'] != null
-              ? User.fromJson(json['otherParticipant'])
-              : null,
+          ? User.fromJson(json['otherParticipant'])
+          : null,
       lastMessage: json['last_message'] != null
           ? ChatMessage.fromJson(json['last_message'])
           : null,
       unreadCount: json['unread_count'] ?? json['unreadCount'] ?? 0,
-      isIdentityRevealed: json['is_identity_revealed'] ??
+      isIdentityRevealed:
+          json['is_identity_revealed'] ??
           json['isIdentityRevealed'] ??
           json['identity_revealed'] ??
           json['identityRevealed'] ??
@@ -196,19 +199,25 @@ class ChatMessage {
 
   bool get isGift => type == 'gift';
   bool get isSystem => type == 'system';
-  bool get hasImage => type == 'image' && mediaUrl != null && mediaUrl!.isNotEmpty;
-  bool get hasVoice => type == 'voice' && mediaUrl != null && mediaUrl!.isNotEmpty;
-  bool get hasVideo => type == 'video' && mediaUrl != null && mediaUrl!.isNotEmpty;
+  bool get hasImage =>
+      type == 'image' && mediaUrl != null && mediaUrl!.isNotEmpty;
+  bool get hasVoice =>
+      type == 'voice' && mediaUrl != null && mediaUrl!.isNotEmpty;
+  bool get hasVideo =>
+      type == 'video' && mediaUrl != null && mediaUrl!.isNotEmpty;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     // Support multiple API field names for sender ID
-    final senderIdRaw = json['sender_id'] ??
-                        json['senderId'] ??
-                        json['user_id'] ??
-                        json['userId'] ??
-                        json['sender']?['id'] ??
-                        0;
-    final senderId = senderIdRaw is int ? senderIdRaw : int.tryParse(senderIdRaw.toString()) ?? 0;
+    final senderIdRaw =
+        json['sender_id'] ??
+        json['senderId'] ??
+        json['user_id'] ??
+        json['userId'] ??
+        json['sender']?['id'] ??
+        0;
+    final senderId = senderIdRaw is int
+        ? senderIdRaw
+        : int.tryParse(senderIdRaw.toString()) ?? 0;
 
     return ChatMessage(
       id: json['id'] ?? 0,

@@ -37,21 +37,22 @@ class LinkText extends StatelessWidget {
 
     for (final match in matches) {
       if (match.start > lastIndex) {
-        spans.add(TextSpan(
-          text: text.substring(lastIndex, match.start),
-          style: style,
-        ));
+        spans.add(
+          TextSpan(text: text.substring(lastIndex, match.start), style: style),
+        );
       }
 
       final rawUrl = text.substring(match.start, match.end);
       final normalized = _normalizeUrl(rawUrl);
       firstUrl ??= normalized;
-      spans.add(TextSpan(
-        text: rawUrl,
-        style: linkStyle ?? style?.copyWith(color: Colors.blue),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () => _openUrl(normalized),
-      ));
+      spans.add(
+        TextSpan(
+          text: rawUrl,
+          style: linkStyle ?? style?.copyWith(color: Colors.blue),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () => _openUrl(normalized),
+        ),
+      );
       lastIndex = match.end;
     }
 

@@ -21,8 +21,12 @@ class MonetizationPeriodStats {
 
   factory MonetizationPeriodStats.fromJson(Map<String, dynamic> json) {
     return MonetizationPeriodStats(
-      periodStart: json['period_start'] != null ? DateTime.parse(json['period_start']) : null,
-      periodEnd: json['period_end'] != null ? DateTime.parse(json['period_end']) : null,
+      periodStart: json['period_start'] != null
+          ? DateTime.parse(json['period_start'])
+          : null,
+      periodEnd: json['period_end'] != null
+          ? DateTime.parse(json['period_end'])
+          : null,
       views: (json['views'] ?? 0) as int,
       likes: (json['likes'] ?? 0) as int,
       score: (json['score'] ?? 0) as int,
@@ -91,14 +95,18 @@ class MonetizationPayout {
       periodStart: json['period_start'] != null
           ? DateTime.parse(json['period_start'])
           : DateTime.now(),
-      periodEnd: json['period_end'] != null ? DateTime.parse(json['period_end']) : DateTime.now(),
+      periodEnd: json['period_end'] != null
+          ? DateTime.parse(json['period_end'])
+          : DateTime.now(),
       amount: (json['amount'] ?? 0) as int,
       views: (json['views_count'] ?? 0) as int,
       likes: (json['likes_count'] ?? 0) as int,
       score: (json['engagement_score'] ?? 0) as int,
       totalScore: (json['total_engagement_score'] ?? 0) as int,
       status: json['status'] ?? 'pending',
-      processedAt: json['processed_at'] != null ? DateTime.parse(json['processed_at']) : null,
+      processedAt: json['processed_at'] != null
+          ? DateTime.parse(json['processed_at'])
+          : null,
     );
   }
 

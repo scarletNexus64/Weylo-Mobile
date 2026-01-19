@@ -43,7 +43,10 @@ class ProfileProvider extends ChangeNotifier {
   bool get hasMoreFollowing => _hasMoreFollowing;
 
   /// Load user profile by username
-  Future<void> loadProfile(String username, {bool loadConfessions = true}) async {
+  Future<void> loadProfile(
+    String username, {
+    bool loadConfessions = true,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -74,7 +77,8 @@ class ProfileProvider extends ChangeNotifier {
     if (!_hasMoreConfessions && loadMore) return;
 
     try {
-      if (kDebugMode) print('ProfileProvider: Loading confessions for user $userId');
+      if (kDebugMode)
+        print('ProfileProvider: Loading confessions for user $userId');
 
       final response = await _confessionService.getUserConfessions(
         userId,
@@ -82,9 +86,13 @@ class ProfileProvider extends ChangeNotifier {
       );
 
       if (kDebugMode) {
-        print('ProfileProvider: Loaded ${response.confessions.length} confessions');
+        print(
+          'ProfileProvider: Loaded ${response.confessions.length} confessions',
+        );
         print('ProfileProvider: Has more: ${response.hasMore}');
-        print('ProfileProvider: Page: ${response.currentPage}/${response.lastPage}');
+        print(
+          'ProfileProvider: Page: ${response.currentPage}/${response.lastPage}',
+        );
       }
 
       if (loadMore) {
@@ -106,11 +114,15 @@ class ProfileProvider extends ChangeNotifier {
   }
 
   /// Load user's confessions by username (preferred method)
-  Future<void> loadUserConfessionsByUsername(String username, {bool loadMore = false}) async {
+  Future<void> loadUserConfessionsByUsername(
+    String username, {
+    bool loadMore = false,
+  }) async {
     if (!_hasMoreConfessions && loadMore) return;
 
     try {
-      if (kDebugMode) print('ProfileProvider: Loading confessions for user @$username');
+      if (kDebugMode)
+        print('ProfileProvider: Loading confessions for user @$username');
 
       final response = await _confessionService.getUserConfessionsByUsername(
         username,
@@ -118,9 +130,13 @@ class ProfileProvider extends ChangeNotifier {
       );
 
       if (kDebugMode) {
-        print('ProfileProvider: Loaded ${response.confessions.length} confessions');
+        print(
+          'ProfileProvider: Loaded ${response.confessions.length} confessions',
+        );
         print('ProfileProvider: Has more: ${response.hasMore}');
-        print('ProfileProvider: Page: ${response.currentPage}/${response.lastPage}');
+        print(
+          'ProfileProvider: Page: ${response.currentPage}/${response.lastPage}',
+        );
       }
 
       if (loadMore) {
@@ -135,7 +151,9 @@ class ProfileProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       if (kDebugMode) {
-        print('ProfileProvider: Error loading user confessions by username: $e');
+        print(
+          'ProfileProvider: Error loading user confessions by username: $e',
+        );
         print('ProfileProvider: Stack trace: ${StackTrace.current}');
       }
     }
@@ -158,7 +176,9 @@ class ProfileProvider extends ChangeNotifier {
       }
 
       if (kDebugMode) {
-        print('ProfileProvider: Loaded own confessions: ${response.confessions.length}');
+        print(
+          'ProfileProvider: Loaded own confessions: ${response.confessions.length}',
+        );
       }
 
       _hasMoreConfessions = response.hasMore;
@@ -188,7 +208,9 @@ class ProfileProvider extends ChangeNotifier {
       }
 
       if (kDebugMode) {
-        print('ProfileProvider: Loaded liked confessions: ${response.confessions.length}');
+        print(
+          'ProfileProvider: Loaded liked confessions: ${response.confessions.length}',
+        );
       }
 
       _hasMoreLiked = response.hasMore;

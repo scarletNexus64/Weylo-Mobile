@@ -67,11 +67,7 @@ class LoadingWidget extends StatelessWidget {
   final String? message;
   final double size;
 
-  const LoadingWidget({
-    super.key,
-    this.message,
-    this.size = 50,
-  });
+  const LoadingWidget({super.key, this.message, this.size = 50});
 
   @override
   Widget build(BuildContext context) {
@@ -79,17 +75,14 @@ class LoadingWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SpinKitFadingCircle(
-            color: AppColors.primary,
-            size: size,
-          ),
+          SpinKitFadingCircle(color: AppColors.primary, size: size),
           if (message != null) ...[
             const SizedBox(height: 16),
             Text(
               message!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],

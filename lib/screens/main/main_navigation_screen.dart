@@ -54,10 +54,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
@@ -154,7 +151,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       return AppColors.primaryGradient.createShader(bounds);
                     }
                     return LinearGradient(
-                      colors: [AppColors.textSecondary, AppColors.textSecondary],
+                      colors: [
+                        AppColors.textSecondary,
+                        AppColors.textSecondary,
+                      ],
                     ).createShader(bounds);
                   },
                   child: Icon(

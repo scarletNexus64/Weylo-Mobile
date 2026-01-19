@@ -85,9 +85,8 @@ class MessageCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           message.replyToMessage!.content,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -99,7 +98,10 @@ class MessageCard extends StatelessWidget {
               if (message.isIdentityRevealed && message.sender != null) ...[
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.success.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -134,7 +136,8 @@ class MessageCard extends StatelessWidget {
 
   Widget _buildAvatar() {
     if (isReceived) {
-      if (message.sender?.avatar != null && message.sender!.avatar!.isNotEmpty) {
+      if (message.sender?.avatar != null &&
+          message.sender!.avatar!.isNotEmpty) {
         return AvatarWidget(
           imageUrl: message.sender!.avatar,
           name: message.isIdentityRevealed ? message.sender!.fullName : null,
@@ -174,14 +177,18 @@ class MessageCard extends StatelessWidget {
       if (message.isIdentityRevealed && message.sender != null) {
         return Text(
           message.sender!.fullName,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         );
       }
       return Row(
         children: [
-          const Icon(Icons.person_off, size: 16, color: AppColors.textSecondary),
+          const Icon(
+            Icons.person_off,
+            size: 16,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(width: 4),
           Text(
             l10n.anonymousUser,
@@ -195,9 +202,9 @@ class MessageCard extends StatelessWidget {
     } else {
       return Text(
         l10n.toRecipient(message.recipient?.fullName ?? l10n.userFallback),
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       );
     }
   }

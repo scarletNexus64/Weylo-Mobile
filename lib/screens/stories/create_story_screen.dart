@@ -96,9 +96,9 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   Future<void> _publishStory() async {
     final l10n = AppLocalizations.of(context)!;
     if (_selectedMedia == null && _textController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.storyContentRequired)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.storyContentRequired)));
       return;
     }
 
@@ -113,9 +113,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
         backgroundColor: _selectedMedia == null
             ? '#${_backgroundColor.value.toRadixString(16).substring(2)}'
             : null,
-        type: _selectedMedia == null
-            ? 'text'
-            : (_isVideo ? 'video' : 'image'),
+        type: _selectedMedia == null ? 'text' : (_isVideo ? 'video' : 'image'),
       );
 
       if (mounted) {
@@ -211,10 +209,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                       ),
                     ),
                   )
-                : Image.file(
-                    _selectedMedia!,
-                    fit: BoxFit.cover,
-                  )
+                : Image.file(_selectedMedia!, fit: BoxFit.cover)
           else
             Container(
               color: _backgroundColor,
@@ -243,7 +238,9 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     decoration: InputDecoration(
                       hintText: l10n.storyWriteHint,
                       hintStyle: TextStyle(
-                        color: _getContrastColor(_backgroundColor).withOpacity(0.6),
+                        color: _getContrastColor(
+                          _backgroundColor,
+                        ).withOpacity(0.6),
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
@@ -270,10 +267,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.transparent,
-                  ],
+                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
                 ),
               ),
               child: Column(
@@ -366,10 +360,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.delete_outline,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.delete_outline, color: Colors.white),
                 ),
               ),
             ),
@@ -407,10 +398,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
         ],
       ),

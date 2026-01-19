@@ -41,15 +41,18 @@ class WebSocketService {
         return;
       }
 
-      final wsUri = Uri.parse('${ApiConstants.wsUrl}/app/${ApiConstants.reverbAppKey}').replace(
-        queryParameters: {
-          'protocol': '7',
-          'client': 'dart',
-          'version': '2.0',
-          'flash': 'false',
-          'token': token,
-        },
-      );
+      final wsUri =
+          Uri.parse(
+            '${ApiConstants.wsUrl}/app/${ApiConstants.reverbAppKey}',
+          ).replace(
+            queryParameters: {
+              'protocol': '7',
+              'client': 'dart',
+              'version': '2.0',
+              'flash': 'false',
+              'token': token,
+            },
+          );
 
       _channel = WebSocketChannel.connect(wsUri);
 
@@ -82,7 +85,8 @@ class WebSocketService {
       } else if (decoded is Map<String, dynamic>) {
         json = decoded;
       } else {
-        if (kDebugMode) print('WebSocket: Unexpected message type - ${decoded.runtimeType}');
+        if (kDebugMode)
+          print('WebSocket: Unexpected message type - ${decoded.runtimeType}');
         return;
       }
 
@@ -134,7 +138,6 @@ class WebSocketService {
       // Handle application events
       final message = WebSocketMessage.fromJson(json);
       _messageController.add(message);
-
     } catch (e) {
       if (kDebugMode) print('WebSocket: Error parsing message - $e');
     }
@@ -203,10 +206,7 @@ class WebSocketService {
   }
 
   void send(String event, Map<String, dynamic> data) {
-    _sendRaw({
-      'event': event,
-      'data': data,
-    });
+    _sendRaw({'event': event, 'data': data});
   }
 
   void _resubscribeToChannels() {
@@ -217,7 +217,10 @@ class WebSocketService {
 
   void _subscribeToChannelInternal(String channel) async {
     if (_socketId == null) {
-      if (kDebugMode) print('WebSocket: Socket ID not available yet, delaying subscribe for $channel');
+      if (kDebugMode)
+        print(
+          'WebSocket: Socket ID not available yet, delaying subscribe for $channel',
+        );
       return;
     }
 
@@ -233,7 +236,8 @@ class WebSocketService {
       };
       _sendRaw(payload);
     } catch (e) {
-      if (kDebugMode) print('WebSocket: Failed to authorize channel $channel - $e');
+      if (kDebugMode)
+        print('WebSocket: Failed to authorize channel $channel - $e');
     }
   }
 
@@ -245,10 +249,7 @@ class WebSocketService {
 
     final response = await _apiClient.post(
       ApiConstants.broadcastingAuth,
-      data: {
-        'socket_id': socketId,
-        'channel_name': channel,
-      },
+      data: {'socket_id': socketId, 'channel_name': channel},
     );
 
     final payload = response.data;
@@ -270,9 +271,7 @@ class WebSocketService {
     if (_isConnected) {
       _sendRaw({
         'event': 'pusher:unsubscribe',
-        'data': {
-          'channel': channel,
-        },
+        'data': {'channel': channel},
       });
     }
   }
@@ -327,11 +326,7 @@ class WebSocketMessage {
   final String? channel;
   final Map<String, dynamic> data;
 
-  WebSocketMessage({
-    required this.event,
-    this.channel,
-    required this.data,
-  });
+  WebSocketMessage({required this.event, this.channel, required this.data});
 
   factory WebSocketMessage.fromJson(Map<String, dynamic> json) {
     // Parse data - can be a String (JSON) or Map

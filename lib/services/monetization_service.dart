@@ -16,6 +16,8 @@ class MonetizationService {
       queryParameters: {'page': page.toString()},
     );
     final data = response.data['payouts'] ?? response.data['data'] ?? [];
-    return (data as List).map((item) => MonetizationPayout.fromJson(item)).toList();
+    return (data as List)
+        .map((item) => MonetizationPayout.fromJson(item))
+        .toList();
   }
 }

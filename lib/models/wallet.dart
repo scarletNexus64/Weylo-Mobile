@@ -1,5 +1,14 @@
-enum TransactionType { deposit, withdrawal, gift_sent, gift_received, premium, subscription }
+enum TransactionType {
+  deposit,
+  withdrawal,
+  gift_sent,
+  gift_received,
+  premium,
+  subscription,
+}
+
 enum TransactionStatus { pending, completed, failed, cancelled }
+
 enum WithdrawalStatus { pending, processing, completed, rejected }
 
 class WalletTransaction {
@@ -27,7 +36,8 @@ class WalletTransaction {
     required this.createdAt,
   });
 
-  bool get isCredit => type == TransactionType.deposit || type == TransactionType.gift_received;
+  bool get isCredit =>
+      type == TransactionType.deposit || type == TransactionType.gift_received;
   bool get isDebit => !isCredit;
 
   String get typeLabel {
@@ -53,8 +63,10 @@ class WalletTransaction {
       userId: json['user_id'] ?? json['userId'] ?? 0,
       type: _parseType(json['type']),
       amount: (json['amount'] ?? 0).toDouble(),
-      balanceBefore: (json['balance_before'] ?? json['balanceBefore'] ?? 0).toDouble(),
-      balanceAfter: (json['balance_after'] ?? json['balanceAfter'] ?? 0).toDouble(),
+      balanceBefore: (json['balance_before'] ?? json['balanceBefore'] ?? 0)
+          .toDouble(),
+      balanceAfter: (json['balance_after'] ?? json['balanceAfter'] ?? 0)
+          .toDouble(),
       description: json['description'],
       reference: json['reference'],
       status: _parseStatus(json['status']),
@@ -226,11 +238,18 @@ class WalletStats {
 
   factory WalletStats.fromJson(Map<String, dynamic> json) {
     return WalletStats(
-      totalDeposits: (json['total_deposits'] ?? json['totalDeposits'] ?? 0).toDouble(),
-      totalWithdrawals: (json['total_withdrawals'] ?? json['totalWithdrawals'] ?? 0).toDouble(),
-      totalGiftsSent: (json['total_gifts_sent'] ?? json['totalGiftsSent'] ?? 0).toDouble(),
-      totalGiftsReceived: (json['total_gifts_received'] ?? json['totalGiftsReceived'] ?? 0).toDouble(),
-      transactionsCount: json['transactions_count'] ?? json['transactionsCount'] ?? 0,
+      totalDeposits: (json['total_deposits'] ?? json['totalDeposits'] ?? 0)
+          .toDouble(),
+      totalWithdrawals:
+          (json['total_withdrawals'] ?? json['totalWithdrawals'] ?? 0)
+              .toDouble(),
+      totalGiftsSent: (json['total_gifts_sent'] ?? json['totalGiftsSent'] ?? 0)
+          .toDouble(),
+      totalGiftsReceived:
+          (json['total_gifts_received'] ?? json['totalGiftsReceived'] ?? 0)
+              .toDouble(),
+      transactionsCount:
+          json['transactions_count'] ?? json['transactionsCount'] ?? 0,
     );
   }
 }

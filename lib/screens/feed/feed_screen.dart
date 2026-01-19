@@ -56,7 +56,8 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       appBar: AppBar(
         title: ShaderMask(
-          shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+          shaderCallback: (bounds) =>
+              AppColors.primaryGradient.createShader(bounds),
           child: const Text(
             'Weylo',
             style: TextStyle(
@@ -70,7 +71,8 @@ class _FeedScreenState extends State<FeedScreen> {
         actions: [
           IconButton(
             icon: ShaderMask(
-              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+              shaderCallback: (bounds) =>
+                  AppColors.primaryGradient.createShader(bounds),
               child: const Icon(Icons.search, color: Colors.white),
             ),
             onPressed: () {
@@ -80,7 +82,8 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           IconButton(
             icon: ShaderMask(
-              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+              shaderCallback: (bounds) =>
+                  AppColors.primaryGradient.createShader(bounds),
               child: const Icon(Icons.add_box_outlined, color: Colors.white),
             ),
             onPressed: () {
@@ -89,8 +92,12 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
           IconButton(
             icon: ShaderMask(
-              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
-              child: const Icon(Icons.notifications_outlined, color: Colors.white),
+              shaderCallback: (bounds) =>
+                  AppColors.primaryGradient.createShader(bounds),
+              child: const Icon(
+                Icons.notifications_outlined,
+                color: Colors.white,
+              ),
             ),
             onPressed: () {
               context.push('/notifications');
@@ -101,9 +108,7 @@ class _FeedScreenState extends State<FeedScreen> {
       body: Consumer<FeedProvider>(
         builder: (context, feedProvider, child) {
           if (feedProvider.isLoading && feedProvider.confessions.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (feedProvider.error != null && feedProvider.confessions.isEmpty) {
@@ -128,9 +133,7 @@ class _FeedScreenState extends State<FeedScreen> {
             child: CustomScrollView(
               slivers: [
                 // Stories bar
-                const SliverToBoxAdapter(
-                  child: StoriesBar(),
-                ),
+                const SliverToBoxAdapter(child: StoriesBar()),
 
                 // Confessions feed
                 if (feedProvider.confessions.isEmpty)
@@ -143,43 +146,42 @@ class _FeedScreenState extends State<FeedScreen> {
                   )
                 else
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final confession = feedProvider.confessions[index];
-                        final currentUser = context.read<AuthProvider>().user;
-                        final isOwnPost = currentUser?.id == confession.authorId;
-                        return ConfessionCard(
-                          confession: confession,
-                          onTap: () {
-                            _navigateToConfessionDetail(confession.id);
-                          },
-                          onLike: () {
-                            if (confession.isLiked) {
-                              feedProvider.unlikeConfession(confession.id);
-                            } else {
-                              feedProvider.likeConfession(confession.id);
-                            }
-                          },
-                          onComment: () {
-                            _navigateToConfessionDetail(confession.id);
-                          },
-                          onShare: () {
-                            _shareConfession(confession.id);
-                          },
-                          // Only allow promoting own posts
-                          onPromote: isOwnPost ? () {
-                            _showPromoteSheet(confession.id);
-                          } : null,
-                          onAuthorTap: () {
-                            if (confession.author != null &&
-                                confession.author!.username.isNotEmpty) {
-                              context.push('/u/${confession.author!.username}');
-                            }
-                          },
-                        );
-                      },
-                      childCount: feedProvider.confessions.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final confession = feedProvider.confessions[index];
+                      final currentUser = context.read<AuthProvider>().user;
+                      final isOwnPost = currentUser?.id == confession.authorId;
+                      return ConfessionCard(
+                        confession: confession,
+                        onTap: () {
+                          _navigateToConfessionDetail(confession.id);
+                        },
+                        onLike: () {
+                          if (confession.isLiked) {
+                            feedProvider.unlikeConfession(confession.id);
+                          } else {
+                            feedProvider.likeConfession(confession.id);
+                          }
+                        },
+                        onComment: () {
+                          _navigateToConfessionDetail(confession.id);
+                        },
+                        onShare: () {
+                          _shareConfession(confession.id);
+                        },
+                        // Only allow promoting own posts
+                        onPromote: isOwnPost
+                            ? () {
+                                _showPromoteSheet(confession.id);
+                              }
+                            : null,
+                        onAuthorTap: () {
+                          if (confession.author != null &&
+                              confession.author!.username.isNotEmpty) {
+                            context.push('/u/${confession.author!.username}');
+                          }
+                        },
+                      );
+                    }, childCount: feedProvider.confessions.length),
                   ),
               ],
             ),
@@ -337,9 +339,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
     final l10n = AppLocalizations.of(context)!;
 
     if (content.isEmpty && _selectedImage == null && _selectedVideo == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.addContentOrMediaError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.addContentOrMediaError)));
       return;
     }
 
@@ -468,11 +470,17 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.videocam, size: 48, color: Colors.grey[600]),
+                                      Icon(
+                                        Icons.videocam,
+                                        size: 48,
+                                        color: Colors.grey[600],
+                                      ),
                                       const SizedBox(height: 8),
                                       Text(
                                         l10n.videoSelectedLabel,
-                                        style: TextStyle(color: Colors.grey[600]),
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -527,7 +535,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                 IconButton(
                   icon: Icon(
                     Icons.image_outlined,
-                    color: _selectedImage != null ? AppColors.primary : Colors.grey[600],
+                    color: _selectedImage != null
+                        ? AppColors.primary
+                        : Colors.grey[600],
                   ),
                   onPressed: _pickImage,
                   tooltip: l10n.addImageAction,
@@ -542,17 +552,16 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                 ),
                 // GIF button
                 IconButton(
-                  icon: Icon(
-                    Icons.gif_box_outlined,
-                    color: Colors.grey[600],
-                  ),
+                  icon: Icon(Icons.gif_box_outlined, color: Colors.grey[600]),
                   onPressed: _pickGif,
                   tooltip: l10n.addGifAction,
                 ),
                 IconButton(
                   icon: Icon(
                     Icons.videocam_outlined,
-                    color: _selectedVideo != null ? AppColors.primary : Colors.grey[600],
+                    color: _selectedVideo != null
+                        ? AppColors.primary
+                        : Colors.grey[600],
                   ),
                   onPressed: _pickVideo,
                   tooltip: l10n.addVideoAction,
@@ -566,7 +575,10 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     });
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(20),
@@ -581,7 +593,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _isPublic ? l10n.visibilityPublic : l10n.visibilityAnonymous,
+                          _isPublic
+                              ? l10n.visibilityPublic
+                              : l10n.visibilityAnonymous,
                           style: TextStyle(
                             color: Colors.grey[700],
                             fontSize: 14,

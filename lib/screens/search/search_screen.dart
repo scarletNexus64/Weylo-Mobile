@@ -87,7 +87,10 @@ class _SearchScreenState extends State<SearchScreen>
             hintText: l10n.searchHint,
             border: InputBorder.none,
             hintStyle: TextStyle(color: Colors.grey[500]),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
           ),
           onChanged: (value) {
             if (value.length >= 2) {
@@ -144,14 +147,11 @@ class _SearchScreenState extends State<SearchScreen>
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _searchQuery.isEmpty
-              ? _buildEmptyState()
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildUsersList(),
-                    _buildPostsList(),
-                  ],
-                ),
+          ? _buildEmptyState()
+          : TabBarView(
+              controller: _tabController,
+              children: [_buildUsersList(), _buildPostsList()],
+            ),
     );
   }
 
@@ -174,9 +174,7 @@ class _SearchScreenState extends State<SearchScreen>
           const SizedBox(height: 8),
           Text(
             l10n.searchEmptySubtitle,
-            style: TextStyle(
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(color: Colors.grey[500]),
           ),
         ],
       ),
@@ -192,10 +190,7 @@ class _SearchScreenState extends State<SearchScreen>
           children: [
             Icon(Icons.person_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              l10n.searchNoUsers,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            Text(l10n.searchNoUsers, style: TextStyle(color: Colors.grey[600])),
           ],
         ),
       );
@@ -223,10 +218,7 @@ class _SearchScreenState extends State<SearchScreen>
           children: [
             Icon(Icons.article_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              l10n.searchNoPosts,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            Text(l10n.searchNoPosts, style: TextStyle(color: Colors.grey[600])),
           ],
         ),
       );
@@ -250,10 +242,7 @@ class _UserSearchTile extends StatelessWidget {
   final User user;
   final VoidCallback? onTap;
 
-  const _UserSearchTile({
-    required this.user,
-    this.onTap,
-  });
+  const _UserSearchTile({required this.user, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -280,11 +269,7 @@ class _UserSearchTile extends StatelessWidget {
                   color: Color(0xFF1877F2), // Bleu Facebook vérifié
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  size: 10,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.check, size: 10, color: Colors.white),
               ),
             ],
           ],
@@ -300,10 +285,7 @@ class _PostSearchTile extends StatelessWidget {
   final Confession post;
   final VoidCallback? onTap;
 
-  const _PostSearchTile({
-    required this.post,
-    this.onTap,
-  });
+  const _PostSearchTile({required this.post, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -320,11 +302,7 @@ class _PostSearchTile extends StatelessWidget {
           ),
           child: const Icon(Icons.article, color: Colors.white),
         ),
-        title: Text(
-          post.content,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: Text(post.content, maxLines: 2, overflow: TextOverflow.ellipsis),
         subtitle: Row(
           children: [
             const Icon(Icons.favorite, size: 14, color: Colors.grey),

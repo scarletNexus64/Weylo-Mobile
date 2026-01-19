@@ -7,11 +7,7 @@ class VerifiedBadge extends StatelessWidget {
   final double size;
   final bool showTooltip;
 
-  const VerifiedBadge({
-    super.key,
-    this.size = 16,
-    this.showTooltip = true,
-  });
+  const VerifiedBadge({super.key, this.size = 16, this.showTooltip = true});
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +19,11 @@ class VerifiedBadge extends StatelessWidget {
         color: Color(0xFF1877F2), // Bleu Facebook
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.check,
-        size: size * 0.65,
-        color: Colors.white,
-      ),
+      child: Icon(Icons.check, size: size * 0.65, color: Colors.white),
     );
 
     if (showTooltip) {
-      return Tooltip(
-        message: l10n.verifiedAccountTooltip,
-        child: badge,
-      );
+      return Tooltip(message: l10n.verifiedAccountTooltip, child: badge);
     }
     return badge;
   }
@@ -45,11 +34,7 @@ class PremiumBadge extends StatelessWidget {
   final double size;
   final bool showTooltip;
 
-  const PremiumBadge({
-    super.key,
-    this.size = 16,
-    this.showTooltip = true,
-  });
+  const PremiumBadge({super.key, this.size = 16, this.showTooltip = true});
 
   @override
   Widget build(BuildContext context) {
@@ -72,18 +57,11 @@ class PremiumBadge extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        Icons.star,
-        size: size * 0.6,
-        color: Colors.white,
-      ),
+      child: Icon(Icons.star, size: size * 0.6, color: Colors.white),
     );
 
     if (showTooltip) {
-      return Tooltip(
-        message: l10n.premiumAccountTooltip,
-        child: badge,
-      );
+      return Tooltip(message: l10n.premiumAccountTooltip, child: badge);
     }
     return badge;
   }
@@ -119,10 +97,7 @@ class NameWithBadge extends StatelessWidget {
         Flexible(
           child: Text(
             name,
-            style: textStyle ??
-                const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: textStyle ?? const TextStyle(fontWeight: FontWeight.bold),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -180,11 +155,7 @@ class StyledPremiumBadge extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(
-        Icons.check,
-        size: size * 0.6,
-        color: Colors.white,
-      ),
+      child: Icon(Icons.check, size: size * 0.6, color: Colors.white),
     );
   }
 }

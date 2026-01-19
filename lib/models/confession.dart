@@ -1,6 +1,7 @@
 import 'user.dart';
 
 enum ConfessionType { private, public }
+
 enum ConfessionStatus { pending, approved, rejected }
 
 class Confession {
@@ -81,29 +82,38 @@ class Confession {
       recipientId: json['recipient_id'] ?? json['recipientId'],
       content: json['content'] ?? '',
       image: json['image'],
-      imageUrl: json['image_url'] ??
+      imageUrl:
+          json['image_url'] ??
           json['imageUrl'] ??
           json['image_full_url'] ??
           json['imageFullUrl'] ??
           (isImageMedia ? (mediaFullUrl ?? mediaUrl) : null),
       video: json['video'],
-      videoUrl: json['video_url'] ??
+      videoUrl:
+          json['video_url'] ??
           json['videoUrl'] ??
           json['video_full_url'] ??
           json['videoFullUrl'] ??
           (isVideoMedia ? (mediaFullUrl ?? mediaUrl) : null),
-      type: json['type'] == 'private' ? ConfessionType.private : ConfessionType.public,
+      type: json['type'] == 'private'
+          ? ConfessionType.private
+          : ConfessionType.public,
       status: _parseStatus(json['status']),
-      isIdentityRevealed: json['is_identity_revealed'] ?? json['isIdentityRevealed'] ?? false,
+      isIdentityRevealed:
+          json['is_identity_revealed'] ?? json['isIdentityRevealed'] ?? false,
       isAnonymous: json['is_anonymous'] ?? json['isAnonymous'] ?? false,
       likesCount: json['likes_count'] ?? json['likesCount'] ?? 0,
       viewsCount: json['views_count'] ?? json['viewsCount'] ?? 0,
       commentsCount: json['comments_count'] ?? json['commentsCount'] ?? 0,
       isLiked: json['is_liked'] ?? json['isLiked'] ?? false,
       author: json['author'] != null ? User.fromJson(json['author']) : null,
-      recipient: json['recipient'] != null ? User.fromJson(json['recipient']) : null,
+      recipient: json['recipient'] != null
+          ? User.fromJson(json['recipient'])
+          : null,
       comments: json['comments'] != null && json['comments'] is List
-          ? (json['comments'] as List).map((c) => ConfessionComment.fromJson(c)).toList()
+          ? (json['comments'] as List)
+                .map((c) => ConfessionComment.fromJson(c))
+                .toList()
           : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])

@@ -15,11 +15,13 @@ class GroupsScreen extends StatefulWidget {
   State<GroupsScreen> createState() => _GroupsScreenState();
 }
 
-class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderStateMixin {
+class _GroupsScreenState extends State<GroupsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final GroupService _groupService = GroupService();
   final RefreshController _myGroupsRefreshController = RefreshController();
-  final RefreshController _discoverGroupsRefreshController = RefreshController();
+  final RefreshController _discoverGroupsRefreshController =
+      RefreshController();
   final TextEditingController _inviteCodeController = TextEditingController();
 
   List<Group> _myGroups = [];
@@ -61,7 +63,9 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
 
       setState(() {
         _myGroups = myGroups;
-        _discoverGroups = discoverGroups.where((group) => !existingIds.contains(group.id)).toList();
+        _discoverGroups = discoverGroups
+            .where((group) => !existingIds.contains(group.id))
+            .toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -145,22 +149,22 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
       body: _isLoading
           ? const LoadingWidget()
           : _hasError
-              ? ErrorState(onRetry: _loadData)
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildGroupsList(
-                      _myGroups,
-                      isMyGroups: true,
-                      controller: _myGroupsRefreshController,
-                    ),
-                    _buildGroupsList(
-                      _discoverGroups,
-                      isDiscover: true,
-                      controller: _discoverGroupsRefreshController,
-                    ),
-                  ],
+          ? ErrorState(onRetry: _loadData)
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildGroupsList(
+                  _myGroups,
+                  isMyGroups: true,
+                  controller: _myGroupsRefreshController,
                 ),
+                _buildGroupsList(
+                  _discoverGroups,
+                  isDiscover: true,
+                  controller: _discoverGroupsRefreshController,
+                ),
+              ],
+            ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'groups_fab',
         onPressed: () => context.push('/create-group'),
@@ -184,7 +188,9 @@ class _GroupsScreenState extends State<GroupsScreen> with SingleTickerProviderSt
             ? l10n.noGroupsSubtitle
             : l10n.noGroupsDiscoverSubtitle,
         buttonText: isMyGroups ? l10n.createGroupAction : null,
-        onButtonPressed: isMyGroups ? () => context.push('/create-group') : null,
+        onButtonPressed: isMyGroups
+            ? () => context.push('/create-group')
+            : null,
       );
     }
 
@@ -260,11 +266,7 @@ class _GroupCard extends StatelessWidget {
   final bool isDiscover;
   final VoidCallback? onTap;
 
-  const _GroupCard({
-    required this.group,
-    this.isDiscover = false,
-    this.onTap,
-  });
+  const _GroupCard({required this.group, this.isDiscover = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -314,16 +316,18 @@ class _GroupCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             group.name,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (group.isPublic)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.success.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
@@ -379,7 +383,10 @@ class _GroupCard extends StatelessWidget {
               ),
               if (!isDiscover && group.unreadCount > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12),

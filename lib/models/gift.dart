@@ -142,10 +142,14 @@ class GiftTransaction {
       giftId: json['gift_id'] ?? json['giftId'] ?? 0,
       message: json['message'],
       amount: (json['amount'] ?? 0).toDouble(),
-      platformFee: (json['platform_fee'] ?? json['platformFee'] ?? 0).toDouble(),
-      recipientAmount: (json['recipient_amount'] ?? json['recipientAmount'] ?? 0).toDouble(),
+      platformFee: (json['platform_fee'] ?? json['platformFee'] ?? 0)
+          .toDouble(),
+      recipientAmount:
+          (json['recipient_amount'] ?? json['recipientAmount'] ?? 0).toDouble(),
       sender: json['sender'] != null ? User.fromJson(json['sender']) : null,
-      recipient: json['recipient'] != null ? User.fromJson(json['recipient']) : null,
+      recipient: json['recipient'] != null
+          ? User.fromJson(json['recipient'])
+          : null,
       gift: json['gift'] != null ? Gift.fromJson(json['gift']) : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
@@ -172,7 +176,8 @@ class GiftStats {
       totalSent: json['total_sent'] ?? json['totalSent'] ?? 0,
       totalReceived: json['total_received'] ?? json['totalReceived'] ?? 0,
       totalSpent: (json['total_spent'] ?? json['totalSpent'] ?? 0).toDouble(),
-      totalEarned: (json['total_earned'] ?? json['totalEarned'] ?? 0).toDouble(),
+      totalEarned: (json['total_earned'] ?? json['totalEarned'] ?? 0)
+          .toDouble(),
     );
   }
 }

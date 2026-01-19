@@ -28,7 +28,9 @@ class _SendGiftScreenState extends State<SendGiftScreen> {
 
   Future<void> _loadConversation() async {
     try {
-      final conversation = await _chatService.getConversation(widget.conversationId);
+      final conversation = await _chatService.getConversation(
+        widget.conversationId,
+      );
       if (!mounted) return;
       setState(() {
         _conversation = conversation;
@@ -71,22 +73,20 @@ class _SendGiftScreenState extends State<SendGiftScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.sendGift),
-      ),
+      appBar: AppBar(title: Text(l10n.sendGift)),
       body: Center(
         child: _isLoading
             ? const CircularProgressIndicator()
             : _error != null
-                ? Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      _error!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  )
-                : Text(l10n.loading),
+            ? Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  _error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              )
+            : Text(l10n.loading),
       ),
     );
   }

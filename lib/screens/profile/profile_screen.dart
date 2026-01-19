@@ -75,218 +75,131 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
-          children: [
-            // Profile Header
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Stack(
-                      children: [
-                        AvatarWidget(
-                          imageUrl: user?.avatar,
-                          name: user?.fullName,
-                          size: 100,
-                          isPremium: user?.isPremium ?? false,
-                        ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: GestureDetector(
-                            onTap: () => context.push('/edit-profile'),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Theme.of(context).cardColor,
-                                  width: 3,
+            children: [
+              // Profile Header
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Stack(
+                        children: [
+                          AvatarWidget(
+                            imageUrl: user?.avatar,
+                            name: user?.fullName,
+                            size: 100,
+                            isPremium: user?.isPremium ?? false,
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: GestureDetector(
+                              onTap: () => context.push('/edit-profile'),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Theme.of(context).cardColor,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                  color: Colors.white,
                                 ),
                               ),
-                              child: const Icon(
-                                Icons.edit,
-                                size: 18,
-                                color: Colors.white,
-                              ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      user?.fullName ?? '',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '@${user?.username ?? ''}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    if (user?.bio != null && user!.bio!.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        user.bio!,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    // Share Link
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'weylo.app/${user?.username}',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.copy, size: 20),
-                            onPressed: () {
-                              Helpers.showSuccessSnackBar(context, l10n.profileShareLinkCopied);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.share, size: 20),
-                            onPressed: () {
-                              // Share functionality
-                            },
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Wallet Card
-            GestureDetector(
-              onTap: () => context.push('/wallet'),
-              child: Card(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.account_balance_wallet,
-                          color: Colors.white,
-                          size: 28,
+                      const SizedBox(height: 16),
+                      Text(
+                        user?.fullName ?? '',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '@${user?.username ?? ''}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      if (user?.bio != null && user!.bio!.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          user.bio!,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      // Share Link
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              l10n.profileWalletTitle,
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
+                            Expanded(
+                              child: Text(
+                                'weylo.app/${user?.username}',
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              Helpers.formatCurrency(user?.walletBalance ?? 0),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            IconButton(
+                              icon: const Icon(Icons.copy, size: 20),
+                              onPressed: () {
+                                Helpers.showSuccessSnackBar(
+                                  context,
+                                  l10n.profileShareLinkCopied,
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.share, size: 20),
+                              onPressed: () {
+                                // Share functionality
+                              },
                             ),
                           ],
                         ),
                       ),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white70,
-                        size: 20,
-                      ),
                     ],
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Stats
-            if (_isLoading)
-              const LoadingWidget()
-            else if (_stats != null)
-              Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.mail_outline,
-                      label: l10n.profileStatsMessages,
-                      value: '${_stats!.messagesReceived}',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.favorite_outline,
-                      label: l10n.profileStatsConfessions,
-                      value: '${_stats!.confessionsReceived}',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.chat_bubble_outline,
-                      label: l10n.profileStatsConversations,
-                      value: '${_stats!.conversationsCount}',
-                    ),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 24),
-            // Premium Card
-            if (!(user?.isPremium ?? false))
-              Card(
-                child: InkWell(
-                  onTap: () => context.push('/premium'),
-                  borderRadius: BorderRadius.circular(16),
+              const SizedBox(height: 16),
+              // Wallet Card
+              GestureDetector(
+                onTap: () => context.push('/wallet'),
+                child: Card(
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      gradient: AppColors.premiumGradient,
+                      gradient: AppColors.primaryGradient,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.star,
+                            Icons.account_balance_wallet,
                             color: Colors.white,
+                            size: 28,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -295,19 +208,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                l10n.profileUpgradeTitle,
+                                l10n.profileWalletTitle,
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white70,
+                                  fontSize: 14,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                l10n.profileUpgradeSubtitle,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 12,
+                                Helpers.formatCurrency(
+                                  user?.walletBalance ?? 0,
+                                ),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -316,64 +231,153 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const Icon(
                           Icons.arrow_forward_ios,
                           color: Colors.white70,
-                          size: 16,
+                          size: 20,
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-            const SizedBox(height: 16),
-            // Menu Items
-            Card(
-              child: Column(
-                children: [
-                  _MenuItem(
-                    icon: Icons.edit_outlined,
-                    title: l10n.profileMenuEditProfile,
-                    onTap: () => context.push('/edit-profile'),
+              const SizedBox(height: 16),
+              // Stats
+              if (_isLoading)
+                const LoadingWidget()
+              else if (_stats != null)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                        icon: Icons.mail_outline,
+                        label: l10n.profileStatsMessages,
+                        value: '${_stats!.messagesReceived}',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        icon: Icons.favorite_outline,
+                        label: l10n.profileStatsConfessions,
+                        value: '${_stats!.confessionsReceived}',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        icon: Icons.chat_bubble_outline,
+                        label: l10n.profileStatsConversations,
+                        value: '${_stats!.conversationsCount}',
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(height: 24),
+              // Premium Card
+              if (!(user?.isPremium ?? false))
+                Card(
+                  child: InkWell(
+                    onTap: () => context.push('/premium'),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.premiumGradient,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.star, color: Colors.white),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.profileUpgradeTitle,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  l10n.profileUpgradeSubtitle,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white70,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const Divider(height: 1),
-                  _MenuItem(
-                    icon: Icons.card_giftcard_outlined,
-                    title: l10n.profileMenuMyGifts,
-                    onTap: () => context.push('/my-gifts'),
-                  ),
-                  const Divider(height: 1),
-                  _MenuItem(
-                    icon: Icons.block_outlined,
-                    title: l10n.profileMenuBlockedUsers,
-                    onTap: () => context.push('/blocked-users'),
-                  ),
-                  const Divider(height: 1),
-                  _MenuItem(
-                    icon: Icons.help_outline,
-                    title: l10n.profileMenuHelpSupport,
-                    onTap: () => context.push('/help'),
-                  ),
-                  const Divider(height: 1),
-                  _MenuItem(
-                    icon: Icons.info_outline,
-                    title: l10n.profileMenuAbout,
-                    onTap: () => context.push('/about'),
-                  ),
-                ],
+                ),
+              const SizedBox(height: 16),
+              // Menu Items
+              Card(
+                child: Column(
+                  children: [
+                    _MenuItem(
+                      icon: Icons.edit_outlined,
+                      title: l10n.profileMenuEditProfile,
+                      onTap: () => context.push('/edit-profile'),
+                    ),
+                    const Divider(height: 1),
+                    _MenuItem(
+                      icon: Icons.card_giftcard_outlined,
+                      title: l10n.profileMenuMyGifts,
+                      onTap: () => context.push('/my-gifts'),
+                    ),
+                    const Divider(height: 1),
+                    _MenuItem(
+                      icon: Icons.block_outlined,
+                      title: l10n.profileMenuBlockedUsers,
+                      onTap: () => context.push('/blocked-users'),
+                    ),
+                    const Divider(height: 1),
+                    _MenuItem(
+                      icon: Icons.help_outline,
+                      title: l10n.profileMenuHelpSupport,
+                      onTap: () => context.push('/help'),
+                    ),
+                    const Divider(height: 1),
+                    _MenuItem(
+                      icon: Icons.info_outline,
+                      title: l10n.profileMenuAbout,
+                      onTap: () => context.push('/about'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Logout
-            Card(
-              child: _MenuItem(
-                icon: Icons.logout,
-                title: l10n.logout,
-                textColor: AppColors.error,
-                onTap: () => _showLogoutDialog(context),
+              const SizedBox(height: 16),
+              // Logout
+              Card(
+                child: _MenuItem(
+                  icon: Icons.logout,
+                  title: l10n.logout,
+                  textColor: AppColors.error,
+                  onTap: () => _showLogoutDialog(context),
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-          ],
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -429,15 +433,12 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+            Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),
@@ -462,10 +463,7 @@ class _MenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: textColor ?? AppColors.textPrimary),
-      title: Text(
-        title,
-        style: TextStyle(color: textColor),
-      ),
+      title: Text(title, style: TextStyle(color: textColor)),
       trailing: Icon(
         Icons.arrow_forward_ios,
         size: 16,

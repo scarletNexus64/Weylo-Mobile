@@ -534,6 +534,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResultsFound => 'No results found';
 
   @override
+  String get todayLabel => 'Today';
+
+  @override
+  String get yesterdayLabel => 'Yesterday';
+
+  @override
   String get anonymousConversation => 'Anonymous';
 
   @override
@@ -627,6 +633,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String streakDays(Object days) {
     return '$days day streak';
   }
+
+  @override
+  String streakExpiresIn(Object hours, Object minutes) {
+    return 'Expires in ${hours}h ${minutes}m';
+  }
+
+  @override
+  String get streakExpired => 'Streak ended';
 
   @override
   String get copyAction => 'Copy';

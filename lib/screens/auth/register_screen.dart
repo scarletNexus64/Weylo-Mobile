@@ -54,12 +54,13 @@ class _RegisterScreenState extends State<RegisterScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.1, 0),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.1, 0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
     _animationController.forward();
   }
 
@@ -161,7 +162,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                   _buildProgressIndicator(),
 
                   // Error message
-                  if (authProvider.error != null) _buildErrorMessage(authProvider.error!),
+                  if (authProvider.error != null)
+                    _buildErrorMessage(authProvider.error!),
 
                   // Pages
                   Expanded(
@@ -196,9 +198,9 @@ class _RegisterScreenState extends State<RegisterScreen>
           Expanded(
             child: Text(
               _getPageTitle(),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -237,8 +239,12 @@ class _RegisterScreenState extends State<RegisterScreen>
                   ),
                   height: 4,
                   decoration: BoxDecoration(
-                    gradient: index <= _currentPage ? AppColors.primaryGradient : null,
-                    color: index <= _currentPage ? null : AppColors.primary.withOpacity(0.2),
+                    gradient: index <= _currentPage
+                        ? AppColors.primaryGradient
+                        : null,
+                    color: index <= _currentPage
+                        ? null
+                        : AppColors.primary.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -247,10 +253,12 @@ class _RegisterScreenState extends State<RegisterScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context)!.registerStepLabel(_currentPage + 1, 3),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            AppLocalizations.of(
+              context,
+            )!.registerStepLabel(_currentPage + 1, 3),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -522,9 +530,8 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                     Text(
                       AppLocalizations.of(context)!.registerSecureTitle,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
@@ -560,7 +567,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                         if (value == null || value.isEmpty) {
                           return AppLocalizations.of(context)!.pinRequired;
                         }
-                        if (value.length != 4 || !RegExp(r'^\\d{4}$').hasMatch(value)) {
+                        if (value.length != 4 ||
+                            !RegExp(r'^\d{4}$').hasMatch(value)) {
                           return AppLocalizations.of(context)!.pinInvalid;
                         }
                         return null;
@@ -570,7 +578,9 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                     CustomTextField(
                       controller: _confirmPasswordController,
-                      label: AppLocalizations.of(context)!.pinConfirmLabelRequired,
+                      label: AppLocalizations.of(
+                        context,
+                      )!.pinConfirmLabelRequired,
                       hintText: AppLocalizations.of(context)!.pinConfirmHint,
                       keyboardType: TextInputType.number,
                       maxLength: 4,
@@ -585,12 +595,17 @@ class _RegisterScreenState extends State<RegisterScreen>
                               : Icons.visibility_off_outlined,
                         ),
                         onPressed: () {
-                          setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                          setState(
+                            () => _obscureConfirmPassword =
+                                !_obscureConfirmPassword,
+                          );
                         },
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context)!.pinConfirmRequired;
+                          return AppLocalizations.of(
+                            context,
+                          )!.pinConfirmRequired;
                         }
                         if (value != _passwordController.text) {
                           return AppLocalizations.of(context)!.pinMismatch;
@@ -622,17 +637,29 @@ class _RegisterScreenState extends State<RegisterScreen>
                                 text: TextSpan(
                                   style: Theme.of(context).textTheme.bodyMedium,
                                   children: [
-                                    TextSpan(text: AppLocalizations.of(context)!.acceptTermsPrefix),
                                     TextSpan(
-                                      text: AppLocalizations.of(context)!.acceptTermsLink,
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.acceptTermsPrefix,
+                                    ),
+                                    TextSpan(
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.acceptTermsLink,
                                       style: TextStyle(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    TextSpan(text: AppLocalizations.of(context)!.acceptPrivacyMiddle),
                                     TextSpan(
-                                      text: AppLocalizations.of(context)!.acceptPrivacyLink,
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.acceptPrivacyMiddle,
+                                    ),
+                                    TextSpan(
+                                      text: AppLocalizations.of(
+                                        context,
+                                      )!.acceptPrivacyLink,
                                       style: TextStyle(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.w600,

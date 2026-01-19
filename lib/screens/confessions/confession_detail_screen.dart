@@ -63,7 +63,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         _error = null;
       });
 
-      final confession = await _confessionService.getConfession(widget.confessionId);
+      final confession = await _confessionService.getConfession(
+        widget.confessionId,
+      );
 
       setState(() {
         _confession = confession;
@@ -129,26 +131,30 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
 
     _videoController?.dispose();
     _videoController = VideoPlayerController.networkUrl(Uri.parse(resolvedUrl))
-      ..initialize().then((_) {
-        if (!mounted) return;
-        setState(() {
-          _isVideoInitialized = true;
-          _videoInitError = false;
-        });
-      }).catchError((_) {
-        if (!mounted) return;
-        setState(() {
-          _isVideoInitialized = false;
-          _videoInitError = true;
-        });
-      });
+      ..initialize()
+          .then((_) {
+            if (!mounted) return;
+            setState(() {
+              _isVideoInitialized = true;
+              _videoInitError = false;
+            });
+          })
+          .catchError((_) {
+            if (!mounted) return;
+            setState(() {
+              _isVideoInitialized = false;
+              _videoInitError = true;
+            });
+          });
   }
 
   Future<void> _loadComments() async {
     try {
       setState(() => _isLoadingComments = true);
 
-      final comments = await _confessionService.getComments(widget.confessionId);
+      final comments = await _confessionService.getComments(
+        widget.confessionId,
+      );
 
       setState(() {
         _comments = comments;
@@ -212,10 +218,14 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
 
     try {
       if (_confession!.isLiked) {
-        final updated = await _confessionService.unlikeConfession(widget.confessionId);
+        final updated = await _confessionService.unlikeConfession(
+          widget.confessionId,
+        );
         setState(() => _confession = updated);
       } else {
-        final updated = await _confessionService.likeConfession(widget.confessionId);
+        final updated = await _confessionService.likeConfession(
+          widget.confessionId,
+        );
         setState(() => _confession = updated);
       }
     } catch (e) {
@@ -280,10 +290,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             const SizedBox(height: 16),
             Text(_error!, textAlign: TextAlign.center),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadConfession,
-              child: Text(l10n.retry),
-            ),
+            ElevatedButton(onPressed: _loadConfession, child: Text(l10n.retry)),
           ],
         ),
       );
@@ -327,7 +334,8 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  if (confession.isIdentityRevealed && confession.author != null) {
+                  if (confession.isIdentityRevealed &&
+                      confession.author != null) {
                     context.push('/u/${confession.author!.username}');
                   }
                 },
@@ -340,14 +348,16 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        if (confession.isIdentityRevealed && confession.author != null) {
+                        if (confession.isIdentityRevealed &&
+                            confession.author != null) {
                           context.push('/u/${confession.author!.username}');
                         }
                       },
                       child: Row(
                         children: [
                           Text(
-                            confession.isIdentityRevealed && confession.author != null
+                            confession.isIdentityRevealed &&
+                                    confession.author != null
                                 ? confession.author!.fullName
                                 : l10n.userAnonymous,
                             style: const TextStyle(
@@ -394,18 +404,18 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             LinkText(
               text: confession.content,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 16,
-                    height: 1.5,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimary,
-                  ),
+                fontSize: 16,
+                height: 1.5,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimary,
+              ),
               linkStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 16,
-                    height: 1.5,
-                    color: AppColors.primary,
-                    decoration: TextDecoration.underline,
-                  ),
+                fontSize: 16,
+                height: 1.5,
+                color: AppColors.primary,
+                decoration: TextDecoration.underline,
+              ),
               showPreview: true,
               previewBackgroundColor: Colors.black.withOpacity(0.04),
               previewTextColor: Theme.of(context).brightness == Brightness.dark
@@ -475,7 +485,10 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                       color: Colors.grey[200],
                       child: Center(
                         child: _videoInitError
-                            ? const Icon(Icons.error_outline, color: Colors.grey)
+                            ? const Icon(
+                                Icons.error_outline,
+                                color: Colors.grey,
+                              )
                             : const CircularProgressIndicator(),
                       ),
                     ),
@@ -487,7 +500,11 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
           // Stats row
           Row(
             children: [
-              Icon(Icons.visibility_outlined, size: 16, color: Colors.grey[600]),
+              Icon(
+                Icons.visibility_outlined,
+                size: 16,
+                color: Colors.grey[600],
+              ),
               const SizedBox(width: 4),
               Text(
                 l10n.viewsCount(Helpers.formatNumber(confession.viewsCount)),
@@ -501,10 +518,16 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
               const SizedBox(width: 16),
-              Icon(Icons.chat_bubble_outline, size: 16, color: Colors.grey[600]),
+              Icon(
+                Icons.chat_bubble_outline,
+                size: 16,
+                color: Colors.grey[600],
+              ),
               const SizedBox(width: 4),
               Text(
-                l10n.commentsCount(Helpers.formatNumber(confession.commentsCount)),
+                l10n.commentsCount(
+                  Helpers.formatNumber(confession.commentsCount),
+                ),
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
             ],
@@ -518,7 +541,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildTwitterActionButton(
-                icon: confession.isLiked ? Icons.favorite : Icons.favorite_outline,
+                icon: confession.isLiked
+                    ? Icons.favorite
+                    : Icons.favorite_outline,
                 label: l10n.likeAction,
                 color: confession.isLiked ? AppColors.error : null,
                 onTap: _toggleLike,
@@ -597,11 +622,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
               shape: BoxShape.circle,
             ),
             child: const Center(
-              child: Icon(
-                Icons.person_off,
-                color: Colors.white,
-                size: 24,
-              ),
+              child: Icon(Icons.person_off, color: Colors.white, size: 24),
             ),
           ),
           if (_confession!.isAnonymous)
@@ -664,10 +685,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
           padding: const EdgeInsets.all(16),
           child: Text(
             l10n.commentsCountTitle(_confession?.commentsCount ?? 0),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
 
@@ -684,22 +702,20 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             child: Center(
               child: Column(
                 children: [
-                  Icon(Icons.chat_bubble_outline, size: 48, color: Colors.grey[400]),
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    size: 48,
+                    color: Colors.grey[400],
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.noCommentsTitle,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     l10n.noCommentsSubtitle,
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[500], fontSize: 14),
                   ),
                 ],
               ),
@@ -777,10 +793,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                     const Spacer(),
                     Text(
                       Helpers.getTimeAgo(comment.createdAt),
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
                     ),
                   ],
                 ),
@@ -788,7 +801,10 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 if (comment.parent != null)
                   Container(
                     margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.04),
                       borderRadius: BorderRadius.circular(8),
@@ -809,7 +825,8 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                comment.parent?.user?.fullName ?? l10n.userAnonymous,
+                                comment.parent?.user?.fullName ??
+                                    l10n.userAnonymous,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,
@@ -836,7 +853,8 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                     comment.content,
                     style: const TextStyle(fontSize: 14, height: 1.4),
                   ),
-                if (comment.mediaFullUrl != null || comment.mediaUrl != null) ...[
+                if (comment.mediaFullUrl != null ||
+                    comment.mediaUrl != null) ...[
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -854,7 +872,10 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                         height: 200,
                         color: Colors.grey[200],
                         child: const Center(
-                          child: Icon(Icons.broken_image_outlined, color: Colors.grey),
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
@@ -989,7 +1010,11 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                           color: Colors.black54,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.close, color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ),
@@ -1163,7 +1188,10 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                     children: [
                       Text(
                         l10n.costLabel,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                       Text(
                         l10n.revealIdentityAmount('450 FCFA'),
@@ -1216,12 +1244,12 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
-      final updatedConfession = await _confessionService.revealIdentity(widget.confessionId);
+      final updatedConfession = await _confessionService.revealIdentity(
+        widget.confessionId,
+      );
 
       if (mounted) {
         Navigator.pop(context); // Fermer le loading
@@ -1238,7 +1266,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 Expanded(
                   child: Text(
                     updatedConfession.author != null
-                        ? l10n.revealIdentitySuccessWithName(updatedConfession.author!.fullName)
+                        ? l10n.revealIdentitySuccessWithName(
+                            updatedConfession.author!.fullName,
+                          )
                         : l10n.revealIdentitySuccess,
                   ),
                 ),

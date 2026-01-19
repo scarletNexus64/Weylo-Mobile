@@ -51,16 +51,14 @@ class PusherService {
         onEvent: _onEvent,
         onMemberAdded: _onMemberAdded,
         onMemberRemoved: _onMemberRemoved,
-        onAuthorizer: (String channelName, String socketId, dynamic options) async {
-          final response = await _apiClient.post(
-            ApiConstants.broadcastingAuth,
-            data: {
-              'socket_id': socketId,
-              'channel_name': channelName,
+        onAuthorizer:
+            (String channelName, String socketId, dynamic options) async {
+              final response = await _apiClient.post(
+                ApiConstants.broadcastingAuth,
+                data: {'socket_id': socketId, 'channel_name': channelName},
+              );
+              return response.data;
             },
-          );
-          return response.data;
-        },
       );
 
       await _pusher!.connect();
@@ -98,28 +96,35 @@ class PusherService {
   }
 
   void _onEvent(PusherEvent event) {
-    if (kDebugMode) print('Pusher Event: ${event.eventName} on ${event.channelName}');
+    if (kDebugMode)
+      print('Pusher Event: ${event.eventName} on ${event.channelName}');
     _messageController.add(event);
   }
 
   void _onMemberAdded(String channelName, PusherMember member) {
-    if (kDebugMode) print('Pusher: Member added to $channelName: ${member.userId}');
-    _messageController.add(PusherEvent(
-      channelName: channelName,
-      eventName: 'member_added',
-      data: member.userInfo.toString(),
-      userId: member.userId,
-    ));
+    if (kDebugMode)
+      print('Pusher: Member added to $channelName: ${member.userId}');
+    _messageController.add(
+      PusherEvent(
+        channelName: channelName,
+        eventName: 'member_added',
+        data: member.userInfo.toString(),
+        userId: member.userId,
+      ),
+    );
   }
 
   void _onMemberRemoved(String channelName, PusherMember member) {
-    if (kDebugMode) print('Pusher: Member removed from $channelName: ${member.userId}');
-    _messageController.add(PusherEvent(
-      channelName: channelName,
-      eventName: 'member_removed',
-      data: member.userInfo.toString(),
-      userId: member.userId,
-    ));
+    if (kDebugMode)
+      print('Pusher: Member removed from $channelName: ${member.userId}');
+    _messageController.add(
+      PusherEvent(
+        channelName: channelName,
+        eventName: 'member_removed',
+        data: member.userInfo.toString(),
+        userId: member.userId,
+      ),
+    );
   }
 
   Future<void> _resubscribe(String channelName) async {
@@ -183,12 +188,18 @@ class PusherService {
   }
 
   // Send client event (for presence channels)
-  Future<void> trigger(String channelName, String eventName, dynamic data) async {
-    await _pusher?.trigger(PusherEvent(
-      channelName: channelName,
-      eventName: eventName,
-      data: data.toString(),
-    ));
+  Future<void> trigger(
+    String channelName,
+    String eventName,
+    dynamic data,
+  ) async {
+    await _pusher?.trigger(
+      PusherEvent(
+        channelName: channelName,
+        eventName: eventName,
+        data: data.toString(),
+      ),
+    );
   }
 
   Future<void> disconnect() async {

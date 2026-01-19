@@ -4,8 +4,10 @@ class ApiConstants {
   //static const String baseUrl = 'http://10.0.2.2:8000/api/v1'; // Local Development (Android Emulator)
   //static const String wsUrl = 'wss://10.0.2.2:8000'; // Local Development (Android Emulator)
 
-  static const String baseUrl ='http://192.168.43.73:8001/api/v1'; // Local Development (Physical Device)
-  static const String wsUrl ='ws://192.168.43.73:8080'; // Local Development (Physical Device)
+  static const String baseUrl =
+      'http://192.168.43.73:8001/api/v1'; // Local Development (Physical Device)
+  static const String wsUrl =
+      'ws://192.168.43.73:8080'; // Local Development (Physical Device)
 
   // Reverb/Pusher Configuration
   // static const String reverbHost = 'weylo-adminpanel.space'; // Production
@@ -16,11 +18,11 @@ class ApiConstants {
   static const String reverbAppId = 'Weylo-app'; // Local Development
   static const String reverbHost = '192.168.43.73'; // Local Development
   static const int reverbPort = 8080; // Local Development
-  static const String reverbAppKey = '1425cdd3ef7425fa6746d2895a233e52'; // Local Development
+  static const String reverbAppKey =
+      '1425cdd3ef7425fa6746d2895a233e52'; // Local Development
   static const String reverbAppSecret =
       '0684dbd3bef3b2550a2be1d8fea7e1d6464e19c8a3e925064f9fac17d4f60077'; // Local Development
-  static const String reverbScheme = 'http';  // Local Development
-  
+  static const String reverbScheme = 'http'; // Local Development
 
   // Auth
   static const String login = '/auth/login';
@@ -53,7 +55,8 @@ class ApiConstants {
   static String userFollow(String username) => '/users/$username/follow';
   static String userFollowers(String username) => '/users/$username/followers';
   static String userFollowing(String username) => '/users/$username/following';
-  static String userFollowStatus(String username) => '/users/$username/follow-status';
+  static String userFollowStatus(String username) =>
+      '/users/$username/follow-status';
   static String userReport(String username) => '/users/$username/report';
   static String userBlock(String username) => '/users/$username/block';
 
@@ -66,17 +69,20 @@ class ApiConstants {
   static String messageDelete(int id) => '/messages/$id'; // DJSTAR7
   static String messageSend(String username) => '/messages/send/$username';
   static String messageReveal(int id) => '/messages/$id/reveal';
-  static String messageStartConversation(int id) => '/messages/$id/start-conversation';
+  static String messageStartConversation(int id) =>
+      '/messages/$id/start-conversation';
   static String messageReport(int id) => '/messages/$id/report';
 
   // Confessions
   static const String confessions = '/confessions';
   static const String confessionsReceived = '/confessions/received';
   static const String confessionsSent = '/confessions/sent';
-  static const String confessionsLiked = '/confessions/liked'; // DJSTAR7 - Liste des confessions aimées
+  static const String confessionsLiked =
+      '/confessions/liked'; // DJSTAR7 - Liste des confessions aimées
   static const String confessionsStats = '/confessions/stats';
   static String confessionLike(int id) => '/confessions/$id/like';
-  static String userConfessions(String username) => '/users/$username/confessions'; // DJSTAR7 - Confessions d'un utilisateur par username
+  static String userConfessions(String username) =>
+      '/users/$username/confessions'; // DJSTAR7 - Confessions d'un utilisateur par username
   static String confessionComments(int id) => '/confessions/$id/comments';
   static String confessionReveal(int id) => '/confessions/$id/reveal';
   static String confessionReport(int id) => '/confessions/$id/report';
@@ -86,12 +92,18 @@ class ApiConstants {
   static const String chatPresence = '/chat/presence';
   static const String chatUserStatus = '/chat/user-status';
   static const String chatStats = '/chat/stats';
-  static String chatConversation(int conversationId) => '/chat/conversations/$conversationId'; // DJSTAR7
-  static String chatMessages(int conversationId) => '/chat/conversations/$conversationId/messages';
-  static String chatRead(int conversationId) => '/chat/conversations/$conversationId/read';
-  static String chatReveal(int conversationId) => '/chat/conversations/$conversationId/reveal';
-  static String chatGift(int conversationId) => '/chat/conversations/$conversationId/gift';
-  static String chatDelete(int conversationId) => '/chat/conversations/$conversationId'; // DJSTAR7
+  static String chatConversation(int conversationId) =>
+      '/chat/conversations/$conversationId'; // DJSTAR7
+  static String chatMessages(int conversationId) =>
+      '/chat/conversations/$conversationId/messages';
+  static String chatRead(int conversationId) =>
+      '/chat/conversations/$conversationId/read';
+  static String chatReveal(int conversationId) =>
+      '/chat/conversations/$conversationId/reveal';
+  static String chatGift(int conversationId) =>
+      '/chat/conversations/$conversationId/gift';
+  static String chatDelete(int conversationId) =>
+      '/chat/conversations/$conversationId'; // DJSTAR7
   static const String broadcastingAuth = '/broadcasting/auth';
 
   // Groups
@@ -104,9 +116,12 @@ class ApiConstants {
   static String groupDelete(int groupId) => '/groups/$groupId'; // DJSTAR7
   static String groupMessages(int groupId) => '/groups/$groupId/messages';
   static String groupMembers(int groupId) => '/groups/$groupId/members';
-  static String groupRemoveMember(int groupId, int memberId) => '/groups/$groupId/members/$memberId'; // DJSTAR7
-  static String groupUpdateMemberRole(int groupId, int memberId) => '/groups/$groupId/members/$memberId/role'; // DJSTAR7
-  static String groupRegenerateInvite(int groupId) => '/groups/$groupId/regenerate-invite'; // DJSTAR7
+  static String groupRemoveMember(int groupId, int memberId) =>
+      '/groups/$groupId/members/$memberId'; // DJSTAR7
+  static String groupUpdateMemberRole(int groupId, int memberId) =>
+      '/groups/$groupId/members/$memberId/role'; // DJSTAR7
+  static String groupRegenerateInvite(int groupId) =>
+      '/groups/$groupId/regenerate-invite'; // DJSTAR7
   static String groupLeave(int groupId) => '/groups/$groupId/leave';
   static String groupRead(int groupId) => '/groups/$groupId/read';
 
@@ -117,17 +132,22 @@ class ApiConstants {
   static const String giftsStats = '/gifts/stats';
   static const String giftsSend = '/gifts/send';
   static const String giftCategories = '/gift-categories';
-  static String giftsByCategory(int categoryId) => '/gift-categories/$categoryId/gifts';
+  static String giftsByCategory(int categoryId) =>
+      '/gift-categories/$categoryId/gifts';
 
   // Premium
   static const String premium = '/premium';
   static const String premiumSubscriptions = '/premium/subscriptions';
-  static const String premiumSubscriptionsActive = '/premium/subscriptions/active';
+  static const String premiumSubscriptionsActive =
+      '/premium/subscriptions/active';
   static const String premiumPricing = '/premium/pricing';
   static const String premiumCheck = '/premium/check';
-  static String premiumSubscribeMessage(int messageId) => '/premium/subscribe/message/$messageId';
-  static String premiumSubscribeConversation(int conversationId) => '/premium/subscribe/conversation/$conversationId';
-  static String premiumSubscribeStory(int storyId) => '/premium/subscribe/story/$storyId';
+  static String premiumSubscribeMessage(int messageId) =>
+      '/premium/subscribe/message/$messageId';
+  static String premiumSubscribeConversation(int conversationId) =>
+      '/premium/subscribe/conversation/$conversationId';
+  static String premiumSubscribeStory(int storyId) =>
+      '/premium/subscribe/story/$storyId';
 
   // Premium Pass
   static const String premiumPass = '/premium-pass';
@@ -136,7 +156,8 @@ class ApiConstants {
   static const String premiumPassPurchase = '/premium-pass/purchase';
   static const String premiumPassRenew = '/premium-pass/renew';
   static const String premiumPassHistory = '/premium-pass/history';
-  static String premiumPassCanViewIdentity(int userId) => '/premium-pass/can-view-identity/$userId';
+  static String premiumPassCanViewIdentity(int userId) =>
+      '/premium-pass/can-view-identity/$userId';
 
   // Wallet
   static const String wallet = '/wallet';
@@ -160,9 +181,11 @@ class ApiConstants {
   // Post Promotions
   static const String promotionsPricing = '/promotions/pricing';
   static const String myPromotions = '/promotions/my-promotions';
-  static String promoteConfession(int confessionId) => '/promotions/confessions/$confessionId';
+  static String promoteConfession(int confessionId) =>
+      '/promotions/confessions/$confessionId';
   static String cancelPromotion(int promotionId) => '/promotions/$promotionId';
-  static String promotionStats(int promotionId) => '/promotions/$promotionId/stats';
+  static String promotionStats(int promotionId) =>
+      '/promotions/$promotionId/stats';
 
   // Notifications
   static const String notifications = '/notifications';
@@ -177,10 +200,14 @@ class ApiConstants {
 
   // Reveal Identity
   static const String revealIdentityPrice = '/reveal-identity/price';
-  static String revealIdentityInitiate(int messageId) => '/reveal-identity/messages/$messageId/initiate';
-  static String revealIdentityStatus(int messageId) => '/reveal-identity/messages/$messageId/status';
-  static String revealIdentityConversationInitiate(int conversationId) => '/reveal-identity/conversations/$conversationId/initiate'; // DJSTAR7
-  static String revealIdentityConversationStatus(int conversationId) => '/reveal-identity/conversations/$conversationId/status'; // DJSTAR7
+  static String revealIdentityInitiate(int messageId) =>
+      '/reveal-identity/messages/$messageId/initiate';
+  static String revealIdentityStatus(int messageId) =>
+      '/reveal-identity/messages/$messageId/status';
+  static String revealIdentityConversationInitiate(int conversationId) =>
+      '/reveal-identity/conversations/$conversationId/initiate'; // DJSTAR7
+  static String revealIdentityConversationStatus(int conversationId) =>
+      '/reveal-identity/conversations/$conversationId/status'; // DJSTAR7
 
   // Settings
   static const String settingsPublic = '/settings/public';

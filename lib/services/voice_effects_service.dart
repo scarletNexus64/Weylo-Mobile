@@ -1,13 +1,6 @@
 import 'package:just_audio/just_audio.dart';
 
-enum VoiceEffect {
-  none,
-  pitchUp,
-  pitchDown,
-  robot,
-  chipmunk,
-  deep,
-}
+enum VoiceEffect { none, pitchUp, pitchDown, robot, chipmunk, deep }
 
 /// Voice effect parameters for just_audio playback
 class VoiceEffectParams {

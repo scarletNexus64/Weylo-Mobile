@@ -60,7 +60,9 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
       // Use realUserId to correctly identify the user even for anonymous stories
       var feedStories = results[0] as List<UserStories>;
       if (user != null) {
-        feedStories = feedStories.where((s) => s.realUserId != user.id).toList();
+        feedStories = feedStories
+            .where((s) => s.realUserId != user.id)
+            .toList();
       }
 
       // Also remove duplicates based on realUserId (not user.id which can be null for anonymous)
@@ -165,18 +167,22 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
           _loadStories();
         }
       },
-      onLongPress: hasStory ? () async {
-        await context.push('/create-story');
-        if (mounted) {
-          _loadStories();
-        }
-      } : null,
+      onLongPress: hasStory
+          ? () async {
+              await context.push('/create-story');
+              if (mounted) {
+                _loadStories();
+              }
+            }
+          : null,
       child: Container(
         width: 100,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: hasStory ? AppColors.primaryGradient : null,
-          border: hasStory ? null : Border.all(color: Colors.grey.shade300, width: 2),
+          border: hasStory
+              ? null
+              : Border.all(color: Colors.grey.shade300, width: 2),
         ),
         padding: const EdgeInsets.all(3),
         child: Container(
@@ -194,16 +200,20 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
                   CachedNetworkImage(
                     imageUrl: lastStory.mediaUrl!,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                      color: AppColors.shimmerBase,
-                    ),
+                    placeholder: (_, __) =>
+                        Container(color: AppColors.shimmerBase),
                     errorWidget: (_, __, ___) => _buildAvatarBackground(user),
                   )
                 else if (lastStory != null && lastStory.isText)
                   Container(
-                    color: Color(int.parse(
-                      (lastStory.backgroundColor ?? '#8B5CF6').replaceFirst('#', '0xFF'),
-                    )),
+                    color: Color(
+                      int.parse(
+                        (lastStory.backgroundColor ?? '#8B5CF6').replaceFirst(
+                          '#',
+                          '0xFF',
+                        ),
+                      ),
+                    ),
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(8),
@@ -246,16 +256,9 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       gradient: AppColors.primaryGradient,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ),
+                      border: Border.all(color: Colors.white, width: 2),
                     ),
-                    child: const Icon(
-                      Icons.add,
-                      size: 16,
-                      color: Colors.white,
-                    ),
+                    child: const Icon(Icons.add, size: 16, color: Colors.white),
                   ),
                 ),
                 // Label
@@ -269,12 +272,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 4,
-                          color: Colors.black54,
-                        ),
-                      ],
+                      shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -291,9 +289,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
   Widget _buildAvatarBackground(user) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-      ),
+      decoration: BoxDecoration(gradient: AppColors.primaryGradient),
       child: Center(
         child: AvatarWidget(
           imageUrl: user?.avatar,
@@ -309,17 +305,16 @@ class _StoryCard extends StatelessWidget {
   final UserStories userStories;
   final VoidCallback? onTap;
 
-  const _StoryCard({
-    required this.userStories,
-    this.onTap,
-  });
+  const _StoryCard({required this.userStories, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isAnonymous = userStories.isAnonymous;
     final isHidden = isAnonymous && !userStories.isIdentityRevealed;
-    final displayName = isHidden ? l10n.userAnonymous : userStories.user.fullName;
+    final displayName = isHidden
+        ? l10n.userAnonymous
+        : userStories.user.fullName;
     final hasUnviewed = userStories.hasUnviewed;
     final preview = userStories.preview;
 
@@ -330,7 +325,9 @@ class _StoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: hasUnviewed ? AppColors.primaryGradient : null,
-          border: hasUnviewed ? null : Border.all(color: Colors.grey.shade400, width: 2),
+          border: hasUnviewed
+              ? null
+              : Border.all(color: Colors.grey.shade400, width: 2),
         ),
         padding: const EdgeInsets.all(3),
         child: Container(
@@ -370,9 +367,9 @@ class _StoryCard extends StatelessWidget {
                         width: 2,
                       ),
                     ),
-                  child: isHidden
-                      ? Container(
-                          width: 28,
+                    child: isHidden
+                        ? Container(
+                            width: 28,
                             height: 28,
                             decoration: BoxDecoration(
                               gradient: AppColors.primaryGradient,
@@ -403,7 +400,8 @@ class _StoryCard extends StatelessWidget {
                                       child: Center(
                                         child: Text(
                                           userStories.user.firstName.isNotEmpty
-                                              ? userStories.user.firstName[0].toUpperCase()
+                                              ? userStories.user.firstName[0]
+                                                    .toUpperCase()
                                               : '?',
                                           style: const TextStyle(
                                             color: Colors.white,
@@ -421,7 +419,8 @@ class _StoryCard extends StatelessWidget {
                                     child: Center(
                                       child: Text(
                                         userStories.user.firstName.isNotEmpty
-                                            ? userStories.user.firstName[0].toUpperCase()
+                                            ? userStories.user.firstName[0]
+                                                  .toUpperCase()
                                             : '?',
                                         style: const TextStyle(
                                           color: Colors.white,
@@ -444,13 +443,12 @@ class _StoryCard extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
-                      fontWeight: hasUnviewed ? FontWeight.w600 : FontWeight.normal,
-                    fontStyle: isHidden ? FontStyle.italic : FontStyle.normal,
+                      fontWeight: hasUnviewed
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      fontStyle: isHidden ? FontStyle.italic : FontStyle.normal,
                       shadows: const [
-                        Shadow(
-                          blurRadius: 4,
-                          color: Colors.black54,
-                        ),
+                        Shadow(blurRadius: 4, color: Colors.black54),
                       ],
                     ),
                     maxLines: 1,
@@ -468,9 +466,7 @@ class _StoryCard extends StatelessWidget {
   Widget _buildPreviewBackground(StoryPreview? preview, bool isAnonymous) {
     if (preview == null) {
       return Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
+        decoration: BoxDecoration(gradient: AppColors.primaryGradient),
       );
     }
 
@@ -479,14 +475,10 @@ class _StoryCard extends StatelessWidget {
         imageUrl: preview.mediaUrl!,
         fit: BoxFit.cover,
         placeholder: (_, __) => Container(
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-          ),
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
         ),
         errorWidget: (_, __, ___) => Container(
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-          ),
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
         ),
       );
     }
@@ -515,9 +507,7 @@ class _StoryCard extends StatelessWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-      ),
+      decoration: BoxDecoration(gradient: AppColors.primaryGradient),
     );
   }
 }

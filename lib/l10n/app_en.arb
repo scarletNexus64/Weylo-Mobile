@@ -233,6 +233,8 @@
   "emptyConversationsSubtitle": "Start a conversation with someone",
   "searchConversationsHint": "Search conversations...",
   "noResultsFound": "No results found",
+  "todayLabel": "Today",
+  "yesterdayLabel": "Yesterday",
   "anonymousConversation": "Anonymous",
   "newConversationFab": "Start a new chat",
   "anonymousMessage": "Anonymous message",
@@ -277,6 +279,15 @@
     }
   },
   "streakDays": "{days} day streak",
+  "@streakExpiresIn": {
+    "description": "Label showing how much time is left before the streak expires",
+    "placeholders": {
+      "hours": {},
+      "minutes": {}
+    }
+  },
+  "streakExpiresIn": "Expires in {hours}h {minutes}m",
+  "streakExpired": "Streak ended",
   "copyAction": "Copy",
   "deleteAction": "Delete",
   "@deleteConversationConfirm": {

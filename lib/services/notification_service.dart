@@ -15,7 +15,9 @@ class NotificationApiService {
   }
 
   Future<int> getUnreadCount() async {
-    final response = await _apiClient.get(ApiConstants.notificationsUnreadCount);
+    final response = await _apiClient.get(
+      ApiConstants.notificationsUnreadCount,
+    );
     return response.data['count'] ?? response.data['unread_count'] ?? 0;
   }
 

@@ -10,7 +10,10 @@ import 'api_client.dart';
 class MessageService {
   final ApiClient _apiClient = ApiClient();
 
-  Future<PaginatedMessages> getInbox({int page = 1, int perPage = AppConstants.defaultPageSize}) async {
+  Future<PaginatedMessages> getInbox({
+    int page = 1,
+    int perPage = AppConstants.defaultPageSize,
+  }) async {
     final response = await _apiClient.get(
       ApiConstants.messages,
       queryParameters: {'page': page, 'per_page': perPage},
@@ -18,7 +21,10 @@ class MessageService {
     return PaginatedMessages.fromJson(response.data);
   }
 
-  Future<PaginatedMessages> getSentMessages({int page = 1, int perPage = AppConstants.defaultPageSize}) async {
+  Future<PaginatedMessages> getSentMessages({
+    int page = 1,
+    int perPage = AppConstants.defaultPageSize,
+  }) async {
     final response = await _apiClient.get(
       ApiConstants.messagesSent,
       queryParameters: {'page': page, 'per_page': perPage},
@@ -36,9 +42,7 @@ class MessageService {
     required String content,
     int? replyToMessageId,
   }) async {
-    final data = <String, dynamic>{
-      'content': content,
-    };
+    final data = <String, dynamic>{'content': content};
     if (replyToMessageId != null) {
       data['reply_to_message_id'] = replyToMessageId;
     }
@@ -65,10 +69,12 @@ class MessageService {
     });
 
     if (image != null) {
-      formData.files.add(MapEntry(
-        'image',
-        await MultipartFile.fromFile(image.path, filename: 'image.jpg'),
-      ));
+      formData.files.add(
+        MapEntry(
+          'image',
+          await MultipartFile.fromFile(image.path, filename: 'image.jpg'),
+        ),
+      );
     }
 
     if (voice != null) {
@@ -102,14 +108,16 @@ class MessageService {
         'Sending voice file: $filename (ext=$extension, type=$contentType, path=${voice.path})',
       );
 
-      formData.files.add(MapEntry(
-        'voice',
-        await MultipartFile.fromFile(
-          voice.path,
-          filename: filename,
-          contentType: http_parser.MediaType.parse(contentType),
+      formData.files.add(
+        MapEntry(
+          'voice',
+          await MultipartFile.fromFile(
+            voice.path,
+            filename: filename,
+            contentType: http_parser.MediaType.parse(contentType),
+          ),
         ),
-      ));
+      );
     }
 
     final response = await _apiClient.post(
@@ -120,12 +128,16 @@ class MessageService {
   }
 
   Future<AnonymousMessage> revealIdentity(int messageId) async {
-    final response = await _apiClient.post('${ApiConstants.messages}/$messageId/reveal');
+    final response = await _apiClient.post(
+      '${ApiConstants.messages}/$messageId/reveal',
+    );
     return AnonymousMessage.fromJson(response.data['message'] ?? response.data);
   }
 
   Future<Map<String, dynamic>> startConversation(int messageId) async {
-    final response = await _apiClient.post('${ApiConstants.messages}/$messageId/start-conversation');
+    final response = await _apiClient.post(
+      '${ApiConstants.messages}/$messageId/start-conversation',
+    );
     return response.data;
   }
 
@@ -138,7 +150,9 @@ class MessageService {
   }
 
   Future<bool> deleteMessage(int messageId) async {
-    final response = await _apiClient.delete('${ApiConstants.messages}/$messageId');
+    final response = await _apiClient.delete(
+      '${ApiConstants.messages}/$messageId',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -173,7 +187,9 @@ class PaginatedMessages {
     final meta = json['meta'] ?? json;
 
     return PaginatedMessages(
-      messages: (data as List).map((m) => AnonymousMessage.fromJson(m)).toList(),
+      messages: (data as List)
+          .map((m) => AnonymousMessage.fromJson(m))
+          .toList(),
       currentPage: meta['current_page'] ?? 1,
       lastPage: meta['last_page'] ?? 1,
       total: meta['total'] ?? 0,

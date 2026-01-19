@@ -11,9 +11,7 @@ class StorageService {
   StorageService._internal();
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
   // Token management

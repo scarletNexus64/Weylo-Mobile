@@ -25,11 +25,7 @@ class StoryReplyService {
   }) async {
     final response = await _api.post(
       ApiConstants.storyReplies(storyId),
-      data: {
-        'content': content,
-        'type': 'text',
-        'is_anonymous': isAnonymous,
-      },
+      data: {'content': content, 'type': 'text', 'is_anonymous': isAnonymous},
     );
     return response.data;
   }
@@ -42,11 +38,7 @@ class StoryReplyService {
   }) async {
     final response = await _api.post(
       ApiConstants.storyReplies(storyId),
-      data: {
-        'content': emoji,
-        'type': 'emoji',
-        'is_anonymous': isAnonymous,
-      },
+      data: {'content': emoji, 'type': 'emoji', 'is_anonymous': isAnonymous},
     );
     return response.data;
   }

@@ -42,7 +42,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   List<User> _defaultUsers = [];
   bool _isLoadingUsers = true;
   String _searchQuery = '';
-  
+
   Map<String, ConversationIndex> _conversationIndex = {};
   bool _isLoadingConversations = true;
 
@@ -85,24 +85,31 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   Future<void> _loadConversations() async {
-    debugPrint('>>> [SendMessageScreen] Début du chargement des conversations...');
+    debugPrint(
+      '>>> [SendMessageScreen] Début du chargement des conversations...',
+    );
     setState(() {
       _isLoadingConversations = true;
     });
 
     try {
-      debugPrint('>>> [SendMessageScreen] Appel à _chatService.getConversations()...');
+      debugPrint(
+        '>>> [SendMessageScreen] Appel à _chatService.getConversations()...',
+      );
       final conversations = await _chatService.getConversations();
-      debugPrint('>>> [SendMessageScreen] Conversations reçues: ${conversations.length}');
-      
+      debugPrint(
+        '>>> [SendMessageScreen] Conversations reçues: ${conversations.length}',
+      );
+
       for (var conv in conversations) {
-        debugPrint('>>> Conversation avec: ${conv.otherParticipant?.username} - isIdentityRevealed: ${conv.isIdentityRevealed}');
+        debugPrint(
+          '>>> Conversation avec: ${conv.otherParticipant?.username} - isIdentityRevealed: ${conv.isIdentityRevealed}',
+        );
       }
 
-      final conversationIndex = await _chatService.getConversationsIndexByUsername(
-        conversations: conversations,
-      );
-      
+      final conversationIndex = await _chatService
+          .getConversationsIndexByUsername(conversations: conversations);
+
       if (!mounted) return;
       setState(() {
         _conversationIndex = conversationIndex;
@@ -145,7 +152,6 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     }
   }
 
-
   Widget _buildUsersPanel() {
     final l10n = AppLocalizations.of(context)!;
     final hasQuery = _searchQuery.isNotEmpty;
@@ -159,9 +165,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     if (users.isEmpty) {
       return Center(
         child: Text(
-          hasQuery
-              ? l10n.noUsersFound
-              : l10n.noUsersAvailable,
+          hasQuery ? l10n.noUsersFound : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
@@ -186,9 +190,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     if (sectionWidgets.isEmpty) {
       return Center(
         child: Text(
-          hasQuery
-              ? l10n.noUsersFound
-              : l10n.noUsersAvailable,
+          hasQuery ? l10n.noUsersFound : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
@@ -211,13 +213,13 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
 
     final title = shouldHideInfo ? l10n.anonymousUser : user.fullName;
     final subtitle = shouldHideInfo ? l10n.maskedInfo : '@${user.username}';
-    final avatarName = shouldHideInfo 
+    final avatarName = shouldHideInfo
         ? (user.username.isNotEmpty ? user.username[0].toUpperCase() : '?')
         : user.fullName;
 
     late String statusBadge;
     late Color statusColor;
-    
+
     if (!hasConversation) {
       statusBadge = l10n.statusNew;
       statusColor = Colors.blue;
@@ -246,7 +248,9 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
             ),
             child: Icon(
               hasConversation
-                  ? (isIdentityRevealed ? Icons.visibility : Icons.visibility_off)
+                  ? (isIdentityRevealed
+                        ? Icons.visibility
+                        : Icons.visibility_off)
                   : Icons.person_outline,
               size: 12,
               color: Colors.white,
@@ -315,10 +319,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
               const Spacer(),
               Text(
                 '${section.users.length}',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
@@ -327,10 +328,7 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 section.helper,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ),
         ],
@@ -338,7 +336,10 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     );
   }
 
-  List<_UserSection> _buildUserSections(AppLocalizations l10n, List<User> users) {
+  List<_UserSection> _buildUserSections(
+    AppLocalizations l10n,
+    List<User> users,
+  ) {
     final revealed = <User>[];
     final anonymous = <User>[];
     final withoutConversation = <User>[];
@@ -361,10 +362,10 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     }
 
     void sortByName(List<User> list) => list.sort(
-          (a, b) => _userDisplayName(a)
-              .toLowerCase()
-              .compareTo(_userDisplayName(b).toLowerCase()),
-        );
+      (a, b) => _userDisplayName(
+        a,
+      ).toLowerCase().compareTo(_userDisplayName(b).toLowerCase()),
+    );
 
     sortByName(revealed);
     sortByName(anonymous);
@@ -426,16 +427,16 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
     final message = _messageController.text.trim();
 
     if (_selectedRecipient == null || _selectedRecipient!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.selectRecipientError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.selectRecipientError)));
       return;
     }
 
     if (message.isEmpty && _selectedImage == null && _voiceFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.enterMessageError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.enterMessageError)));
       return;
     }
 
@@ -550,7 +551,9 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _isAnonymous ? l10n.anonymousMode : l10n.publicMode,
+                                _isAnonymous
+                                    ? l10n.anonymousMode
+                                    : l10n.publicMode,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -658,12 +661,16 @@ class _SendMessageScreenState extends State<SendMessageScreen> {
                               children: [
                                 Text(
                                   l10n.voiceMessageRecorded,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 if (_selectedEffect != VoiceEffect.none)
                                   Text(
                                     l10n.voiceEffectLabel(
-                                      VoiceEffectsService.getEffectName(_selectedEffect),
+                                      VoiceEffectsService.getEffectName(
+                                        _selectedEffect,
+                                      ),
                                     ),
                                     style: TextStyle(
                                       fontSize: 12,

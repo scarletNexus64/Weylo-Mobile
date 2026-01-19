@@ -176,7 +176,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, color: AppColors.error),
+                          const Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -219,7 +222,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       onSubmitted: (_) => _verifyIdentity(),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context)!.firstNameRequiredSimple;
+                          return AppLocalizations.of(
+                            context,
+                          )!.firstNameRequiredSimple;
                         }
                         return null;
                       },
@@ -263,7 +268,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     CustomTextField(
                       controller: _confirmPasswordController,
                       label: AppLocalizations.of(context)!.confirmPasswordLabel,
-                      hintText: AppLocalizations.of(context)!.confirmPasswordHint,
+                      hintText: AppLocalizations.of(
+                        context,
+                      )!.confirmPasswordHint,
                       prefixIcon: Icons.lock_outline,
                       obscureText: _obscureConfirmPassword,
                       textInputAction: TextInputAction.done,
@@ -275,12 +282,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               : Icons.visibility_off_outlined,
                         ),
                         onPressed: () {
-                          setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                          setState(
+                            () => _obscureConfirmPassword =
+                                !_obscureConfirmPassword,
+                          );
                         },
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return AppLocalizations.of(context)!.confirmPasswordRequired;
+                          return AppLocalizations.of(
+                            context,
+                          )!.confirmPasswordRequired;
                         }
                         if (value != _passwordController.text) {
                           return AppLocalizations.of(context)!.passwordMismatch;

@@ -19,12 +19,8 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         onError: Colors.white,
       ),
-      iconTheme: const IconThemeData(
-        weight: 700,
-      ),
-      primaryIconTheme: const IconThemeData(
-        weight: 700,
-      ),
+      iconTheme: const IconThemeData(weight: 700),
+      primaryIconTheme: const IconThemeData(weight: 700),
       textTheme: GoogleFonts.robotoTextTheme().copyWith(
         displayLarge: GoogleFonts.roboto(
           fontSize: 32,
@@ -115,7 +111,9 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: GoogleFonts.roboto(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -127,7 +125,9 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.primary, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: GoogleFonts.roboto(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -146,7 +146,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.divider),
@@ -167,10 +170,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: GoogleFonts.roboto(
-          fontSize: 14,
-          color: AppColors.textHint,
-        ),
+        hintStyle: GoogleFonts.roboto(fontSize: 14, color: AppColors.textHint),
         labelStyle: GoogleFonts.roboto(
           fontSize: 14,
           color: AppColors.textSecondary,
@@ -217,69 +217,66 @@ class AppTheme {
         onSurface: AppColors.textPrimaryDark,
         onError: Colors.white,
       ),
-      iconTheme: const IconThemeData(
-        weight: 700,
-      ),
-      primaryIconTheme: const IconThemeData(
-        weight: 700,
-      ),
-      textTheme: GoogleFonts.robotoTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.roboto(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimaryDark,
-        ),
-        displayMedium: GoogleFonts.roboto(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimaryDark,
-        ),
-        displaySmall: GoogleFonts.roboto(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimaryDark,
-        ),
-        headlineMedium: GoogleFonts.roboto(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryDark,
-        ),
-        headlineSmall: GoogleFonts.roboto(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryDark,
-        ),
-        titleLarge: GoogleFonts.roboto(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimaryDark,
-        ),
-        titleMedium: GoogleFonts.roboto(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textPrimaryDark,
-        ),
-        bodyLarge: GoogleFonts.roboto(
-          fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: AppColors.textPrimaryDark,
-        ),
-        bodyMedium: GoogleFonts.roboto(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: AppColors.textPrimaryDark,
-        ),
-        bodySmall: GoogleFonts.roboto(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-          color: AppColors.textSecondaryDark,
-        ),
-        labelLarge: GoogleFonts.roboto(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textPrimaryDark,
-        ),
-      ),
+      iconTheme: const IconThemeData(weight: 700),
+      primaryIconTheme: const IconThemeData(weight: 700),
+      textTheme: GoogleFonts.robotoTextTheme(ThemeData.dark().textTheme)
+          .copyWith(
+            displayLarge: GoogleFonts.roboto(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimaryDark,
+            ),
+            displayMedium: GoogleFonts.roboto(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimaryDark,
+            ),
+            displaySmall: GoogleFonts.roboto(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimaryDark,
+            ),
+            headlineMedium: GoogleFonts.roboto(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimaryDark,
+            ),
+            headlineSmall: GoogleFonts.roboto(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimaryDark,
+            ),
+            titleLarge: GoogleFonts.roboto(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimaryDark,
+            ),
+            titleMedium: GoogleFonts.roboto(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimaryDark,
+            ),
+            bodyLarge: GoogleFonts.roboto(
+              fontSize: 16,
+              fontWeight: FontWeight.normal,
+              color: AppColors.textPrimaryDark,
+            ),
+            bodyMedium: GoogleFonts.roboto(
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
+              color: AppColors.textPrimaryDark,
+            ),
+            bodySmall: GoogleFonts.roboto(
+              fontSize: 12,
+              fontWeight: FontWeight.normal,
+              color: AppColors.textSecondaryDark,
+            ),
+            labelLarge: GoogleFonts.roboto(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimaryDark,
+            ),
+          ),
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
@@ -313,7 +310,9 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: GoogleFonts.roboto(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -323,7 +322,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.dividerDark),

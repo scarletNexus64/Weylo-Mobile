@@ -4,11 +4,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../promotion_service.dart';
 
-enum PromotionObjective {
-  boostAccount,
-  getSales,
-  getProspects,
-}
+enum PromotionObjective { boostAccount, getSales, getProspects }
 
 class PromotePostModal extends StatefulWidget {
   final int confessionId;
@@ -64,7 +60,9 @@ class _PromotePostModalState extends State<PromotePostModal>
 
   List<Map<String, dynamic>> _pricingOptions = [];
 
-  Map<PromotionObjective, Map<String, dynamic>> _getObjectives(AppLocalizations l10n) {
+  Map<PromotionObjective, Map<String, dynamic>> _getObjectives(
+    AppLocalizations l10n,
+  ) {
     return {
       PromotionObjective.boostAccount: {
         'title': l10n.promoObjectiveBoostTitle,
@@ -72,9 +70,21 @@ class _PromotePostModalState extends State<PromotePostModal>
         'color': Colors.blue,
         'description': l10n.promoObjectiveBoostDescription,
         'subObjectives': [
-          {'id': 'followers', 'label': l10n.promoObjectiveFollowers, 'icon': Icons.people},
-          {'id': 'visibility', 'label': l10n.promoObjectiveVisibility, 'icon': Icons.visibility},
-          {'id': 'engagement', 'label': l10n.promoObjectiveEngagement, 'icon': Icons.favorite},
+          {
+            'id': 'followers',
+            'label': l10n.promoObjectiveFollowers,
+            'icon': Icons.people,
+          },
+          {
+            'id': 'visibility',
+            'label': l10n.promoObjectiveVisibility,
+            'icon': Icons.visibility,
+          },
+          {
+            'id': 'engagement',
+            'label': l10n.promoObjectiveEngagement,
+            'icon': Icons.favorite,
+          },
         ],
       },
       PromotionObjective.getSales: {
@@ -83,9 +93,21 @@ class _PromotePostModalState extends State<PromotePostModal>
         'color': Colors.green,
         'description': l10n.promoObjectiveSalesDescription,
         'subObjectives': [
-          {'id': 'products', 'label': l10n.promoObjectiveSellProducts, 'icon': Icons.inventory_2},
-          {'id': 'services', 'label': l10n.promoObjectiveSellServices, 'icon': Icons.design_services},
-          {'id': 'events', 'label': l10n.promoObjectivePromoteEvent, 'icon': Icons.event},
+          {
+            'id': 'products',
+            'label': l10n.promoObjectiveSellProducts,
+            'icon': Icons.inventory_2,
+          },
+          {
+            'id': 'services',
+            'label': l10n.promoObjectiveSellServices,
+            'icon': Icons.design_services,
+          },
+          {
+            'id': 'events',
+            'label': l10n.promoObjectivePromoteEvent,
+            'icon': Icons.event,
+          },
         ],
       },
       PromotionObjective.getProspects: {
@@ -94,9 +116,21 @@ class _PromotePostModalState extends State<PromotePostModal>
         'color': Colors.orange,
         'description': l10n.promoObjectiveProspectsDescription,
         'subObjectives': [
-          {'id': 'contacts', 'label': l10n.promoObjectiveCollectContacts, 'icon': Icons.contacts},
-          {'id': 'messages', 'label': l10n.promoObjectiveReceiveMessages, 'icon': Icons.message},
-          {'id': 'website', 'label': l10n.promoObjectiveWebsiteVisits, 'icon': Icons.language},
+          {
+            'id': 'contacts',
+            'label': l10n.promoObjectiveCollectContacts,
+            'icon': Icons.contacts,
+          },
+          {
+            'id': 'messages',
+            'label': l10n.promoObjectiveReceiveMessages,
+            'icon': Icons.message,
+          },
+          {
+            'id': 'website',
+            'label': l10n.promoObjectiveWebsiteVisits,
+            'icon': Icons.language,
+          },
         ],
       },
     };
@@ -344,16 +378,16 @@ class _PromotePostModalState extends State<PromotePostModal>
           children: [
             Text(
               l10n.promoGoalQuestion,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.promoGoalSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
             ...objectives.entries.map((entry) {
@@ -470,22 +504,23 @@ class _PromotePostModalState extends State<PromotePostModal>
           children: [
             Text(
               l10n.promoStepDetailTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.promoDetailSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
             ...subObjectives.map((subObj) {
               final isSelected = _selectedSubObjective == subObj['id'];
               return GestureDetector(
-                onTap: () => setState(() => _selectedSubObjective = subObj['id']),
+                onTap: () =>
+                    setState(() => _selectedSubObjective = subObj['id']),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.only(bottom: 12),
@@ -509,13 +544,14 @@ class _PromotePostModalState extends State<PromotePostModal>
                         child: Text(
                           subObj['label'] as String,
                           style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                             fontSize: 15,
                           ),
                         ),
                       ),
-                      if (isSelected)
-                        Icon(Icons.check_circle, color: color),
+                      if (isSelected) Icon(Icons.check_circle, color: color),
                     ],
                   ),
                 ),
@@ -542,16 +578,16 @@ class _PromotePostModalState extends State<PromotePostModal>
           children: [
             Text(
               l10n.promoPackTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.promoPackSubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 24),
             ..._pricingOptions.asMap().entries.map((entry) {
@@ -577,7 +613,9 @@ class _PromotePostModalState extends State<PromotePostModal>
                     color: isSelected ? null : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.2),
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.grey.withOpacity(0.2),
                       width: isSelected ? 2 : 1,
                     ),
                     boxShadow: isSelected
@@ -612,7 +650,9 @@ class _PromotePostModalState extends State<PromotePostModal>
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
-                                    color: isSelected ? AppColors.primary : Colors.black,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : Colors.black,
                                   ),
                                 ),
                               ],
@@ -622,12 +662,16 @@ class _PromotePostModalState extends State<PromotePostModal>
                               children: [
                                 _buildPackFeature(
                                   Icons.trending_up,
-                                  l10n.promoReachBoost('${pack['reach_boost']}'),
+                                  l10n.promoReachBoost(
+                                    '${pack['reach_boost']}',
+                                  ),
                                 ),
                                 const SizedBox(width: 16),
                                 _buildPackFeature(
                                   Icons.schedule,
-                                  l10n.promoBoostDuration('${pack['duration_hours']}'),
+                                  l10n.promoBoostDuration(
+                                    '${pack['duration_hours']}',
+                                  ),
                                 ),
                               ],
                             ),
@@ -711,10 +755,7 @@ class _PromotePostModalState extends State<PromotePostModal>
         const SizedBox(width: 4),
         Text(
           text,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -735,9 +776,9 @@ class _PromotePostModalState extends State<PromotePostModal>
           children: [
             Text(
               l10n.summaryTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
 
@@ -760,7 +801,8 @@ class _PromotePostModalState extends State<PromotePostModal>
                   _buildSummaryRow(
                     l10n.summaryObjectiveLabel,
                     _selectedObjective != null
-                        ? _getObjectives(l10n)[_selectedObjective]!['title'] as String
+                        ? _getObjectives(l10n)[_selectedObjective]!['title']
+                              as String
                         : '-',
                   ),
                   const Divider(height: 24),
@@ -772,14 +814,18 @@ class _PromotePostModalState extends State<PromotePostModal>
                   _buildSummaryRow(
                     l10n.summaryDurationLabel,
                     selectedPack != null
-                        ? l10n.summaryDurationValue('${selectedPack['duration_hours']}')
+                        ? l10n.summaryDurationValue(
+                            '${selectedPack['duration_hours']}',
+                          )
                         : '-',
                   ),
                   const Divider(height: 24),
                   _buildSummaryRow(
                     l10n.summaryReachBoostLabel,
                     selectedPack != null
-                        ? l10n.summaryReachBoostValue('${selectedPack['reach_boost']}')
+                        ? l10n.summaryReachBoostValue(
+                            '${selectedPack['reach_boost']}',
+                          )
                         : '-',
                   ),
                   const Divider(height: 24),
@@ -809,7 +855,11 @@ class _PromotePostModalState extends State<PromotePostModal>
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                      const Icon(
+                        Icons.info_outline,
+                        color: Colors.orange,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         l10n.promoImportantInfoTitle,
@@ -920,8 +970,8 @@ class _PromotePostModalState extends State<PromotePostModal>
       buttonText = _isPromoting
           ? l10n.processingLabel
           : selectedPack != null
-              ? l10n.payAmountLabel(currencyFormat.format(selectedPack['price']))
-              : l10n.payAction;
+          ? l10n.payAmountLabel(currencyFormat.format(selectedPack['price']))
+          : l10n.payAction;
     } else {
       buttonText = l10n.continueAction;
     }
@@ -947,7 +997,9 @@ class _PromotePostModalState extends State<PromotePostModal>
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
-          gradient: _canContinue() && !_isPromoting ? AppColors.primaryGradient : null,
+          gradient: _canContinue() && !_isPromoting
+              ? AppColors.primaryGradient
+              : null,
           color: _canContinue() && !_isPromoting ? null : Colors.grey[300],
           borderRadius: BorderRadius.circular(12),
           boxShadow: _canContinue() && !_isPromoting

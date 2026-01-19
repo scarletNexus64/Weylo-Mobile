@@ -82,14 +82,14 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     // Handle video stories
     if (story.type == StoryType.video && story.mediaUrl != null) {
       _videoController?.dispose();
-      _videoController = VideoPlayerController.networkUrl(
-        Uri.parse(story.mediaUrl!),
-      )..initialize().then((_) {
-          setState(() {});
-          _videoController!.play();
-          _progressController.duration = _videoController!.value.duration;
-          _progressController.forward();
-        });
+      _videoController =
+          VideoPlayerController.networkUrl(Uri.parse(story.mediaUrl!))
+            ..initialize().then((_) {
+              setState(() {});
+              _videoController!.play();
+              _progressController.duration = _videoController!.value.duration;
+              _progressController.forward();
+            });
     } else {
       _progressController.duration = Duration(seconds: story.duration ?? 5);
       _progressController.forward();
@@ -196,9 +196,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         _comments.insert(0, comment);
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.commentAddError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.commentAddError)));
     }
   }
 
@@ -244,10 +244,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.transparent,
-                    ],
+                    colors: [Colors.black.withOpacity(0.7), Colors.transparent],
                   ),
                 ),
               ),
@@ -276,7 +273,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                           return LinearProgressIndicator(
                             value: progress,
                             backgroundColor: Colors.white.withOpacity(0.3),
-                            valueColor: const AlwaysStoppedAnimation(Colors.white),
+                            valueColor: const AlwaysStoppedAnimation(
+                              Colors.white,
+                            ),
                           );
                         },
                       ),
@@ -325,7 +324,10 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.comment_outlined, color: Colors.white),
+                    icon: const Icon(
+                      Icons.comment_outlined,
+                      color: Colors.white,
+                    ),
                     onPressed: _toggleComments,
                   ),
                   IconButton(
@@ -350,10 +352,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.transparent,
-                    ],
+                    colors: [Colors.black.withOpacity(0.7), Colors.transparent],
                   ),
                 ),
               ),
@@ -367,7 +366,10 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
               child: GestureDetector(
                 onTap: _toggleComments,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(20),
@@ -375,12 +377,16 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 16),
+                      const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         _comments.isEmpty
-                          ? l10n.viewCommentsAction
-                          : l10n.viewCommentsCount(_comments.length),
+                            ? l10n.viewCommentsAction
+                            : l10n.viewCommentsCount(_comments.length),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -402,32 +408,38 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                 storyId: story.id,
                 isExpanded: _isReplying,
                 onTap: _toggleReplyMode,
-                onSend: (content, {isAnonymous = true, voiceFile, voiceEffect}) async {
-                  try {
-                    if (voiceFile != null) {
-                      await _replyService.sendVoiceReply(
-                        storyId: story.id,
-                        audioFile: voiceFile,
-                        voiceEffect: voiceEffect,
-                        isAnonymous: isAnonymous,
-                      );
-                    } else {
-                      await _replyService.sendTextReply(
-                        storyId: story.id,
-                        content: content,
-                        isAnonymous: isAnonymous,
-                      );
-                    }
-                    _toggleReplyMode();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.storyReplySent)),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.storyReplySendError)),
-                    );
-                  }
-                },
+                onSend:
+                    (
+                      content, {
+                      isAnonymous = true,
+                      voiceFile,
+                      voiceEffect,
+                    }) async {
+                      try {
+                        if (voiceFile != null) {
+                          await _replyService.sendVoiceReply(
+                            storyId: story.id,
+                            audioFile: voiceFile,
+                            voiceEffect: voiceEffect,
+                            isAnonymous: isAnonymous,
+                          );
+                        } else {
+                          await _replyService.sendTextReply(
+                            storyId: story.id,
+                            content: content,
+                            isAnonymous: isAnonymous,
+                          );
+                        }
+                        _toggleReplyMode();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.storyReplySent)),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.storyReplySendError)),
+                        );
+                      }
+                    },
                 onClose: _toggleReplyMode,
               ),
             ),
@@ -477,45 +489,47 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     onTap: () {}, // Prevent closing when tapping on comments
                     child: _isLoadingComments
                         ? const Center(
-                            child: CircularProgressIndicator(color: Colors.white),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
                           )
                         : _comments.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.chat_bubble_outline,
-                                      size: 64,
-                                      color: Colors.white.withOpacity(0.5),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      l10n.noCommentsTitle,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.7),
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      l10n.noCommentsSubtitle,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.5),
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 64,
+                                  color: Colors.white.withOpacity(0.5),
                                 ),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                itemCount: _comments.length,
-                                itemBuilder: (context, index) {
-                                  final comment = _comments[index];
-                                  return _buildCommentItem(comment);
-                                },
-                              ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.noCommentsTitle,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.7),
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.noCommentsSubtitle,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.5),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: _comments.length,
+                            itemBuilder: (context, index) {
+                              final comment = _comments[index];
+                              return _buildCommentItem(comment);
+                            },
+                          ),
                   ),
                 ),
 
@@ -533,7 +547,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: l10n.commentHint,
-                            hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                            hintStyle: TextStyle(
+                              color: Colors.white.withOpacity(0.5),
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
                               borderSide: BorderSide.none,
@@ -622,42 +638,44 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                 // Replies
                 if (comment.replies != null && comment.replies!.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  ...comment.replies!.map((reply) => Padding(
-                        padding: const EdgeInsets.only(left: 24, top: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AvatarWidget(
-                              imageUrl: reply.user?.avatar,
-                              name: reply.user?.fullName ?? l10n.userFallback,
-                              size: 28,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    reply.user?.fullName ?? l10n.userFallback,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
+                  ...comment.replies!.map(
+                    (reply) => Padding(
+                      padding: const EdgeInsets.only(left: 24, top: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AvatarWidget(
+                            imageUrl: reply.user?.avatar,
+                            name: reply.user?.fullName ?? l10n.userFallback,
+                            size: 28,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  reply.user?.fullName ?? l10n.userFallback,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
                                   ),
-                                  Text(
-                                    reply.content,
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.9),
-                                      fontSize: 13,
-                                    ),
+                                ),
+                                Text(
+                                  reply.content,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 13,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      )),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -734,5 +752,4 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       return AppColors.primary;
     }
   }
-
 }
