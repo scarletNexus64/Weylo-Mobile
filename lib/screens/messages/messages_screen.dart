@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/message.dart';
@@ -83,11 +84,12 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthProvider>().user;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages anonymes'),
+        title: Text(l10n.messagesTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
@@ -95,8 +97,8 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
               if (user != null) {
                 final link = 'https://weylo.app/${user.username}';
                 Share.share(
-                  'Envoyez-moi un message anonyme sur Weylo! $link',
-                  subject: 'Mon lien Weylo',
+                  l10n.shareWebLinkMessage(link),
+                  subject: l10n.shareLinkSubject,
                 );
               }
             },
@@ -109,7 +111,7 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Reçus'),
+                  Text(l10n.inboxTabReceived),
                   if (_stats != null && _stats!.unreadCount > 0) ...[
                     const SizedBox(width: 8),
                     Container(
@@ -131,7 +133,7 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
                 ],
               ),
             ),
-            const Tab(text: 'Envoyés'),
+            Tab(text: l10n.inboxTabSent),
           ],
         ),
       ),
@@ -170,22 +172,21 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
   }
 
   Widget _buildMessagesList(List<AnonymousMessage> messages, {required bool isReceived}) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = isReceived ? _receivedRefreshController : _sentRefreshController;
     final emptyState = EmptyState(
       icon: Icons.mail_outline,
-      title: isReceived ? 'Aucun message reçu' : 'Aucun message envoyé',
-      subtitle: isReceived
-          ? 'Partagez votre lien pour recevoir des messages anonymes'
-          : 'Envoyez votre premier message anonyme',
-      buttonText: isReceived ? 'Partager mon lien' : 'Envoyer un message',
+      title: isReceived ? l10n.emptyInboxTitle : l10n.emptySentTitle,
+      subtitle: isReceived ? l10n.emptyInboxSubtitle : l10n.emptySentSubtitle,
+      buttonText: isReceived ? l10n.emptyInboxButton : l10n.emptySentButton,
       onButtonPressed: () {
         if (isReceived) {
           final user = context.read<AuthProvider>().user;
           if (user != null) {
             final link = 'https://weylo.app/${user.username}';
             Share.share(
-              'Envoyez-moi un message anonyme sur Weylo! $link',
-              subject: 'Mon lien Weylo',
+              l10n.shareWebLinkMessage(link),
+              subject: l10n.shareLinkSubject,
             );
           }
         } else {

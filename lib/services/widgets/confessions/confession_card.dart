@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:video_player/video_player.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
@@ -133,6 +134,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = context.read<AuthProvider>().user;
     final isOwnPost = currentUser?.id == confession.authorId;
     final imageUrl = _resolveMediaUrl(confession.imageUrl);
@@ -190,7 +192,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      'Privée',
+                                      l10n.visibilityPrivate,
                                       style: TextStyle(
                                         fontSize: 10,
                                         color: AppColors.secondary,
@@ -219,7 +221,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      'Anonyme',
+                                      l10n.userAnonymous,
                                       style: TextStyle(
                                         fontSize: 10,
                                         color: AppColors.primary,
@@ -277,7 +279,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
                     });
                   },
                   child: Text(
-                    _isContentExpanded ? 'Voir moins' : 'Voir plus',
+                    _isContentExpanded ? l10n.viewLessAction : l10n.viewMoreAction,
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -338,7 +340,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Pour ${confession.recipient!.fullName}',
+                          l10n.confessionForUser(confession.recipient!.fullName),
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -392,11 +394,12 @@ class _ConfessionCardState extends State<ConfessionCard> {
   }
 
   Widget _buildAvatar() {
+    final l10n = AppLocalizations.of(context)!;
     // Toujours afficher la photo si l'auteur existe et a une photo
     if (confession.author != null && confession.author!.avatar != null) {
       return AvatarWidget(
         imageUrl: confession.author!.avatar,
-        name: confession.shouldShowAuthor ? confession.author!.fullName : 'Anonyme',
+        name: confession.shouldShowAuthor ? confession.author!.fullName : l10n.userAnonymous,
         size: 44,
       );
     }
@@ -542,6 +545,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
   }
 
   Widget _buildAuthorInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (confession.shouldShowAuthor && confession.author != null) {
       return NameWithBadge(
         name: confession.author!.fullName,
@@ -554,7 +558,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
       );
     }
     return Text(
-      'Anonyme',
+      l10n.userAnonymous,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w700,
         fontStyle: FontStyle.italic,
@@ -563,6 +567,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
   }
 
   Widget _buildBoostButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return InkWell(
       onTap: () {
         if (widget.onPromote != null) {
@@ -586,18 +591,18 @@ class _ConfessionCardState extends State<ConfessionCard> {
           gradient: AppColors.primaryGradient,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.trending_up,
               color: Colors.white,
               size: 16,
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Text(
-              'Booster',
-              style: TextStyle(
+              l10n.boostAction,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w700,
                 fontSize: 12,
@@ -644,6 +649,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
   }
 
   void _showOptions(BuildContext context, bool isOwnPost) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
@@ -658,8 +664,8 @@ class _ConfessionCardState extends State<ConfessionCard> {
                     shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
                     child: const Icon(Icons.trending_up, color: Colors.white),
                   ),
-                  title: const Text('Promouvoir'),
-                  subtitle: const Text('Augmentez la visibilité de ce post'),
+                  title: Text(l10n.profilePromote),
+                  subtitle: Text(l10n.profilePromoteSubtitle),
                   onTap: () {
                     Navigator.pop(ctx);
                     if (widget.onPromote != null) {
@@ -681,7 +687,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
                 ),
               ListTile(
                 leading: const Icon(Icons.share_outlined),
-                title: const Text('Partager'),
+                title: Text(l10n.shareAction),
                 onTap: () {
                   Navigator.pop(ctx);
                   widget.onShare?.call();
@@ -690,7 +696,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
               if (isOwnPost)
                 ListTile(
                   leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                  title: const Text('Supprimer', style: TextStyle(color: AppColors.error)),
+                  title: Text(l10n.deleteAction, style: const TextStyle(color: AppColors.error)),
                   onTap: () async {
                     Navigator.pop(ctx);
                     _confirmDelete(context);
@@ -699,7 +705,7 @@ class _ConfessionCardState extends State<ConfessionCard> {
               if (!isOwnPost)
                 ListTile(
                   leading: const Icon(Icons.flag_outlined),
-                  title: const Text('Signaler'),
+                  title: Text(l10n.reportAction),
                   onTap: () {
                     Navigator.pop(ctx);
                     // Handle report
@@ -713,15 +719,16 @@ class _ConfessionCardState extends State<ConfessionCard> {
   }
 
   void _confirmDelete(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer la publication'),
-        content: const Text('Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.'),
+        title: Text(l10n.profileDeletePostTitle),
+        content: Text(l10n.profileDeletePostConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -732,8 +739,8 @@ class _ConfessionCardState extends State<ConfessionCard> {
                 widget.onDeleted?.call();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Publication supprimée'),
+                    SnackBar(
+                      content: Text(l10n.postDeletedSuccess),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -742,14 +749,14 @@ class _ConfessionCardState extends State<ConfessionCard> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Erreur: ${e.toString()}'),
+                      content: Text(l10n.errorMessage(e.toString())),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Supprimer', style: TextStyle(color: AppColors.error)),
+            child: Text(l10n.deleteAction, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/pusher_service.dart';
@@ -51,6 +52,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -78,7 +80,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     index: 0,
                     icon: Icons.home_outlined,
                     activeIcon: Icons.home,
-                    label: 'Feed',
+                    label: l10n.navFeedLabel,
                   ),
                 ),
                 Expanded(
@@ -86,7 +88,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     index: 1,
                     icon: Icons.mail_outline,
                     activeIcon: Icons.mail,
-                    label: 'Messages',
+                    label: l10n.navMessagesLabel,
                     showBadge: true,
                   ),
                 ),
@@ -95,7 +97,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     index: 2,
                     icon: Icons.chat_bubble_outline,
                     activeIcon: Icons.chat_bubble,
-                    label: 'Chat',
+                    label: l10n.navChatLabel,
                   ),
                 ),
                 Expanded(
@@ -103,7 +105,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     index: 3,
                     icon: Icons.groups_outlined,
                     activeIcon: Icons.groups,
-                    label: 'Groupes',
+                    label: l10n.navGroupsLabel,
                   ),
                 ),
                 Expanded(
@@ -111,7 +113,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     index: 4,
                     icon: Icons.person_outline,
                     activeIcon: Icons.person,
-                    label: 'Profil',
+                    label: l10n.navProfileLabel,
                   ),
                 ),
               ],

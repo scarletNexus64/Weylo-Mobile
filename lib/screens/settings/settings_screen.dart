@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../providers/theme_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -11,24 +13,25 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final themeProvider = context.watch<ThemeProvider>();
     final authProvider = context.watch<AuthProvider>();
     final currentLanguage = authProvider.currentUser?.settings?.language ?? 'fr';
-    final languageLabel = currentLanguage == 'fr' ? 'Français' : 'English';
+    final languageLabel = currentLanguage == 'fr' ? l10n.languageFrench : l10n.languageEnglish;
     final user = authProvider.currentUser;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Paramtres'),
+        title: Text(l10n.settingsTitle),
       ),
       body: ListView(
         children: [
           // Account section
-          _buildSectionHeader('Compte'),
+          _buildSectionHeader(l10n.accountSection),
           if (user != null)
             _buildSettingItem(
               icon: Icons.badge_outlined,
-              title: 'Informations du compte',
+              title: l10n.accountInfo,
               onTap: () {
                 Navigator.push(
                   context,
@@ -40,32 +43,32 @@ class SettingsScreen extends StatelessWidget {
             ),
           _buildSettingItem(
             icon: Icons.person_outline,
-            title: 'Modifier le profil',
+            title: l10n.editProfile,
             onTap: () => context.push('/edit-profile'),
           ),
           _buildSettingItem(
             icon: Icons.account_balance_wallet_outlined,
-            title: 'Portefeuille',
+            title: l10n.wallet,
             onTap: () => context.push('/wallet'),
           ),
           _buildSettingItem(
             icon: Icons.lock_outline,
-            title: 'Confidentialité',
+            title: l10n.privacy,
             onTap: () => context.push('/privacy'),
           ),
           _buildSettingItem(
             icon: Icons.notifications_outlined,
-            title: 'Notifications',
+            title: l10n.notifications,
             onTap: () => context.push('/notifications'),
           ),
 
           const Divider(),
 
           // Appearance section
-          _buildSectionHeader('Apparence'),
+          _buildSectionHeader(l10n.appearanceSection),
           _buildSettingItem(
             icon: Icons.dark_mode_outlined,
-            title: 'Mode sombre',
+            title: l10n.darkMode,
             trailing: Switch(
               value: themeProvider.themeMode == ThemeMode.dark,
               onChanged: (value) {
@@ -77,7 +80,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           _buildSettingItem(
             icon: Icons.language_outlined,
-            title: 'Langue',
+            title: l10n.language,
             subtitle: languageLabel,
             onTap: () => _showLanguageDialog(context),
           ),
@@ -85,11 +88,11 @@ class SettingsScreen extends StatelessWidget {
           const Divider(),
 
           // Premium section
-          _buildSectionHeader('Premium'),
+          _buildSectionHeader(l10n.premiumSection),
           _buildSettingItem(
             icon: Icons.star_outline,
-            title: 'Weylo Premium',
-            subtitle: 'Dbloquez des fonctionnalits exclusives',
+            title: l10n.weyloPremium,
+            subtitle: l10n.premiumSubtitle,
             onTap: () => context.push('/premium'),
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -97,8 +100,8 @@ class SettingsScreen extends StatelessWidget {
                 gradient: AppColors.primaryGradient,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                'UPGRADE',
+              child: Text(
+                l10n.upgrade,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 10,
@@ -109,44 +112,44 @@ class SettingsScreen extends StatelessWidget {
           ),
           _buildSettingItem(
             icon: Icons.subscriptions_outlined,
-            title: 'Mes abonnements',
-            subtitle: 'Pass Premium et abonnements cibls',
+            title: l10n.mySubscriptions,
+            subtitle: l10n.subscriptionsSubtitle,
             onTap: () => context.push('/subscriptions'),
           ),
           _buildSettingItem(
             icon: Icons.tune_outlined,
-            title: 'Rglages Premium',
+            title: l10n.premiumSettings,
             onTap: () => context.push('/premium-settings'),
           ),
           _buildSettingItem(
             icon: Icons.bar_chart_outlined,
-            title: 'Revenus',
-            subtitle: 'Creator Fund et revenus pub',
+            title: l10n.earnings,
+            subtitle: l10n.earningsSubtitle,
             onTap: () => context.push('/earnings'),
           ),
 
           const Divider(),
 
           // Support section
-          _buildSectionHeader('Support'),
+          _buildSectionHeader(l10n.supportSection),
           _buildSettingItem(
             icon: Icons.help_outline,
-            title: 'Aide',
+            title: l10n.help,
             onTap: () => context.push('/help'),
           ),
           _buildSettingItem(
             icon: Icons.info_outline,
-            title: ' propos',
+            title: l10n.about,
             onTap: () => context.push('/about'),
           ),
           _buildSettingItem(
             icon: Icons.description_outlined,
-            title: 'Conditions d\'utilisation',
+            title: l10n.termsOfUse,
             onTap: () => context.push('/terms'),
           ),
           _buildSettingItem(
             icon: Icons.privacy_tip_outlined,
-            title: 'Politique de confidentialité',
+            title: l10n.privacyPolicy,
             onTap: () => context.push('/privacy-policy'),
           ),
 
@@ -155,7 +158,7 @@ class SettingsScreen extends StatelessWidget {
           // Logout
           _buildSettingItem(
             icon: Icons.logout,
-            title: 'Dconnexion',
+            title: l10n.logout,
             textColor: Colors.red,
             onTap: () => _showLogoutDialog(context),
           ),
@@ -165,7 +168,7 @@ class SettingsScreen extends StatelessWidget {
           // App version
           Center(
             child: Text(
-              'Weylo v1.0.0',
+              l10n.appVersion('1.0.0'),
               style: TextStyle(
                 color: Colors.grey[500],
                 fontSize: 12,
@@ -233,35 +236,39 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _showLanguageDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeProvider = context.read<LocaleProvider>();
     final currentLanguage = context.read<AuthProvider>().currentUser?.settings?.language ?? 'fr';
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choisir la langue'),
+        title: Text(l10n.chooseLanguage),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Text('🇫🇷', style: TextStyle(fontSize: 24)),
-              title: const Text('Français'),
+              title: Text(l10n.languageFrench),
               trailing: currentLanguage == 'fr'
                   ? const Icon(Icons.check, color: Colors.green)
                   : null,
               onTap: () {
                 Navigator.pop(context);
                 _updateLanguage(context, 'fr');
+                localeProvider.setLocale(const Locale('fr'));
               },
             ),
             ListTile(
               leading: const Text('🇬🇧', style: TextStyle(fontSize: 24)),
-              title: const Text('English'),
+              title: Text(l10n.languageEnglish),
               trailing: currentLanguage == 'en'
                   ? const Icon(Icons.check, color: Colors.green)
                   : null,
               onTap: () {
                 Navigator.pop(context);
                 _updateLanguage(context, 'en');
+                localeProvider.setLocale(const Locale('en'));
               },
             ),
           ],
@@ -269,7 +276,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -277,36 +284,38 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _updateLanguage(BuildContext context, String language) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await context.read<AuthProvider>().updateSettings({'language': language});
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(language == 'fr'
-                ? 'Langue changée en Français'
-                : 'Language changed to English'),
+                ? l10n.languageChangedToFrench
+                : l10n.languageChangedToEnglish),
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
         );
       }
     }
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Dconnexion'),
-        content: const Text('tes-vous sr de vouloir vous dconnecter?'),
+        title: Text(l10n.logoutTitle),
+        content: Text(l10n.logoutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -314,9 +323,9 @@ class SettingsScreen extends StatelessWidget {
               context.read<AuthProvider>().logout();
               context.go('/login');
             },
-            child: const Text(
-              'Dconnexion',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              l10n.logoutButton,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -332,9 +341,10 @@ class AccountInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Informations du compte'),
+        title: Text(l10n.accountInfoTitle),
       ),
       body: ListView(
         children: [
@@ -357,6 +367,7 @@ class UserInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
@@ -368,34 +379,34 @@ class UserInfoCard extends StatelessWidget {
           children: [
             _buildInfoRow(
               context,
-              'Prénom',
+              l10n.firstName,
               user.firstName,
               isEditable: true,
             ),
             if (user.lastName != null && user.lastName!.isNotEmpty)
               _buildInfoRow(
                 context,
-                'Nom',
+                l10n.lastName,
                 user.lastName,
                 isEditable: true,
               ),
-            _buildInfoRow(context, 'Nom d\'utilisateur', '@${user.username}'),
+            _buildInfoRow(context, l10n.username, '@${user.username}'),
             if (user.email != null && user.email!.isNotEmpty)
-              _buildInfoRow(context, 'Email', user.email),
+              _buildInfoRow(context, l10n.email, user.email),
             if (user.phone != null && user.phone!.isNotEmpty)
-              _buildInfoRow(context, 'Téléphone', user.phone),
+              _buildInfoRow(context, l10n.phone, user.phone),
             _buildInfoRow(
               context,
-              'Bio',
+              l10n.bio,
               (user.bio != null && user.bio!.isNotEmpty)
                   ? user.bio
-                  : 'Non renseignée',
+                  : l10n.notProvided,
               isEditable: true,
             ),
             if (user.createdAt != null)
               _buildInfoRow(
                 context,
-                'Date d\'inscription',
+                l10n.signupDate,
                 Helpers.formatDate(user.createdAt!),
               ),
           ],

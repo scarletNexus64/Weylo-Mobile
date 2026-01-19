@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
@@ -55,6 +56,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   Future<void> _loadConfession() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       setState(() {
         _isLoading = true;
@@ -80,7 +82,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
       _loadComments();
     } catch (e) {
       setState(() {
-        _error = 'Erreur de chargement: $e';
+        _error = l10n.loadingErrorMessage(e.toString());
         _isLoading = false;
       });
     }
@@ -158,6 +160,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   Future<void> _sendComment() async {
+    final l10n = AppLocalizations.of(context)!;
     final content = _commentController.text.trim();
     if (content.isEmpty && _selectedCommentImage == null) return;
 
@@ -197,13 +200,14 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
       setState(() => _isSendingComment = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
         );
       }
     }
   }
 
   Future<void> _toggleLike() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_confession == null) return;
 
     try {
@@ -217,7 +221,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
         );
       }
     }
@@ -226,18 +230,20 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   void _shareConfession() {
     if (_confession == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
     final shareUrl = 'https://weylo.app/post/${_confession!.id}';
     Share.share(
-      'Decouvre cette publication sur Weylo! $shareUrl',
-      subject: 'Publication Weylo',
+      l10n.sharePostMessage(shareUrl),
+      subject: l10n.sharePostSubject,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Publication'),
+        title: Text(l10n.postTitle),
         actions: [
           // Bouton pour révéler l'identité si la publication est anonyme
           if (_confession != null &&
@@ -246,7 +252,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             IconButton(
               icon: const Icon(Icons.visibility),
               onPressed: _showRevealIdentityDialog,
-              tooltip: 'Découvrir l\'identité',
+              tooltip: l10n.revealIdentityTitle,
             ),
           IconButton(
             icon: const Icon(Icons.share_outlined),
@@ -260,6 +266,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   Widget _buildBody() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -275,7 +282,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadConfession,
-              child: const Text('Reessayer'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -283,7 +290,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
     }
 
     if (_confession == null) {
-      return const Center(child: Text('Publication non trouvee'));
+      return Center(child: Text(l10n.postNotFound));
     }
 
     return RefreshIndicator(
@@ -308,6 +315,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
     final imageUrl = _resolveMediaUrl(confession.imageUrl);
     final hasImage = confession.hasImage && imageUrl.isNotEmpty;
     final hasVideo = confession.hasVideo;
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -341,7 +349,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                           Text(
                             confession.isIdentityRevealed && confession.author != null
                                 ? confession.author!.fullName
-                                : 'Anonyme',
+                                : l10n.userAnonymous,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -482,21 +490,21 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
               Icon(Icons.visibility_outlined, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
-                '${Helpers.formatNumber(confession.viewsCount)} vues',
+                l10n.viewsCount(Helpers.formatNumber(confession.viewsCount)),
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
               const SizedBox(width: 16),
               Icon(Icons.favorite, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
-                '${Helpers.formatNumber(confession.likesCount)} j\'aime',
+                l10n.likesCount(Helpers.formatNumber(confession.likesCount)),
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
               const SizedBox(width: 16),
               Icon(Icons.chat_bubble_outline, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
-                '${Helpers.formatNumber(confession.commentsCount)} commentaires',
+                l10n.commentsCount(Helpers.formatNumber(confession.commentsCount)),
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
             ],
@@ -511,20 +519,20 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             children: [
               _buildTwitterActionButton(
                 icon: confession.isLiked ? Icons.favorite : Icons.favorite_outline,
-                label: 'J\'aime',
+                label: l10n.likeAction,
                 color: confession.isLiked ? AppColors.error : null,
                 onTap: _toggleLike,
               ),
               _buildTwitterActionButton(
                 icon: Icons.mode_comment_outlined,
-                label: 'Commenter',
+                label: l10n.commentAction,
                 onTap: () {
                   FocusScope.of(context).requestFocus(FocusNode());
                 },
               ),
               _buildTwitterActionButton(
                 icon: Icons.share_outlined,
-                label: 'Partager',
+                label: l10n.shareAction,
                 onTap: _shareConfession,
               ),
             ],
@@ -648,13 +656,14 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   Widget _buildCommentsSection() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
-            'Commentaires (${_confession?.commentsCount ?? 0})',
+            l10n.commentsCountTitle(_confession?.commentsCount ?? 0),
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -678,7 +687,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   Icon(Icons.chat_bubble_outline, size: 48, color: Colors.grey[400]),
                   const SizedBox(height: 16),
                   Text(
-                    'Aucun commentaire',
+                    l10n.noCommentsTitle,
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 16,
@@ -686,7 +695,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Soyez le premier a commenter!',
+                    l10n.noCommentsSubtitle,
                     style: TextStyle(
                       color: Colors.grey[500],
                       fontSize: 14,
@@ -714,6 +723,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   Widget _buildCommentItem(ConfessionComment comment) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -727,7 +737,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             },
             child: AvatarWidget(
               imageUrl: comment.user?.avatar,
-              name: comment.user?.fullName ?? 'Utilisateur',
+              name: comment.user?.fullName ?? l10n.userFallback,
               size: 36,
             ),
           ),
@@ -745,7 +755,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                         }
                       },
                       child: Text(
-                        comment.user?.fullName ?? 'Utilisateur',
+                        comment.user?.fullName ?? l10n.userFallback,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -799,7 +809,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                comment.parent?.user?.fullName ?? 'Anonyme',
+                                comment.parent?.user?.fullName ?? l10n.userAnonymous,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12,
@@ -858,7 +868,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                     });
                   },
                   child: Text(
-                    'Répondre',
+                    l10n.replyAction,
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 12,
@@ -875,6 +885,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   Widget _buildCommentInput() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: EdgeInsets.only(
         left: 16,
@@ -919,7 +930,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _replyToComment?.user?.fullName ?? 'Anonyme',
+                          _replyToComment?.user?.fullName ?? l10n.userAnonymous,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
@@ -988,7 +999,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
           Row(
             children: [
               IconButton(
-                tooltip: 'Ajouter une image',
+                tooltip: l10n.addImageAction,
                 icon: const Icon(Icons.image_outlined),
                 onPressed: () async {
                   final image = await _imagePicker.pickImage(
@@ -1005,7 +1016,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 },
               ),
               IconButton(
-                tooltip: 'Ajouter un GIF',
+                tooltip: l10n.addGifAction,
                 icon: const Icon(Icons.gif_box_outlined),
                 onPressed: () async {
                   final image = await _imagePicker.pickImage(
@@ -1022,7 +1033,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 child: TextField(
                   controller: _commentController,
                   decoration: InputDecoration(
-                    hintText: 'Ajouter un commentaire...',
+                    hintText: l10n.commentHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(24),
                       borderSide: BorderSide.none,
@@ -1069,6 +1080,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   void _showOptions() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -1081,8 +1093,8 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 _confession!.isAnonymous)
               ListTile(
                 leading: const Icon(Icons.visibility, color: Colors.amber),
-                title: const Text('Découvrir l\'identité'),
-                subtitle: const Text('450 FCFA'),
+                title: Text(l10n.revealIdentityTitle),
+                subtitle: Text(l10n.revealIdentityCost('450 FCFA')),
                 onTap: () {
                   Navigator.pop(context);
                   _showRevealIdentityDialog();
@@ -1090,7 +1102,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
               ),
             ListTile(
               leading: const Icon(Icons.share_outlined),
-              title: const Text('Partager'),
+              title: Text(l10n.shareAction),
               onTap: () {
                 Navigator.pop(context);
                 _shareConfession();
@@ -1098,7 +1110,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.flag_outlined),
-              title: const Text('Signaler'),
+              title: Text(l10n.reportAction),
               onTap: () {
                 Navigator.pop(context);
                 _reportConfession();
@@ -1111,6 +1123,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   void _showRevealIdentityDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1125,16 +1138,14 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
               child: const Icon(Icons.visibility, color: Colors.white),
             ),
             const SizedBox(width: 12),
-            const Text('Découvrir l\'identité'),
+            Text(l10n.revealIdentityTitle),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Voulez-vous payer pour découvrir l\'identité de l\'auteur de cette publication ?',
-            ),
+            Text(l10n.revealIdentityPrompt('450 FCFA')),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -1150,12 +1161,12 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Coût',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        l10n.costLabel,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       Text(
-                        '450 FCFA',
+                        l10n.revealIdentityAmount('450 FCFA'),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -1172,7 +1183,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           Container(
             decoration: BoxDecoration(
@@ -1185,7 +1196,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 await _revealIdentity();
               },
               icon: const Icon(Icons.visibility, size: 18),
-              label: const Text('Découvrir'),
+              label: Text(l10n.revealIdentityAction),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 foregroundColor: Colors.white,
@@ -1199,6 +1210,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   Future<void> _revealIdentity() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       // Afficher un indicateur de chargement
       showDialog(
@@ -1226,8 +1238,8 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 Expanded(
                   child: Text(
                     updatedConfession.author != null
-                        ? 'Identité révélée : ${updatedConfession.author!.fullName}'
-                        : 'Identité révélée !',
+                        ? l10n.revealIdentitySuccessWithName(updatedConfession.author!.fullName)
+                        : l10n.revealIdentitySuccess,
                   ),
                 ),
               ],
@@ -1241,7 +1253,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         Navigator.pop(context); // Fermer le loading
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: $e'),
+            content: Text(l10n.errorMessage(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -1250,17 +1262,16 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   }
 
   void _reportConfession() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Signaler la publication'),
-        content: const Text(
-          'Voulez-vous signaler cette publication pour contenu inapproprie?',
-        ),
+        title: Text(l10n.reportPostTitle),
+        content: Text(l10n.reportPostPrompt),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -1269,19 +1280,19 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                 await _confessionService.reportConfession(widget.confessionId);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Publication signalee')),
+                    SnackBar(content: Text(l10n.reportPostSuccess)),
                   );
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')),
+                    SnackBar(content: Text(l10n.errorMessage(e.toString()))),
                   );
                 }
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Signaler'),
+            child: Text(l10n.reportAction),
           ),
         ],
       ),

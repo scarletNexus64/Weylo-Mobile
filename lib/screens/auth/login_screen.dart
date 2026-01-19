@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/widgets/common/custom_text_field.dart';
@@ -45,6 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
+        final l10n = AppLocalizations.of(context)!;
         return LoadingOverlay(
           isLoading: authProvider.isLoading,
           child: Scaffold(
@@ -69,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 32),
                       // Title
                       Text(
-                        'Bon retour !',
+                        l10n.loginWelcome,
                         style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -77,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Connectez-vous pour continuer',
+                        l10n.loginSubtitle,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -110,13 +112,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Identifier field
                       CustomTextField(
                         controller: _identifierController,
-                        label: 'Nom d\'utilisateur, email ou téléphone',
-                        hintText: 'Entrez votre identifiant',
+                        label: l10n.loginIdentifierLabel,
+                        hintText: l10n.loginIdentifierHint,
                         prefixIcon: Icons.person_outline,
                         textInputAction: TextInputAction.next,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre identifiant';
+                            return l10n.loginIdentifierRequired;
                           }
                           return null;
                         },
@@ -125,8 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Code PIN field
                       CustomTextField(
                         controller: _passwordController,
-                        label: 'Code PIN',
-                        hintText: 'Entrez votre code à 4 chiffres',
+                        label: l10n.loginPinLabel,
+                        hintText: l10n.loginPinHint,
                         prefixIcon: Icons.lock_outline,
                         keyboardType: TextInputType.number,
                         maxLength: 4,
@@ -147,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre code PIN';
+                            return l10n.loginPinRequired;
                           }
                           return null;
                         },
@@ -158,13 +160,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () => context.push('/forgot-password'),
-                          child: const Text('Code oublié ?'),
+                          child: Text(l10n.forgotPin),
                         ),
                       ),
                       const SizedBox(height: 24),
                       // Login button
                       CustomButton(
-                        text: 'Se connecter',
+                        text: l10n.loginAction,
                         onPressed: _handleLogin,
                         isLoading: authProvider.isLoading,
                       ),
@@ -176,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
-                              'ou',
+                              l10n.orSeparator,
                               style: TextStyle(color: AppColors.textSecondary),
                             ),
                           ),
@@ -186,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       // Register button
                       CustomButton(
-                        text: 'Créer un compte',
+                        text: l10n.createAccount,
                         onPressed: () => context.push('/register'),
                         isOutlined: true,
                       ),

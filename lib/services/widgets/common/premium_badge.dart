@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 
 /// Badge de vérification bleu style Facebook
@@ -14,6 +15,7 @@ class VerifiedBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final badge = Container(
       width: size,
       height: size,
@@ -30,7 +32,7 @@ class VerifiedBadge extends StatelessWidget {
 
     if (showTooltip) {
       return Tooltip(
-        message: 'Compte vérifié',
+        message: l10n.verifiedAccountTooltip,
         child: badge,
       );
     }
@@ -51,6 +53,7 @@ class PremiumBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final badge = Container(
       width: size,
       height: size,
@@ -78,7 +81,7 @@ class PremiumBadge extends StatelessWidget {
 
     if (showTooltip) {
       return Tooltip(
-        message: 'Compte Premium',
+        message: l10n.premiumAccountTooltip,
         child: badge,
       );
     }

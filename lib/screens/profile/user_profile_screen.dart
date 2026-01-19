@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:typed_data';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/confession.dart';
@@ -66,17 +67,18 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   Widget _buildErrorState(ProfileProvider provider) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
-          Text(provider.error ?? 'Utilisateur introuvable'),
+          Text(provider.error ?? l10n.userNotFound),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => provider.loadProfile(widget.username),
-            child: const Text('Réessayer'),
+            child: Text(l10n.retry),
           ),
         ],
       ),
@@ -92,6 +94,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     ProfileProvider provider,
     bool isOwnProfile,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       onRefresh: _onRefresh,
       child: NestedScrollView(
@@ -115,23 +118,23 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'block',
                       child: Row(
                         children: [
-                          Icon(Icons.block, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Bloquer'),
+                          const Icon(Icons.block, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(l10n.block),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'report',
                       child: Row(
                         children: [
-                          Icon(Icons.flag, color: Colors.orange),
-                          SizedBox(width: 8),
-                          Text('Signaler'),
+                          const Icon(Icons.flag, color: Colors.orange),
+                          const SizedBox(width: 8),
+                          Text(l10n.report),
                         ],
                       ),
                     ),
@@ -147,9 +150,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 labelColor: AppColors.secondary,
                 unselectedLabelColor: Colors.grey,
                 indicatorColor: AppColors.primary,
-                tabs: const [
-                  Tab(text: 'Publications'),
-                  Tab(text: 'Cadeaux'),
+                tabs: [
+                  Tab(text: l10n.profilePostsTab),
+                  Tab(text: l10n.profileGiftsTab),
                 ],
               ),
             ),
@@ -172,6 +175,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     ProfileProvider provider,
     bool isOwnProfile,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: const BoxDecoration(
         gradient: AppColors.primaryGradient,
@@ -242,7 +246,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             const SizedBox(height: 12),
             // Name - Afficher "Anonyme" si l'utilisateur a choisi de ne pas montrer son nom
             Text(
-              (user.settings?.showNameOnPosts ?? true) ? user.fullName : 'Anonyme',
+              (user.settings?.showNameOnPosts ?? true) ? user.fullName : l10n.userAnonymous,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -282,7 +286,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
               children: [
                 _buildStatItem(
                   '${user.followersCount}',
-                  'Abonnés',
+                  l10n.profileFollowers,
                   () => _showFollowersList(),
                 ),
                 Container(
@@ -293,7 +297,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 ),
                 _buildStatItem(
                   '${user.followingCount}',
-                  'Abonnements',
+                  l10n.profileSubscriptions,
                   () => _showFollowingList(),
                 ),
                 Container(
@@ -304,7 +308,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 ),
                 _buildStatItem(
                   '${user.confessionsCount ?? 0}',
-                  'Publications',
+                  l10n.profilePostsTab,
                   null,
                 ),
               ],
@@ -344,6 +348,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   Widget _buildActionButtons(User user, ProfileProvider provider) {
+    final l10n = AppLocalizations.of(context)!;
     final isFollowing = user.isFollowing ?? false;
 
     return Row(
@@ -391,7 +396,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            isFollowing ? 'Abonné' : 'Suivre',
+                            isFollowing ? l10n.followed : l10n.follow,
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -416,15 +421,15 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             child: InkWell(
               onTap: () => _sendMessage(user),
               borderRadius: BorderRadius.circular(25),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.mail_outline, size: 18, color: Colors.white),
-                    SizedBox(width: 6),
+                    const Icon(Icons.mail_outline, size: 18, color: Colors.white),
+                    const SizedBox(width: 6),
                     Text(
-                      'Message',
+                      l10n.message,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -441,17 +446,18 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   Widget _buildConfessionsTab(ProfileProvider provider) {
+    final l10n = AppLocalizations.of(context)!;
     final confessions = provider.userConfessions;
 
     if (confessions.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.article_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.article_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              'Aucune publication',
+              l10n.profileNoPostsTitle,
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -643,18 +649,17 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   void _blockUser() {
+    final l10n = AppLocalizations.of(context)!;
     final username = widget.username;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Bloquer cet utilisateur'),
-        content: const Text(
-          'Vous ne verrez plus les messages et les posts de cet utilisateur.',
-        ),
+        title: Text(l10n.blockUserTitle),
+        content: Text(l10n.blockUserConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -663,19 +668,19 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 await _userService.blockUser(username);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Utilisateur bloqué')),
+                    SnackBar(content: Text(l10n.userBlocked)),
                   );
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')),
+                    SnackBar(content: Text(l10n.errorMessage(e.toString()))),
                   );
                 }
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Bloquer'),
+            child: Text(l10n.block),
           ),
         ],
       ),
@@ -683,6 +688,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   void _reportUser() {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     String reason = 'spam';
 
@@ -690,17 +696,17 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Signaler cet utilisateur'),
+          title: Text(l10n.reportUserTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
                 value: reason,
-                items: const [
-                  DropdownMenuItem(value: 'spam', child: Text('Spam')),
-                  DropdownMenuItem(value: 'harassment', child: Text('Harcèlement')),
-                  DropdownMenuItem(value: 'inappropriate', child: Text('Inapproprié')),
-                  DropdownMenuItem(value: 'other', child: Text('Autre')),
+                items: [
+                  DropdownMenuItem(value: 'spam', child: Text(l10n.reportSpam)),
+                  DropdownMenuItem(value: 'harassment', child: Text(l10n.reportHarassment)),
+                  DropdownMenuItem(value: 'inappropriate', child: Text(l10n.reportInappropriate)),
+                  DropdownMenuItem(value: 'other', child: Text(l10n.reportOther)),
                 ],
                 onChanged: (value) {
                   if (value != null) {
@@ -709,8 +715,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     });
                   }
                 },
-                decoration: const InputDecoration(
-                  labelText: 'Raison',
+                decoration: InputDecoration(
+                  labelText: l10n.reportReason,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -718,8 +724,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
               TextField(
                 controller: controller,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: 'Détails (optionnel)',
+                decoration: InputDecoration(
+                  hintText: l10n.reportDetailsHint,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -728,7 +734,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Annuler'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -741,18 +747,18 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                   );
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Signalement envoyé')),
+                      SnackBar(content: Text(l10n.reportSent)),
                     );
                   }
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erreur: $e')),
+                      SnackBar(content: Text(l10n.errorMessage(e.toString()))),
                     );
                   }
                 }
               },
-              child: const Text('Signaler'),
+              child: Text(l10n.report),
             ),
           ],
         ),
@@ -844,19 +850,20 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_error == 'private') {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lock_outline, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.lock_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              'Les cadeaux sont privés',
+              l10n.giftsPrivate,
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -872,13 +879,13 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
             const Icon(Icons.error_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              'Erreur lors du chargement',
+              l10n.giftsLoadError,
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadGifts,
-              child: const Text('Réessayer'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -886,14 +893,14 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
     }
 
     if (_gifts == null || _gifts!.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.card_giftcard_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.card_giftcard_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              'Aucun cadeau reçu',
+              l10n.profileNoGiftsTitle,
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -942,7 +949,7 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: Text(
-                  gift?.name ?? 'Cadeau',
+                  gift?.name ?? l10n.giftDefaultName,
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -953,7 +960,7 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                   child: Text(
-                    'de ${sender.username}',
+                    l10n.giftFromUserLower(sender.username),
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../messages/messages_screen.dart';
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -62,31 +64,31 @@ class _HomeScreenState extends State<HomeScreen> {
           type: BottomNavigationBarType.fixed,
           selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.textSecondary,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.mail_outline, weight: 700),
-              activeIcon: Icon(Icons.mail, weight: 700),
-              label: 'Messages',
+              icon: const Icon(Icons.mail_outline, weight: 700),
+              activeIcon: const Icon(Icons.mail, weight: 700),
+              label: l10n.navMessages,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline, weight: 700),
-              activeIcon: Icon(Icons.favorite, weight: 700),
+              icon: Icon(Icons.favorite_outline),
+              activeIcon: Icon(Icons.favorite),
               label: 'Confessions',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline, weight: 700),
-              activeIcon: Icon(Icons.chat_bubble, weight: 700),
-              label: 'Chat',
+              icon: const Icon(Icons.chat_bubble_outline, weight: 700),
+              activeIcon: const Icon(Icons.chat_bubble, weight: 700),
+              label: l10n.navChat,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.group_outlined, weight: 700),
-              activeIcon: Icon(Icons.group, weight: 700),
-              label: 'Groupes',
+              icon: const Icon(Icons.group_outlined, weight: 700),
+              activeIcon: const Icon(Icons.group, weight: 700),
+              label: l10n.navGroups,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline, weight: 700),
-              activeIcon: Icon(Icons.person, weight: 700),
-              label: 'Profil',
+              icon: const Icon(Icons.person_outline, weight: 700),
+              activeIcon: const Icon(Icons.person, weight: 700),
+              label: l10n.navProfile,
             ),
           ],
         ),

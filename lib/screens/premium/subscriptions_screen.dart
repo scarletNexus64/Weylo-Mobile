@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/premium.dart';
@@ -55,18 +56,19 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
   }
 
   Future<void> _cancelSubscription(PremiumSubscription subscription) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await _premiumService.cancelSubscription(subscription.id);
       await _loadData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Abonnement annulé')),
+          SnackBar(content: Text(l10n.subscriptionCancelled)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
         );
       }
     }
@@ -74,18 +76,19 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes abonnements'),
+        title: Text(l10n.subscriptionsTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Pass Premium'),
-            Tab(text: 'Ciblés'),
+          tabs: [
+            Tab(text: l10n.premiumPassTab),
+            Tab(text: l10n.targetedSubscriptionsTab),
           ],
         ),
       ),
@@ -102,6 +105,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
   }
 
   Widget _buildPremiumPassTab() {
+    final l10n = AppLocalizations.of(context)!;
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
@@ -116,19 +120,23 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Weylo Premium',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.premiumBrandName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _passStatus?.isActive == true ? 'Actif' : 'Inactif',
+                  _passStatus?.isActive == true ? l10n.statusActive : l10n.statusInactive,
                   style: const TextStyle(color: Colors.white70),
                 ),
                 if (_passStatus?.daysRemaining != null && _passStatus!.daysRemaining > 0) ...[
                   const SizedBox(height: 8),
                   Text(
-                    '${_passStatus!.daysRemaining} jours restants',
+                    l10n.premiumDaysRemaining(_passStatus!.daysRemaining),
                     style: const TextStyle(color: Colors.white70),
                   ),
                 ],
@@ -136,16 +144,16 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Historique',
-            style: TextStyle(fontWeight: FontWeight.w600),
+          Text(
+            l10n.historyTitle,
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           if (_passHistory.isEmpty)
-            const EmptyState(
+            EmptyState(
               icon: Icons.receipt_long_outlined,
-              title: 'Aucun pass',
-              subtitle: 'Votre historique Premium apparaîtra ici',
+              title: l10n.noPassTitle,
+              subtitle: l10n.noPassSubtitle,
             )
           else
             Column(
@@ -155,7 +163,9 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
                   leading: const Icon(Icons.star, color: Colors.amber),
                   title: Text(Helpers.formatCurrency(pass.amount.toInt())),
                   subtitle: Text(
-                    'Expire le ${pass.expiresAt.day}/${pass.expiresAt.month}/${pass.expiresAt.year}',
+                    l10n.expiresOnDate(
+                      '${pass.expiresAt.day}/${pass.expiresAt.month}/${pass.expiresAt.year}',
+                    ),
                     style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
                   trailing: Text(
@@ -171,11 +181,12 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
   }
 
   Widget _buildSubscriptionsTab() {
+    final l10n = AppLocalizations.of(context)!;
     if (_subscriptions.isEmpty) {
-      return const EmptyState(
+      return EmptyState(
         icon: Icons.subscriptions_outlined,
-        title: 'Aucun abonnement',
-        subtitle: 'Vos abonnements ciblés apparaîtront ici',
+        title: l10n.noSubscriptionsTitle,
+        subtitle: l10n.noSubscriptionsSubtitle,
       );
     }
 
@@ -192,12 +203,14 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
               title: Text(subscription.typeLabel),
               subtitle: Text(
                 subscription.expiresAt != null
-                    ? 'Expire le ${subscription.expiresAt!.day}/${subscription.expiresAt!.month}/${subscription.expiresAt!.year}'
-                    : 'Sans date d\'expiration',
+                    ? l10n.expiresOnDate(
+                        '${subscription.expiresAt!.day}/${subscription.expiresAt!.month}/${subscription.expiresAt!.year}',
+                      )
+                    : l10n.noExpiryLabel,
               ),
               trailing: TextButton(
                 onPressed: () => _cancelSubscription(subscription),
-                child: const Text('Annuler'),
+                child: Text(l10n.cancel),
               ),
             ),
           );

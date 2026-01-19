@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/story_service.dart';
 
@@ -93,9 +94,10 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
   }
 
   Future<void> _publishStory() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedMedia == null && _textController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ajoutez du contenu  votre story')),
+        SnackBar(content: Text(l10n.storyContentRequired)),
       );
       return;
     }
@@ -119,8 +121,8 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Story publie!'),
+          SnackBar(
+            content: Text(l10n.storyPublishedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -140,13 +142,13 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
       debugPrint('==========================');
 
       // Show user-friendly error message
-      String errorMessage = 'Erreur lors de la publication';
+      String errorMessage = l10n.storyPublishError;
       if (e.toString().contains('DioException')) {
-        errorMessage = 'Erreur de connexion. Vérifiez votre internet.';
+        errorMessage = l10n.connectionError;
       } else if (e.toString().contains('type')) {
-        errorMessage = 'Format de fichier non supporté';
+        errorMessage = l10n.unsupportedFileFormat;
       } else if (e.toString().contains('size')) {
-        errorMessage = 'Fichier trop volumineux';
+        errorMessage = l10n.fileTooLarge;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -161,6 +163,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -182,9 +185,9 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                       strokeWidth: 2,
                     ),
                   )
-                : const Text(
-                    'Publier',
-                    style: TextStyle(
+                : Text(
+                    l10n.publishAction,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -238,7 +241,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     textAlign: TextAlign.center,
                     maxLines: null,
                     decoration: InputDecoration(
-                      hintText: 'Écrivez quelque chose...',
+                      hintText: l10n.storyWriteHint,
                       hintStyle: TextStyle(
                         color: _getContrastColor(_backgroundColor).withOpacity(0.6),
                         fontSize: 32,
@@ -316,23 +319,23 @@ class _CreateStoryScreenState extends State<CreateStoryScreen> {
                     children: [
                       _buildMediaButton(
                         icon: Icons.photo_library,
-                        label: 'Galerie',
+                        label: l10n.galleryLabel,
                         onTap: _pickImage,
                       ),
                       _buildMediaButton(
                         icon: Icons.camera_alt,
-                        label: 'Photo',
+                        label: l10n.photoAction,
                         onTap: _takePhoto,
                       ),
                       _buildMediaButton(
                         icon: Icons.videocam,
-                        label: 'Vido',
+                        label: l10n.videoLabel,
                         onTap: _pickVideo,
                       ),
                       if (_selectedMedia != null)
                         _buildMediaButton(
                           icon: Icons.text_fields,
-                          label: 'Texte',
+                          label: l10n.textLabel,
                           onTap: () {
                             setState(() {
                               _selectedMedia = null;

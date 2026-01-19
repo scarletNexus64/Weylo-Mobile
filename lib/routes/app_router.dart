@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:video_player/video_player.dart';
+import '../l10n/app_localizations.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../providers/auth_provider.dart';
 import '../services/story_service.dart';
@@ -207,16 +208,17 @@ class AppRouter {
           path: '/payment',
           name: 'payment',
           builder: (context, state) {
+            final l10n = AppLocalizations.of(context)!;
             final url = state.uri.queryParameters['url'] ?? '';
             if (url.isEmpty) {
               return Scaffold(
-                appBar: AppBar(title: const Text('Paiement')),
-                body: const Center(child: Text('URL de paiement invalide')),
+                appBar: AppBar(title: Text(l10n.paymentTitle)),
+                body: Center(child: Text(l10n.invalidPaymentUrl)),
               );
             }
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Paiement'),
+                title: Text(l10n.paymentTitle),
                 leading: IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
@@ -283,7 +285,10 @@ class AppRouter {
           path: '/terms',
           name: 'terms',
           builder: (context, state) {
-            return const _LegalScreen(title: 'Conditions d\'utilisation', type: 'terms');
+            return _LegalScreen(
+              title: AppLocalizations.of(context)!.termsOfUse,
+              type: 'terms',
+            );
           },
         ),
 
@@ -292,7 +297,10 @@ class AppRouter {
           path: '/privacy-policy',
           name: 'privacy-policy',
           builder: (context, state) {
-            return const _LegalScreen(title: 'Politique de confidentialité', type: 'privacy');
+            return _LegalScreen(
+              title: AppLocalizations.of(context)!.privacyPolicy,
+              type: 'privacy',
+            );
           },
         ),
 
@@ -437,11 +445,11 @@ class AppRouter {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.grey),
               const SizedBox(height: 16),
-              Text('Page non trouvée: ${state.uri}'),
+              Text(AppLocalizations.of(context)!.pageNotFound(state.uri.toString())),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => context.go('/'),
-                child: const Text('Retour à l\'accueil'),
+                child: Text(AppLocalizations.of(context)!.backToHome),
               ),
             ],
           ),
@@ -548,7 +556,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
       if (!mounted) return;
       context.go('/chat/${conversation.id}');
     } catch (e) {
-      Helpers.showErrorSnackBar(context, 'Impossible de démarrer la conversation');
+      Helpers.showErrorSnackBar(context, AppLocalizations.of(context)!.startConversationError);
     } finally {
       if (!mounted) return;
       setState(() => _startingConversationIds.remove(user.id));
@@ -557,9 +565,10 @@ class _NewChatScreenState extends State<_NewChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nouvelle conversation'),
+        title: Text(l10n.newChatTitle),
       ),
       body: Column(
         children: [
@@ -568,7 +577,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Rechercher un utilisateur...',
+                hintText: l10n.searchUserHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -590,6 +599,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
   Widget _buildUsersPanel() {
     final showSearchResults = _lastQuery.isNotEmpty;
     final usersToShow = showSearchResults ? _searchResults : _defaultUsers;
+    final l10n = AppLocalizations.of(context)!;
 
     if (_isSearching) {
       return const Center(child: CircularProgressIndicator());
@@ -599,15 +609,15 @@ class _NewChatScreenState extends State<_NewChatScreen> {
       return Center(
         child: Text(
           showSearchResults
-              ? 'Aucun utilisateur trouvé'
-              : 'Aucun utilisateur disponible pour le moment',
+              ? l10n.noUsersFound
+              : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
       );
     }
 
-    final sections = _buildUserSections(usersToShow);
+    final sections = _buildUserSections(l10n, usersToShow);
     final sectionWidgets = <Widget>[];
 
     for (final section in sections) {
@@ -626,8 +636,8 @@ class _NewChatScreenState extends State<_NewChatScreen> {
       return Center(
         child: Text(
           showSearchResults
-              ? 'Aucun utilisateur trouvé'
-              : 'Aucun utilisateur disponible pour le moment',
+              ? l10n.noUsersFound
+              : l10n.noUsersAvailable,
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
@@ -641,13 +651,14 @@ class _NewChatScreenState extends State<_NewChatScreen> {
   }
 
   Widget _buildUserTile(User user) {
+    final l10n = AppLocalizations.of(context)!;
     final index = _conversationIndex[user.username];
     final hasConversation = index?.hasConversation ?? false;
     final isIdentityRevealed = index?.isIdentityRevealed ?? false;
 
     final shouldHideInfo = !hasConversation || !isIdentityRevealed;
-    final title = shouldHideInfo ? 'Anonyme' : user.fullName;
-    final subtitle = shouldHideInfo ? 'Informations masquées' : '@${user.username}';
+    final title = shouldHideInfo ? l10n.anonymousUser : user.fullName;
+    final subtitle = shouldHideInfo ? l10n.maskedInfo : '@${user.username}';
     final avatarName = shouldHideInfo
         ? (user.username.isNotEmpty ? user.username[0].toUpperCase() : '?')
         : user.fullName;
@@ -655,13 +666,13 @@ class _NewChatScreenState extends State<_NewChatScreen> {
     late String statusBadge;
     late Color statusColor;
     if (!hasConversation) {
-      statusBadge = 'Nouveau';
+      statusBadge = l10n.statusNew;
       statusColor = Colors.blue;
     } else if (isIdentityRevealed) {
-      statusBadge = 'Révélée';
+      statusBadge = l10n.statusRevealed;
       statusColor = Colors.green;
     } else {
-      statusBadge = 'Anonyme';
+      statusBadge = l10n.statusAnonymous;
       statusColor = Colors.orange;
     }
 
@@ -725,7 +736,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
             )
           : TextButton(
               onPressed: () => _startConversation(user),
-              child: const Text('Démarrer'),
+              child: Text(l10n.startAction),
             ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       onTap: () => _startConversation(user),
@@ -782,7 +793,7 @@ class _NewChatScreenState extends State<_NewChatScreen> {
     );
   }
 
-  List<_UserSection> _buildUserSections(List<User> users) {
+  List<_UserSection> _buildUserSections(AppLocalizations l10n, List<User> users) {
     final revealed = <User>[];
     final anonymous = <User>[];
     final withoutConversation = <User>[];
@@ -816,20 +827,20 @@ class _NewChatScreenState extends State<_NewChatScreen> {
 
     return [
       _UserSection(
-        title: 'Conversations révélées',
-        helper: 'Ils ont déjà dévoilé leur identité',
+        title: l10n.revealedConversations,
+        helper: l10n.revealedConversationsHelper,
         accentColor: Colors.green,
         users: revealed,
       ),
       _UserSection(
-        title: 'Conversations anonymes',
-        helper: 'Identité masquée malgré un échange',
+        title: l10n.anonymousConversations,
+        helper: l10n.anonymousConversationsHelper,
         accentColor: Colors.orange,
         users: anonymous,
       ),
       _UserSection(
-        title: 'Sans conversation',
-        helper: 'Pas encore échangé avec vous',
+        title: l10n.noConversation,
+        helper: l10n.noConversationHelper,
         accentColor: Colors.blue,
         users: withoutConversation,
       ),
@@ -939,7 +950,7 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
     // Validate that there's either content or media
     if (content.isEmpty && _selectedImage == null && _selectedVideo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez ajouter du contenu ou un média')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.addContentOrMediaError)),
       );
       return;
     }
@@ -958,7 +969,7 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Publication créée avec succès!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.postCreatedSuccess)),
         );
       }
     } catch (e) {
@@ -966,7 +977,7 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la création: ${e.toString()}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.postCreateError(e.toString()))),
         );
       }
     }
@@ -974,9 +985,10 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nouvelle publication'),
+        title: Text(l10n.createPostTitle),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _publish,
@@ -986,7 +998,7 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Publier'),
+                : Text(l10n.publishAction),
           ),
         ],
       ),
@@ -999,9 +1011,9 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
               controller: _contentController,
               maxLines: 8,
               maxLength: 500,
-              decoration: const InputDecoration(
-                hintText: 'Qu\'avez-vous à confesser? (optionnel avec média)',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: l10n.confessionHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -1027,7 +1039,7 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
                                   Icon(Icons.video_library, size: 48, color: Colors.grey[600]),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Vidéo sélectionnée',
+                                    l10n.videoSelected,
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
                                 ],
@@ -1056,32 +1068,32 @@ class _CreateConfessionScreenState extends State<_CreateConfessionScreen> {
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _pickImage,
                   icon: const Icon(Icons.image),
-                  label: const Text('Image'),
+                  label: Text(l10n.attachmentImage),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _pickVideo,
                   icon: const Icon(Icons.videocam),
-                  label: const Text('Vidéo'),
+                  label: Text(l10n.attachmentVideo),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _takePhoto,
                   icon: const Icon(Icons.camera_alt),
-                  label: const Text('Photo'),
+                  label: Text(l10n.photoAction),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Publication anonyme'),
-              subtitle: const Text('Votre identité sera cachée'),
+              title: Text(l10n.postAnonymousTitle),
+              subtitle: Text(l10n.postAnonymousSubtitle),
               value: _isAnonymous,
               onChanged: (value) => setState(() => _isAnonymous = value),
             ),
             SwitchListTile(
-              title: const Text('Publication publique'),
-              subtitle: const Text('Visible par tous les utilisateurs'),
+              title: Text(l10n.postPublicTitle),
+              subtitle: Text(l10n.postPublicSubtitle),
               value: _isPublic,
               onChanged: (value) => setState(() => _isPublic = value),
             ),
@@ -1180,7 +1192,7 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Paramètres mis à jour')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.settingsUpdated)),
         );
       }
     } catch (e) {
@@ -1189,7 +1201,7 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
         // Revert the local state if update failed
         await _loadSettings();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     } finally {
@@ -1205,13 +1217,13 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
       setState(() => _blockedUsers.removeWhere((u) => u.id == user.id));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('@${user.username} a été débloqué')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.userUnblocked(user.username))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -1235,7 +1247,7 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                   const Icon(Icons.block),
                   const SizedBox(width: 12),
                   Text(
-                    'Utilisateurs bloqués (${_blockedUsers.length})',
+                    AppLocalizations.of(context)!.blockedUsersWithCount(_blockedUsers.length),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -1244,13 +1256,13 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
             const Divider(height: 1),
             Expanded(
               child: _blockedUsers.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.check_circle_outline, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text('Aucun utilisateur bloqué'),
+                          const Icon(Icons.check_circle_outline, size: 64, color: Colors.grey),
+                          const SizedBox(height: 16),
+                          Text(AppLocalizations.of(context)!.noBlockedUsers),
                         ],
                       ),
                     )
@@ -1276,7 +1288,7 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                               Navigator.pop(context);
                               _unblockUser(user);
                             },
-                            child: const Text('Débloquer'),
+                            child: Text(AppLocalizations.of(context)!.unblockAction),
                           ),
                         );
                       },
@@ -1292,21 +1304,21 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Confidentialité')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.privacy)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Confidentialité')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.privacy)),
       body: Stack(
         children: [
           ListView(
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text(
-                  'VISIBILITE DU PROFIL',
+                  AppLocalizations.of(context)!.profileVisibilityHeader,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -1315,8 +1327,8 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 ),
               ),
               SwitchListTile(
-                title: const Text('Afficher mon nom sur mes publications'),
-                subtitle: const Text('Votre nom sera visible sur vos posts publics'),
+                title: Text(AppLocalizations.of(context)!.showNameOnPostsTitle),
+                subtitle: Text(AppLocalizations.of(context)!.showNameOnPostsSubtitle),
                 value: _showNameOnPosts,
                 onChanged: (value) {
                   setState(() => _showNameOnPosts = value);
@@ -1324,8 +1336,8 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 },
               ),
               SwitchListTile(
-                title: const Text('Afficher ma photo sur mes publications'),
-                subtitle: const Text('Votre photo de profil sera visible'),
+                title: Text(AppLocalizations.of(context)!.showPhotoOnPostsTitle),
+                subtitle: Text(AppLocalizations.of(context)!.showPhotoOnPostsSubtitle),
                 value: _showPhotoOnPosts,
                 onChanged: (value) {
                   setState(() => _showPhotoOnPosts = value);
@@ -1333,10 +1345,10 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 },
               ),
               const Divider(),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text(
-                  'ACTIVITE',
+                  AppLocalizations.of(context)!.activityHeader,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -1345,8 +1357,8 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 ),
               ),
               SwitchListTile(
-                title: const Text('Afficher le statut en ligne'),
-                subtitle: const Text('Les autres peuvent voir quand vous etes en ligne'),
+                title: Text(AppLocalizations.of(context)!.showOnlineStatusTitle),
+                subtitle: Text(AppLocalizations.of(context)!.showOnlineStatusSubtitle),
                 value: _showOnlineStatus,
                 onChanged: (value) {
                   setState(() => _showOnlineStatus = value);
@@ -1354,8 +1366,8 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 },
               ),
               SwitchListTile(
-                title: const Text('Autoriser les messages anonymes'),
-                subtitle: const Text('Recevoir des messages anonymes'),
+                title: Text(AppLocalizations.of(context)!.allowAnonymousMessagesTitle),
+                subtitle: Text(AppLocalizations.of(context)!.allowAnonymousMessagesSubtitle),
                 value: _allowMessages,
                 onChanged: (value) {
                   setState(() => _allowMessages = value);
@@ -1363,10 +1375,10 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
                 },
               ),
               const Divider(),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text(
-                  'GESTION DU COMPTE',
+                  AppLocalizations.of(context)!.accountManagementHeader,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -1376,18 +1388,18 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.block),
-                title: const Text('Utilisateurs bloques'),
-                subtitle: Text('${_blockedUsers.length} utilisateur(s)'),
+                title: Text(AppLocalizations.of(context)!.blockedUsersTitle),
+                subtitle: Text(AppLocalizations.of(context)!.blockedUsersCount(_blockedUsers.length)),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: _showBlockedUsersSheet,
               ),
               ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
-                title: const Text(
-                  'Supprimer mon compte',
-                  style: TextStyle(color: Colors.red),
+                title: Text(
+                  AppLocalizations.of(context)!.deleteAccountTitle,
+                  style: const TextStyle(color: Colors.red),
                 ),
-                subtitle: const Text('Cette action est irreversible'),
+                subtitle: Text(AppLocalizations.of(context)!.deleteAccountSubtitle),
                 onTap: () => _showDeleteAccountDialog(),
               ),
             ],
@@ -1406,15 +1418,12 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer mon compte'),
-        content: const Text(
-          'Êtes-vous sûr de vouloir supprimer votre compte? '
-          'Toutes vos données seront définitivement supprimées.',
-        ),
+        title: Text(AppLocalizations.of(context)!.deleteAccountTitle),
+        content: Text(AppLocalizations.of(context)!.deleteAccountConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -1428,13 +1437,13 @@ class _PrivacySettingsScreenState extends State<_PrivacySettingsScreen> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
                   );
                 }
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Supprimer'),
+            child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
       ),
@@ -1451,32 +1460,27 @@ class _LegalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Dernière mise à jour: 1er Janvier 2026',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+              l10n.legalLastUpdated,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              'En utilisant Weylo, vous acceptez les conditions suivantes...',
-              style: TextStyle(fontSize: 14),
+              l10n.legalIntro,
+              style: const TextStyle(fontSize: 14),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              '1. Utilisation du service\n\nWeylo est une plateforme de messagerie anonyme. '
-              'En utilisant ce service, vous vous engagez à respecter les autres utilisateurs '
-              'et à ne pas publier de contenu illégal ou offensant.\n\n'
-              '2. Confidentialité\n\nNous respectons votre vie privée. Vos messages anonymes '
-              'ne révèlent pas votre identité sauf si vous choisissez de la révéler.\n\n'
-              '3. Responsabilité\n\nVous êtes responsable du contenu que vous publiez. '
-              'Weylo se réserve le droit de supprimer tout contenu inapproprié.',
-              style: TextStyle(fontSize: 14, height: 1.5),
+              l10n.legalBody,
+              style: const TextStyle(fontSize: 14, height: 1.5),
             ),
           ],
         ),
@@ -1491,34 +1495,32 @@ class _HelpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Aide')),
+      appBar: AppBar(title: Text(l10n.help)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'Questions fréquentes',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            l10n.faqTitle,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           _buildFAQItem(
-            'Comment envoyer un message anonyme?',
-            'Allez sur le profil d\'un utilisateur et tapez sur "Envoyer un message". '
-            'Votre identité restera cachée à moins que vous ne choisissiez de la révéler.',
+            l10n.faqSendAnonymousQuestion,
+            l10n.faqSendAnonymousAnswer,
           ),
           _buildFAQItem(
-            'Comment voir qui m\'a envoyé un message?',
-            'Par défaut, les messages sont anonymes. Vous pouvez demander la révélation '
-            'd\'identité moyennant des pièces ou un abonnement Premium.',
+            l10n.faqRevealIdentityQuestion,
+            l10n.faqRevealIdentityAnswer,
           ),
           _buildFAQItem(
-            'Comment partager mon lien?',
-            'Allez dans votre profil et tapez sur "Partager le profil". '
-            'Vous pouvez partager votre lien sur les réseaux sociaux.',
+            l10n.faqShareLinkQuestion,
+            l10n.faqShareLinkAnswer,
           ),
           _buildFAQItem(
-            'Comment contacter le support?',
-            'Envoyez un email à support@weylo.app pour toute question ou problème.',
+            l10n.faqContactSupportQuestion,
+            l10n.faqContactSupportAnswer,
           ),
           const SizedBox(height: 24),
           OutlinedButton.icon(
@@ -1527,7 +1529,7 @@ class _HelpScreen extends StatelessWidget {
                 scheme: 'mailto',
                 path: 'support@weylo.app',
                 queryParameters: {
-                  'subject': 'Support - Weylo',
+                  'subject': AppLocalizations.of(context)!.supportEmailSubject,
                 },
               );
               if (await canLaunchUrl(emailUri)) {
@@ -1535,15 +1537,13 @@ class _HelpScreen extends StatelessWidget {
               } else {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Impossible d\'ouvrir le client email'),
-                    ),
+                    SnackBar(content: Text(l10n.emailClientError)),
                   );
                 }
               }
             },
             icon: const Icon(Icons.email_outlined),
-            label: const Text('Contacter le support'),
+            label: Text(l10n.contactSupport),
           ),
         ],
       ),
@@ -1569,8 +1569,9 @@ class _AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('À propos')),
+      appBar: AppBar(title: Text(l10n.about)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -1598,24 +1599,24 @@ class _AboutScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Weylo',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              Text(
+                l10n.appName,
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'Version 1.0.0',
+                l10n.versionLabel('1.0.0'),
                 style: TextStyle(color: Colors.grey[600]),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'La plateforme de messagerie anonyme\nqui connecte les gens en toute sécurité.',
+              Text(
+                l10n.aboutTagline,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 32),
               Text(
-                '© 2026 Weylo. Tous droits réservés.',
+                l10n.copyrightNotice,
                 style: TextStyle(color: Colors.grey[500], fontSize: 12),
               ),
             ],
@@ -1678,7 +1679,7 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera),
-              title: const Text('Prendre une photo'),
+              title: Text(AppLocalizations.of(ctx)!.takePhotoAction),
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(
@@ -1694,7 +1695,7 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Choisir dans la galerie'),
+              title: Text(AppLocalizations.of(ctx)!.chooseFromGalleryAction),
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await picker.pickImage(
@@ -1711,7 +1712,10 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
             if (_avatarUrl != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Supprimer la photo', style: TextStyle(color: Colors.red)),
+                title: Text(
+                  AppLocalizations.of(ctx)!.deletePhotoAction,
+                  style: const TextStyle(color: Colors.red),
+                ),
                 onTap: () async {
                   Navigator.pop(ctx);
                   _deleteAvatar();
@@ -1737,14 +1741,14 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
           _isUploadingAvatar = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Photo de profil mise à jour!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.profilePhotoUpdated)),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isUploadingAvatar = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -1765,14 +1769,14 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
           _isUploadingAvatar = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Photo de profil supprimée!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.profilePhotoDeleted)),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isUploadingAvatar = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -1798,14 +1802,14 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
         setState(() => _isLoading = false);
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil mis à jour!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileUpdated)),
         );
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -1814,10 +1818,11 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Modifier le profil'),
+        title: Text(l10n.editProfile),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _saveProfile,
@@ -1827,7 +1832,7 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Enregistrer'),
+                : Text(l10n.saveAction),
           ),
         ],
       ),
@@ -1883,19 +1888,19 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
             Center(
               child: TextButton(
                 onPressed: _isUploadingAvatar ? null : _pickAndUploadAvatar,
-                child: const Text('Changer la photo de profil'),
+                child: Text(l10n.changeProfilePhoto),
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _firstNameController,
-              decoration: const InputDecoration(
-                labelText: 'Prénom',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.firstName,
+                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer votre prénom';
+                  return l10n.firstNameRequired;
                 }
                 return null;
               },
@@ -1903,9 +1908,9 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _lastNameController,
-              decoration: const InputDecoration(
-                labelText: 'Nom',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.lastName,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -1913,10 +1918,10 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
               controller: _bioController,
               maxLines: 3,
               maxLength: 150,
-              decoration: const InputDecoration(
-                labelText: 'Bio',
-                hintText: 'Parlez de vous...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.bio,
+                hintText: l10n.bioHint,
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -1966,7 +1971,7 @@ class _PremiumScreenState extends State<_PremiumScreen> {
       await _loadPremiumStatus();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Abonnement Premium activé!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.premiumActivated)),
         );
         // Update user in auth provider
         final authProvider = context.read<AuthProvider>();
@@ -1977,7 +1982,7 @@ class _PremiumScreenState extends State<_PremiumScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     } finally {
@@ -2000,8 +2005,8 @@ class _PremiumScreenState extends State<_PremiumScreen> {
           SnackBar(
             content: Text(
               _passStatus?.autoRenew == true
-                  ? 'Renouvellement automatique activé'
-                  : 'Renouvellement automatique désactivé',
+                  ? AppLocalizations.of(context)!.autoRenewEnabled
+                  : AppLocalizations.of(context)!.autoRenewDisabled,
             ),
           ),
         );
@@ -2009,7 +2014,7 @@ class _PremiumScreenState extends State<_PremiumScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -2019,16 +2024,17 @@ class _PremiumScreenState extends State<_PremiumScreen> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
     final isPremium = user?.isPremium ?? false;
+    final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Weylo Premium')),
+        appBar: AppBar(title: Text(l10n.weyloPremium)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Weylo Premium')),
+      appBar: AppBar(title: Text(l10n.weyloPremium)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -2047,9 +2053,9 @@ class _PremiumScreenState extends State<_PremiumScreen> {
                   children: [
                     const Icon(Icons.star, size: 48, color: Colors.white),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Vous êtes Premium!',
-                      style: TextStyle(
+                    Text(
+                      l10n.premiumActiveTitle,
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -2058,7 +2064,7 @@ class _PremiumScreenState extends State<_PremiumScreen> {
                     if (_passStatus?.daysRemaining != null && _passStatus!.daysRemaining > 0) ...[
                       const SizedBox(height: 4),
                       Text(
-                        '${_passStatus!.daysRemaining} jours restants',
+                        l10n.premiumDaysRemaining(_passStatus!.daysRemaining),
                         style: const TextStyle(color: Colors.white70),
                       ),
                     ],
@@ -2069,8 +2075,8 @@ class _PremiumScreenState extends State<_PremiumScreen> {
               // Auto-renew toggle
               Card(
                 child: SwitchListTile(
-                  title: const Text('Renouvellement automatique'),
-                  subtitle: const Text('Renouveler automatiquement votre abonnement'),
+                  title: Text(l10n.autoRenewTitle),
+                  subtitle: Text(l10n.autoRenewSubtitle),
                   value: _passStatus?.autoRenew ?? false,
                   onChanged: (_) => _toggleAutoRenew(),
                 ),
@@ -2085,22 +2091,22 @@ class _PremiumScreenState extends State<_PremiumScreen> {
                   ),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Icon(Icons.star, size: 48, color: Colors.white),
-                    SizedBox(height: 8),
+                    const Icon(Icons.star, size: 48, color: Colors.white),
+                    const SizedBox(height: 8),
                     Text(
-                      'Weylo Premium',
-                      style: TextStyle(
+                      l10n.weyloPremium,
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Débloquez toutes les fonctionnalités',
-                      style: TextStyle(color: Colors.white70),
+                      l10n.premiumUnlockTitle,
+                      style: const TextStyle(color: Colors.white70),
                     ),
                   ],
                 ),
@@ -2108,17 +2114,17 @@ class _PremiumScreenState extends State<_PremiumScreen> {
             ],
             const SizedBox(height: 24),
             // Features
-            _buildFeature(Icons.visibility, 'Voir l\'identité', 'Révélez qui vous envoie des messages'),
-            _buildFeature(Icons.verified, 'Badge Premium', 'Montrez votre statut Premium'),
-            _buildFeature(Icons.block, 'Sans publicités', 'Profitez d\'une expérience sans pub'),
-            _buildFeature(Icons.analytics, 'Statistiques avancées', 'Analysez vos interactions'),
+            _buildFeature(Icons.visibility, l10n.featureRevealTitle, l10n.featureRevealSubtitle),
+            _buildFeature(Icons.verified, l10n.featureBadgeTitle, l10n.featureBadgeSubtitle),
+            _buildFeature(Icons.block, l10n.featureNoAdsTitle, l10n.featureNoAdsSubtitle),
+            _buildFeature(Icons.analytics, l10n.featureStatsTitle, l10n.featureStatsSubtitle),
             const SizedBox(height: 24),
             // Pricing (only for non-premium users)
             if (!isPremium && _passStatus?.isActive != true) ...[
               Card(
                 child: ListTile(
-                  title: const Text('Mensuel'),
-                  subtitle: const Text('2 500 FCFA/mois'),
+                  title: Text(l10n.monthlyPlanTitle),
+                  subtitle: Text(l10n.monthlyPlanPrice),
                   trailing: ElevatedButton(
                     onPressed: _isPurchasing ? null : _purchasePremium,
                     child: _isPurchasing
@@ -2127,14 +2133,14 @@ class _PremiumScreenState extends State<_PremiumScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('S\'abonner'),
+                        : Text(l10n.subscribeAction),
                   ),
                 ),
               ),
               Card(
                 child: ListTile(
-                  title: const Text('Annuel'),
-                  subtitle: const Text('20 000 FCFA/an (économisez 33%)'),
+                  title: Text(l10n.yearlyPlanTitle),
+                  subtitle: Text(l10n.yearlyPlanPrice),
                   trailing: ElevatedButton(
                     onPressed: _isPurchasing ? null : _purchasePremium,
                     style: ElevatedButton.styleFrom(
@@ -2146,7 +2152,7 @@ class _PremiumScreenState extends State<_PremiumScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('S\'abonner'),
+                        : Text(l10n.subscribeAction),
                   ),
                 ),
               ),
@@ -2235,13 +2241,13 @@ class _NotificationsScreenState extends State<_NotificationsScreen> {
       _loadNotifications();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Toutes les notifications marquées comme lues')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.notificationsMarkedRead)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -2272,26 +2278,27 @@ class _NotificationsScreenState extends State<_NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(l10n.notifications),
         actions: [
           TextButton(
             onPressed: _markAllAsRead,
-            child: const Text('Tout lire'),
+            child: Text(l10n.markAllRead),
           ),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _notifications.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.notifications_off, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('Aucune notification'),
+                      const Icon(Icons.notifications_off, size: 64, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(l10n.noNotifications),
                     ],
                   ),
                 )
@@ -2378,9 +2385,10 @@ class _NotificationsScreenState extends State<_NotificationsScreen> {
 
   String _formatTime(DateTime time) {
     final diff = DateTime.now().difference(time);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-    if (diff.inHours < 24) return '${diff.inHours}h';
-    return '${diff.inDays}j';
+    final l10n = AppLocalizations.of(context)!;
+    if (diff.inMinutes < 60) return l10n.timeAgoMinutesShort(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.timeAgoHoursShort(diff.inHours);
+    return l10n.timeAgoDaysShort(diff.inDays);
   }
 }
 
@@ -2424,7 +2432,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
       final userId = int.tryParse(widget.userId);
       if (userId == null || userId <= 0) {
         setState(() {
-          _error = 'ID utilisateur invalide';
+          _error = AppLocalizations.of(context)!.storyInvalidUserId;
           _isLoading = false;
         });
         return;
@@ -2433,7 +2441,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
 
       if (stories.isEmpty) {
         setState(() {
-          _error = 'Aucune story disponible';
+          _error = AppLocalizations.of(context)!.storyNoAvailable;
           _isLoading = false;
         });
         return;
@@ -2455,7 +2463,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
 
       if (_storyUser == null) {
         setState(() {
-          _error = 'Utilisateur non trouvé';
+          _error = AppLocalizations.of(context)!.userNotFound;
           _isLoading = false;
         });
         return;
@@ -2514,7 +2522,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Erreur de chargement: $e';
+        _error = AppLocalizations.of(context)!.storyLoadError(e.toString());
         _isLoading = false;
       });
     }
@@ -2572,7 +2580,7 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
         ),
         body: Center(
           child: Text(
-            _error ?? 'Aucune story disponible',
+            _error ?? AppLocalizations.of(context)!.storyNoAvailable,
             style: const TextStyle(color: Colors.white),
           ),
         ),
@@ -2675,13 +2683,13 @@ class _StoryViewerScreenState extends State<_StoryViewerScreen> {
                   _toggleReplyMode();
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Réponse envoyée')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.storyReplySent)),
                     );
                   }
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Erreur lors de l\'envoi')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.storyReplyError)),
                     );
                   }
                 }
@@ -2733,7 +2741,7 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
 
       if (stories.isEmpty) {
         setState(() {
-          _error = 'Vous n\'avez pas de story active';
+          _error = AppLocalizations.of(context)!.storyNoActive;
           _isLoading = false;
         });
         return;
@@ -2791,7 +2799,7 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Erreur de chargement: $e';
+        _error = AppLocalizations.of(context)!.storyLoadError(e.toString());
         _isLoading = false;
       });
     }
@@ -2815,17 +2823,17 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer la story?'),
-        content: const Text('Cette action est irréversible.'),
+        title: Text(AppLocalizations.of(context)!.deleteStoryTitle),
+        content: Text(AppLocalizations.of(context)!.deleteStoryConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Supprimer'),
+            child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
       ),
@@ -2842,11 +2850,11 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Story supprimée')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.storyDeleted)),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -2892,7 +2900,7 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
               const Icon(Icons.photo_camera, size: 64, color: Colors.white38),
               const SizedBox(height: 16),
               Text(
-                _error ?? 'Aucune story',
+                _error ?? AppLocalizations.of(context)!.storyNoneTitle,
                 style: const TextStyle(color: Colors.white),
               ),
               const SizedBox(height: 24),
@@ -2902,7 +2910,7 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
                   context.push('/create-story');
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('Créer une story'),
+                label: Text(AppLocalizations.of(context)!.createStoryAction),
               ),
             ],
           ),
@@ -2957,16 +2965,16 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Ma story',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.myStoryTitle,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       if (_stories.isNotEmpty && _currentIndex < _stories.length)
                         Text(
-                          '${_stories[_currentIndex].viewsCount} vues',
+                          AppLocalizations.of(context)!.viewsCount(_stories[_currentIndex].viewsCount),
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 12,
@@ -3032,7 +3040,7 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
                 const Icon(Icons.visibility),
                 const SizedBox(width: 8),
                 Text(
-                  '${story.viewsCount} vues',
+                  AppLocalizations.of(context)!.viewsCount(story.viewsCount),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -3051,14 +3059,14 @@ class _MyStoriesScreenState extends State<_MyStoriesScreen> {
                       ? Text(viewer.user?.initials ?? '?')
                       : null,
                 ),
-                title: Text(viewer.user?.fullName ?? 'Utilisateur'),
+                title: Text(viewer.user?.fullName ?? AppLocalizations.of(context)!.userFallback),
                 subtitle: Text('@${viewer.user?.username ?? ''}'),
               ))
             else
-              const Padding(
-                padding: EdgeInsets.all(16),
+              Padding(
+                padding: const EdgeInsets.all(16),
                 child: Center(
-                  child: Text('Les vues seront affichées ici'),
+                  child: Text(AppLocalizations.of(context)!.storyViewsEmpty),
                 ),
               ),
           ],
@@ -3129,25 +3137,26 @@ class _FollowersScreenState extends State<_FollowersScreen> {
       _loadFollowers();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Abonnés')),
+      appBar: AppBar(title: Text(l10n.followersTitle)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _followers.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('Aucun abonné', style: TextStyle(color: Colors.grey)),
+                      const Icon(Icons.people_outline, size: 64, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(l10n.noFollowers, style: const TextStyle(color: Colors.grey)),
                     ],
                   ),
                 )
@@ -3167,6 +3176,7 @@ class _FollowersScreenState extends State<_FollowersScreen> {
   Widget _buildUserTile(User user) {
     final currentUser = context.read<AuthProvider>().user;
     final isCurrentUser = currentUser?.id == user.id;
+    final l10n = AppLocalizations.of(context)!;
 
     return ListTile(
       leading: CircleAvatar(
@@ -3188,7 +3198,7 @@ class _FollowersScreenState extends State<_FollowersScreen> {
                 backgroundColor: user.isFollowing == true ? null : AppColors.primary,
                 foregroundColor: user.isFollowing == true ? AppColors.primary : Colors.white,
               ),
-              child: Text(user.isFollowing == true ? 'Abonné' : 'Suivre'),
+              child: Text(user.isFollowing == true ? l10n.followed : l10n.follow),
             ),
       onTap: () => context.push('/u/${user.username}'),
     );
@@ -3256,25 +3266,26 @@ class _FollowingScreenState extends State<_FollowingScreen> {
       _loadFollowing();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Abonnements')),
+      appBar: AppBar(title: Text(l10n.followingTitle)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _following.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('Aucun abonnement', style: TextStyle(color: Colors.grey)),
+                      const Icon(Icons.people_outline, size: 64, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(l10n.noFollowing, style: const TextStyle(color: Colors.grey)),
                     ],
                   ),
                 )
@@ -3294,6 +3305,7 @@ class _FollowingScreenState extends State<_FollowingScreen> {
   Widget _buildUserTile(User user) {
     final currentUser = context.read<AuthProvider>().user;
     final isCurrentUser = currentUser?.id == user.id;
+    final l10n = AppLocalizations.of(context)!;
 
     return ListTile(
       leading: CircleAvatar(
@@ -3315,7 +3327,7 @@ class _FollowingScreenState extends State<_FollowingScreen> {
                 backgroundColor: user.isFollowing == true ? null : AppColors.primary,
                 foregroundColor: user.isFollowing == true ? AppColors.primary : Colors.white,
               ),
-              child: Text(user.isFollowing == true ? 'Abonné' : 'Suivre'),
+              child: Text(user.isFollowing == true ? l10n.followed : l10n.follow),
             ),
       onTap: () => context.push('/u/${user.username}'),
     );
@@ -3473,7 +3485,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lecture audio: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.audioPlaybackError(e.toString()))),
         );
       }
     } finally {
@@ -3500,7 +3512,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lecture vidéo: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.videoPlaybackError(e.toString()))),
         );
       }
       await controller.dispose();
@@ -3672,7 +3684,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           _isSending = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Message modifié')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.messageEdited)),
         );
         _loadMessages();
         return;
@@ -3713,12 +3725,13 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       if (mounted) {
         final errorMessage = _extractErrorMessage(e);
         final voiceInfo = _voiceFile != null ? _voiceDebugInfo(_voiceFile!) : null;
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               voiceInfo != null
-                  ? 'Erreur: $errorMessage | voice=$voiceInfo'
-                  : 'Erreur: $errorMessage',
+                  ? l10n.errorWithDebug(l10n.errorMessage(errorMessage), voiceInfo)
+                  : l10n.errorMessage(errorMessage),
             ),
           ),
         );
@@ -3728,6 +3741,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
@@ -3752,7 +3766,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                       radius: 18,
                       backgroundColor: AppColors.primary.withOpacity(0.15),
                       child: Text(
-                        (_groupName ?? 'G').substring(0, 1).toUpperCase(),
+                        (_groupName ?? l10n.groupTitleFallback).substring(0, 1).toUpperCase(),
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w700,
@@ -3765,10 +3779,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_groupName ?? 'Groupe'),
+                  Text(_groupName ?? l10n.groupTitleFallback),
                   if (_group != null)
                     Text(
-                      '${_group!.membersCount} membre${_group!.membersCount > 1 ? 's' : ''}',
+                      l10n.membersCount(_group!.membersCount),
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).textTheme.bodySmall?.color ??
@@ -3814,14 +3828,14 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                           children: [
                             const Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey),
                             const SizedBox(height: 16),
-                            const Text(
-                              'Aucun message',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            Text(
+                              l10n.groupEmptyTitle,
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'Envoyez un message pour demarrer la conversation',
-                              style: TextStyle(color: Colors.grey),
+                            Text(
+                              l10n.groupEmptySubtitle,
+                              style: const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
@@ -3904,7 +3918,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                         Icon(Icons.videocam, size: 28, color: Colors.grey[700]),
                         const SizedBox(height: 4),
                         Text(
-                          'Vidéo sélectionnée',
+                          l10n.videoSelected,
                           style: TextStyle(color: Colors.grey[700], fontSize: 12),
                         ),
                       ],
@@ -3969,7 +3983,9 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Répondre à ${_replyToMessage!['sender']?['full_name'] ?? 'Utilisateur'}',
+                          l10n.replyToUser(
+                            _replyToMessage!['sender']?['full_name'] ?? l10n.userFallback,
+                          ),
                           style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 12,
@@ -4014,10 +4030,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                 children: [
                   const Icon(Icons.edit, color: Colors.amber, size: 20),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Modification du message',
-                      style: TextStyle(
+                      l10n.messageEditMode,
+                      style: const TextStyle(
                         color: Colors.amber,
                         fontWeight: FontWeight.w500,
                       ),
@@ -4086,8 +4102,8 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                           controller: _messageController,
                           decoration: InputDecoration(
                             hintText: _editingMessageId != null
-                                ? 'Modifier le message...'
-                                : 'Ecrire un message...',
+                                ? l10n.editMessageHint
+                                : l10n.messageInputHint,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
                               borderSide: BorderSide.none,
@@ -4138,7 +4154,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     final replyTo = message['reply_to_message'];
     final sender = message['sender'] as Map<String, dynamic>?;
     final senderName =
-        sender?['full_name'] ?? sender?['username'] ?? 'Utilisateur';
+        sender?['full_name'] ?? sender?['username'] ?? AppLocalizations.of(context)!.userFallback;
     final senderAvatar = sender?['avatar'] ?? sender?['avatar_url'];
 
     return GestureDetector(
@@ -4293,6 +4309,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   }
 
   String _replyPreviewText(Map<String, dynamic> replyTo) {
+    final l10n = AppLocalizations.of(context)!;
     final content = replyTo['content'];
     if (content is String && content.trim().isNotEmpty) {
       return content;
@@ -4301,13 +4318,13 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     final type = replyTo['type'] ?? 'text';
     switch (type) {
       case 'image':
-        return 'Image';
+        return l10n.attachmentImage;
       case 'voice':
-        return 'Message vocal';
+        return l10n.voiceMessageLabel;
       case 'video':
-        return 'Vidéo';
+        return l10n.attachmentVideo;
       default:
-        return 'Message';
+        return l10n.messageLabel;
     }
   }
 
@@ -4369,7 +4386,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.reply),
-              title: const Text('Répondre'),
+              title: Text(AppLocalizations.of(context)!.reply),
               onTap: () {
                 Navigator.pop(context);
                 setState(() {
@@ -4380,7 +4397,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             if (isMe) ...[
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: const Text('Modifier'),
+                title: Text(AppLocalizations.of(context)!.editAction),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
@@ -4391,7 +4408,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+                title: Text(
+                  AppLocalizations.of(context)!.deleteAction,
+                  style: const TextStyle(color: Colors.red),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   _showDeleteMessageDialog(message['id']);
@@ -4400,12 +4420,12 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             ],
             ListTile(
               leading: const Icon(Icons.copy),
-              title: const Text('Copier'),
+              title: Text(AppLocalizations.of(context)!.copyAction),
               onTap: () {
                 Clipboard.setData(ClipboardData(text: message['content'] ?? ''));
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Message copié')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.messageCopied)),
                 );
               },
             ),
@@ -4419,12 +4439,12 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer le message'),
-        content: const Text('Êtes-vous sûr de vouloir supprimer ce message ?'),
+        title: Text(AppLocalizations.of(context)!.deleteMessageTitle),
+        content: Text(AppLocalizations.of(context)!.deleteMessageConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -4438,16 +4458,16 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   _messages.removeWhere((m) => m['id'] == messageId);
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Message supprimé')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.messageDeleted)),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur: $e')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
                 );
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Supprimer'),
+            child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
       ),
@@ -4557,7 +4577,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             // Invite code
             ListTile(
               leading: const Icon(Icons.link, color: AppColors.primary),
-              title: const Text('Code d\'invitation'),
+              title: Text(AppLocalizations.of(context)!.inviteCodeTitle),
               subtitle: Text(_group?.inviteCode ?? ''),
               trailing: IconButton(
                 icon: const Icon(Icons.copy),
@@ -4566,7 +4586,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     Clipboard.setData(ClipboardData(text: _group!.inviteCode));
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Code copié !')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.inviteCodeCopied)),
                     );
                   }
                 },
@@ -4581,7 +4601,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             if (isAdmin)
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: const Text('Modifier le groupe'),
+                title: Text(AppLocalizations.of(context)!.editGroup),
                 onTap: () {
                   Navigator.pop(context);
                   _showEditGroupDialog();
@@ -4589,12 +4609,12 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               ),
             ListTile(
               leading: const Icon(Icons.notifications),
-              title: const Text('Notifications'),
+              title: Text(AppLocalizations.of(context)!.notifications),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.info),
-              title: const Text('Infos du groupe'),
+              title: Text(AppLocalizations.of(context)!.groupInfo),
               onTap: () {
                 Navigator.pop(context);
                 _showGroupInfoDialog();
@@ -4604,7 +4624,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             if (isAdmin)
               ListTile(
                 leading: const Icon(Icons.refresh),
-                title: const Text('Régénérer le code d\'invitation'),
+                title: Text(AppLocalizations.of(context)!.regenerateInviteCode),
                 onTap: () async {
                   Navigator.pop(context);
                   try {
@@ -4613,18 +4633,21 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     );
                     await _loadGroup();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Nouveau code: $newCode')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.newInviteCode(newCode))),
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Erreur lors de la régénération')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.regenerateInviteError)),
                     );
                   }
                 },
               ),
             ListTile(
               leading: const Icon(Icons.exit_to_app, color: Colors.red),
-              title: const Text('Quitter le groupe', style: TextStyle(color: Colors.red)),
+              title: Text(
+                AppLocalizations.of(context)!.leaveGroup,
+                style: const TextStyle(color: Colors.red),
+              ),
               onTap: () async {
                 Navigator.pop(context);
                 _showLeaveGroupDialog();
@@ -4634,7 +4657,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
             if (isAdmin)
               ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
-                title: const Text('Supprimer le groupe', style: TextStyle(color: Colors.red)),
+                title: Text(
+                  AppLocalizations.of(context)!.deleteGroup,
+                  style: const TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _showDeleteGroupDialog();
@@ -4650,15 +4676,12 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Supprimer le groupe'),
-        content: const Text(
-          'Êtes-vous sûr de vouloir supprimer ce groupe ?\n\n'
-          'Cette action est irréversible. Tous les messages et les membres seront supprimés.',
-        ),
+        title: Text(AppLocalizations.of(context)!.deleteGroup),
+        content: Text(AppLocalizations.of(context)!.deleteGroupConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -4667,17 +4690,17 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                 Navigator.pop(context);
                 context.go('/groups');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Groupe supprimé')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.groupDeleted)),
                 );
               } catch (e) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur: $e')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
                 );
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Supprimer'),
+            child: Text(AppLocalizations.of(context)!.deleteAction),
           ),
         ],
       ),
@@ -4689,7 +4712,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Code d\'invitation'),
+        title: Text(AppLocalizations.of(context)!.inviteCodeTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -4714,26 +4737,26 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Partagez ce code pour inviter des personnes à rejoindre le groupe.',
+            Text(
+              AppLocalizations.of(context)!.inviteCodeShareHint,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
           ElevatedButton.icon(
             icon: const Icon(Icons.copy),
-            label: const Text('Copier'),
+            label: Text(AppLocalizations.of(context)!.copyAction),
             onPressed: () {
               Clipboard.setData(ClipboardData(text: _group!.inviteCode));
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Code copié !')),
+                SnackBar(content: Text(AppLocalizations.of(context)!.inviteCodeCopied)),
               );
             },
           ),
@@ -4771,7 +4794,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                     ),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(_group?.name ?? 'Groupe')),
+            Expanded(child: Text(_group?.name ?? AppLocalizations.of(context)!.groupTitleFallback)),
           ],
         ),
         content: Column(
@@ -4779,7 +4802,10 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (_group?.description != null && _group!.description!.isNotEmpty) ...[
-              const Text('Description', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                AppLocalizations.of(context)!.descriptionLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 4),
               Text(_group!.description!),
               const SizedBox(height: 16),
@@ -4788,7 +4814,12 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
               children: [
                 const Icon(Icons.people, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
-                Text('${_group?.membersCount ?? 0}/${_group?.maxMembers ?? 50} membres'),
+                Text(
+                  AppLocalizations.of(context)!.membersCountWithMax(
+                    _group?.membersCount ?? 0,
+                    _group?.maxMembers ?? 50,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -4800,7 +4831,11 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   color: Colors.grey,
                 ),
                 const SizedBox(width: 8),
-                Text(_group?.isPublic == true ? 'Groupe public' : 'Groupe privé'),
+                Text(
+                  _group?.isPublic == true
+                      ? AppLocalizations.of(context)!.publicGroup
+                      : AppLocalizations.of(context)!.privateGroup,
+                ),
               ],
             ),
           ],
@@ -4808,7 +4843,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -4828,7 +4863,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Modifier le groupe'),
+          title: Text(AppLocalizations.of(context)!.editGroup),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -4870,40 +4905,40 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                         }
                       },
                       icon: const Icon(Icons.photo_camera),
-                      label: const Text('Changer le logo'),
+                      label: Text(AppLocalizations.of(context)!.changeGroupLogo),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nom du groupe',
-                    prefixIcon: Icon(Icons.group),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.groupNameLabel,
+                    prefixIcon: const Icon(Icons.group),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: descriptionController,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    prefixIcon: Icon(Icons.description),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.descriptionLabel,
+                    prefixIcon: const Icon(Icons.description),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: maxMembersController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre maximum de membres',
-                    prefixIcon: Icon(Icons.people),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.maxMembersLabel,
+                    prefixIcon: const Icon(Icons.people),
                   ),
                 ),
                 const SizedBox(height: 16),
                 SwitchListTile(
-                  title: const Text('Groupe public'),
-                  subtitle: const Text('Visible dans la découverte'),
+                  title: Text(AppLocalizations.of(context)!.publicGroup),
+                  subtitle: Text(AppLocalizations.of(context)!.publicGroupSubtitle),
                   value: isPublic,
                   onChanged: (value) {
                     setDialogState(() {
@@ -4917,7 +4952,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Annuler'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -4934,15 +4969,15 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   Navigator.pop(context);
                   _loadGroup();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Groupe modifié !')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.groupUpdated)),
                   );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
                   );
                 }
               },
-              child: const Text('Enregistrer'),
+              child: Text(AppLocalizations.of(context)!.saveAction),
             ),
           ],
         ),
@@ -4954,12 +4989,12 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Quitter le groupe'),
-        content: const Text('Êtes-vous sûr de vouloir quitter ce groupe ?'),
+        title: Text(AppLocalizations.of(context)!.leaveGroup),
+        content: Text(AppLocalizations.of(context)!.leaveGroupConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -4968,17 +5003,17 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                 Navigator.pop(context);
                 context.go('/groups');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Vous avez quitté le groupe')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.leftGroupSuccess)),
                 );
               } catch (e) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur: $e')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
                 );
               }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Quitter'),
+            child: Text(AppLocalizations.of(context)!.leaveGroup),
           ),
         ],
       ),
@@ -5062,13 +5097,13 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Text(
-                  'Membres du groupe',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context)!.groupMembersTitle,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Text(
-                  '${_members.length} membres',
+                  AppLocalizations.of(context)!.membersCount(_members.length),
                   style: TextStyle(color: Colors.grey[600]),
                 ),
               ],
@@ -5086,17 +5121,17 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
                           children: [
                             const Icon(Icons.error_outline, size: 48, color: Colors.grey),
                             const SizedBox(height: 16),
-                            Text('Erreur: $_error'),
+                            Text(AppLocalizations.of(context)!.errorMessage(_error ?? '')),
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: _loadMembers,
-                              child: const Text('Réessayer'),
+                              child: Text(AppLocalizations.of(context)!.retry),
                             ),
                           ],
                         ),
                       )
                     : _members.isEmpty
-                        ? const Center(child: Text('Aucun membre'))
+                        ? Center(child: Text(AppLocalizations.of(context)!.noMembers))
                         : ListView.builder(
                             controller: widget.scrollController,
                             itemCount: _members.length,
@@ -5113,7 +5148,7 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
 
   Widget _buildMemberTile(GroupMember member) {
     final isAdmin = member.role == 'admin' || member.role == 'creator';
-    final displayName = member.user?.fullName ?? 'Anonyme';
+    final displayName = member.user?.fullName ?? AppLocalizations.of(context)!.anonymousUser;
     final initial = member.user?.initials ?? 'A';
 
     return ListTile(
@@ -5135,7 +5170,9 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                member.role == 'creator' ? 'Créateur' : 'Admin',
+                member.role == 'creator'
+                    ? AppLocalizations.of(context)!.roleCreator
+                    : AppLocalizations.of(context)!.roleAdmin,
                 style: const TextStyle(
                   fontSize: 10,
                   color: AppColors.primary,
@@ -5156,17 +5193,17 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Retirer le membre'),
-                      content: Text('Voulez-vous retirer $displayName du groupe ?'),
+                      title: Text(AppLocalizations.of(context)!.removeMemberTitle),
+                      content: Text(AppLocalizations.of(context)!.removeMemberConfirm(displayName)),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Annuler'),
+                          child: Text(AppLocalizations.of(context)!.cancel),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
                           style: TextButton.styleFrom(foregroundColor: Colors.red),
-                          child: const Text('Retirer'),
+                          child: Text(AppLocalizations.of(context)!.removeAction),
                         ),
                       ],
                     ),
@@ -5178,24 +5215,27 @@ class _MembersListWidgetState extends State<_MembersListWidget> {
                       _loadMembers();
                       widget.onMemberRemoved();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Membre retiré')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.memberRemoved)),
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Erreur: $e')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
                       );
                     }
                   }
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'remove',
                   child: Row(
                     children: [
-                      Icon(Icons.person_remove, color: Colors.red, size: 20),
-                      SizedBox(width: 8),
-                      Text('Retirer', style: TextStyle(color: Colors.red)),
+                      const Icon(Icons.person_remove, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppLocalizations.of(context)!.removeAction,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                     ],
                   ),
                 ),
@@ -5255,7 +5295,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: ${e.toString()}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
         );
       }
     }
@@ -5268,22 +5308,19 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Révéler l\'identité'),
-        content: const Text(
-          'Voulez-vous dépenser des crédits pour découvrir qui a envoyé ce message?\n\n'
-          'Cette action est irréversible.',
-        ),
+        title: Text(AppLocalizations.of(context)!.revealIdentityTitle),
+        content: Text(AppLocalizations.of(context)!.revealIdentityCreditsPrompt),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Annuler'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
             ),
-            child: const Text('Révéler'),
+            child: Text(AppLocalizations.of(context)!.revealIdentityAction),
           ),
         ],
       ),
@@ -5304,8 +5341,8 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Identité révélée!'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.revealIdentitySuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -5317,7 +5354,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.errorMessage(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -5328,7 +5365,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
   Future<void> _replyOnce() async {
     if (_message == null || _replyController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez saisir un message')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.enterMessageError)),
       );
       return;
     }
@@ -5359,21 +5396,21 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
             content: sentContent,
           );
           _replyController.clear();
-          final replyTitle = Uri.encodeComponent('Message anonyme');
+          final replyTitle = Uri.encodeComponent(AppLocalizations.of(context)!.anonymousMessage);
           final replyEncoded = Uri.encodeComponent(replyContent);
           final sentEncoded = Uri.encodeComponent(sentContent);
           context.go(
             '/chat/$conversationId?reply_title=$replyTitle&reply_content=$replyEncoded&sent_content=$sentEncoded',
           );
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Conversation démarrée! Vous pouvez maintenant discuter.'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.conversationStarted),
               backgroundColor: Colors.green,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Réponse envoyée!')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.replySent)),
           );
         }
       }
@@ -5384,7 +5421,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.errorMessage(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -5394,30 +5431,31 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Message anonyme'),
+        title: Text(l10n.anonymousMessage),
         actions: [
           if (_message != null)
             PopupMenuButton(
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'report',
                   child: Row(
                     children: [
-                      Icon(Icons.flag_outlined, size: 20),
-                      SizedBox(width: 8),
-                      Text('Signaler'),
+                      const Icon(Icons.flag_outlined, size: 20),
+                      const SizedBox(width: 8),
+                      Text(l10n.report),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Supprimer', style: TextStyle(color: Colors.red)),
+                      const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Text(l10n.deleteAction, style: const TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),
@@ -5427,7 +5465,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                   await _messageService.reportMessage(widget.messageId);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Message signalé')),
+                      SnackBar(content: Text(l10n.messageReported)),
                     );
                   }
                 } else if (value == 'delete') {
@@ -5435,7 +5473,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                   if (mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Message supprimé')),
+                      SnackBar(content: Text(l10n.messageDeleted)),
                     );
                   }
                 }
@@ -5446,7 +5484,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _message == null
-              ? const Center(child: Text('Message introuvable'))
+              ? Center(child: Text(l10n.messageNotFound))
               : Container(
                   decoration: const BoxDecoration(
                     image: DecorationImage(
@@ -5480,13 +5518,13 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                                         ),
                                       )
                                     else
-                                      const Row(
+                                      Row(
                                         children: [
-                                          Icon(Icons.person_off, size: 18, color: AppColors.textSecondary),
-                                          SizedBox(width: 8),
+                                          const Icon(Icons.person_off, size: 18, color: AppColors.textSecondary),
+                                          const SizedBox(width: 8),
                                           Text(
-                                            'Expéditeur anonyme',
-                                            style: TextStyle(
+                                            l10n.anonymousSender,
+                                            style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
                                               fontStyle: FontStyle.italic,
@@ -5507,7 +5545,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                                         const Spacer(),
                                         if (!_message!.isIdentityRevealed)
                                           IconButton(
-                                            tooltip: 'Découvrir l\'identité',
+                                            tooltip: l10n.revealIdentityTitle,
                                             onPressed: _isRevealing ? null : _revealIdentity,
                                             icon: _isRevealing
                                                 ? const SizedBox(
@@ -5539,8 +5577,8 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Message',
+                              Text(
+                                l10n.messageLabel,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondary,
@@ -5575,8 +5613,8 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Identité révélée',
+                                    Text(
+                                      l10n.identityRevealedTitle,
                                       style: TextStyle(
                                         color: AppColors.success,
                                         fontWeight: FontWeight.bold,
@@ -5584,7 +5622,7 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Envoyé par ${_message!.sender?.fullName ?? 'Utilisateur'}',
+                                      l10n.sentByUser(_message!.sender?.fullName ?? l10n.userFallback),
                                       style: const TextStyle(fontSize: 14),
                                     ),
                                   ],
@@ -5604,73 +5642,71 @@ class _AnonymousMessageDetailScreenState extends State<_AnonymousMessageDetailSc
                       const SizedBox(height: 16),
 
                       // Reply section
-                      if ((_message?.recipientId ?? 0) ==
-                          (context.read<AuthProvider>().user?.id ?? 0))
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Row(
-                                  children: [
-                                    Icon(Icons.reply, size: 20, color: AppColors.primary),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Répondre une fois',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Répondez à ce message pour démarrer une conversation dans le chat.',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                TextField(
-                                  controller: _replyController,
-                                  maxLines: 3,
-                                  decoration: InputDecoration(
-                                    hintText: 'Écrivez votre réponse...',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Row(
+                                children: [
+                                  Icon(Icons.reply, size: 20, color: AppColors.primary),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Répondre une fois',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Répondez à ce message pour démarrer une conversation dans le chat.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
                                 ),
-                                const SizedBox(height: 12),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: _isReplying ? null : _replyOnce,
-                                    icon: _isReplying
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : const Icon(Icons.send),
-                                    label: Text(_isReplying ? 'Envoi...' : 'Répondre et démarrer la conversation'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 14),
-                                    ),
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                controller: _replyController,
+                                maxLines: 3,
+                                decoration: InputDecoration(
+                                  hintText: 'Écrivez votre réponse...',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: _isReplying ? null : _replyOnce,
+                                  icon: _isReplying
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.send),
+                                  label: Text(_isReplying ? 'Envoi...' : 'Répondre et démarrer la conversation'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                      ),
                       ],
                     ),
                   ),

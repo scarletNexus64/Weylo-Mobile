@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/feed_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -51,6 +52,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: ShaderMask(
@@ -74,7 +76,7 @@ class _FeedScreenState extends State<FeedScreen> {
             onPressed: () {
               context.push('/search');
             },
-            tooltip: 'Rechercher',
+            tooltip: l10n.searchAction,
           ),
           IconButton(
             icon: ShaderMask(
@@ -107,9 +109,9 @@ class _FeedScreenState extends State<FeedScreen> {
           if (feedProvider.error != null && feedProvider.confessions.isEmpty) {
             return EmptyState(
               icon: Icons.error_outline,
-              title: 'Erreur de chargement',
+              title: l10n.loadingErrorTitle,
               subtitle: feedProvider.error!,
-              actionLabel: 'Réessayer',
+              actionLabel: l10n.retry,
               onAction: () => feedProvider.refresh(),
             );
           }
@@ -132,11 +134,11 @@ class _FeedScreenState extends State<FeedScreen> {
 
                 // Confessions feed
                 if (feedProvider.confessions.isEmpty)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: EmptyState(
                       icon: Icons.article_outlined,
-                      title: 'Aucune publication',
-                      subtitle: 'Soyez le premier à publier!',
+                      title: l10n.feedEmptyTitle,
+                      subtitle: l10n.feedEmptySubtitle,
                     ),
                   )
                 else
@@ -225,10 +227,11 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   void _shareConfession(int confessionId) {
+    final l10n = AppLocalizations.of(context)!;
     final shareUrl = 'https://weylo.app/post/$confessionId';
     Share.share(
-      'Découvre cette publication sur Weylo! $shareUrl',
-      subject: 'Publication Weylo',
+      l10n.sharePostMessage(shareUrl),
+      subject: l10n.sharePostSubject,
     );
   }
 
@@ -331,10 +334,11 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
 
   Future<void> _publishPost() async {
     final content = _contentController.text.trim();
+    final l10n = AppLocalizations.of(context)!;
 
     if (content.isEmpty && _selectedImage == null && _selectedVideo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez écrire quelque chose ou ajouter un média')),
+        SnackBar(content: Text(l10n.addContentOrMediaError)),
       );
       return;
     }
@@ -354,8 +358,8 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
         Navigator.pop(context);
         widget.onPostCreated?.call();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Publication créée avec succès!'),
+          SnackBar(
+            content: Text(l10n.postCreatedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -364,7 +368,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur: ${e.toString()}'),
+          content: Text(l10n.errorMessage(e.toString())),
           backgroundColor: Colors.red,
         ),
       );
@@ -373,6 +377,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
@@ -400,11 +405,11 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Annuler'),
+                  child: Text(l10n.cancel),
                 ),
-                const Text(
-                  'Nouvelle publication',
-                  style: TextStyle(
+                Text(
+                  l10n.createPostTitle,
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -417,7 +422,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Publier'),
+                      : Text(l10n.publishAction),
                 ),
               ],
             ),
@@ -436,8 +441,8 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     controller: _contentController,
                     maxLines: 8,
                     maxLength: 500,
-                    decoration: const InputDecoration(
-                      hintText: 'Exprimez-vous...',
+                    decoration: InputDecoration(
+                      hintText: l10n.feedPostHint,
                       border: InputBorder.none,
                     ),
                   ),
@@ -466,7 +471,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                                       Icon(Icons.videocam, size: 48, color: Colors.grey[600]),
                                       const SizedBox(height: 8),
                                       Text(
-                                        'Vidéo sélectionnée',
+                                        l10n.videoSelectedLabel,
                                         style: TextStyle(color: Colors.grey[600]),
                                       ),
                                     ],
@@ -525,7 +530,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     color: _selectedImage != null ? AppColors.primary : Colors.grey[600],
                   ),
                   onPressed: _pickImage,
-                  tooltip: 'Ajouter une image',
+                  tooltip: l10n.addImageAction,
                 ),
                 IconButton(
                   icon: Icon(
@@ -533,7 +538,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     color: Colors.grey[600],
                   ),
                   onPressed: _takePhoto,
-                  tooltip: 'Prendre une photo',
+                  tooltip: l10n.takePhotoAction,
                 ),
                 // GIF button
                 IconButton(
@@ -542,7 +547,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     color: Colors.grey[600],
                   ),
                   onPressed: _pickGif,
-                  tooltip: 'Ajouter un GIF',
+                  tooltip: l10n.addGifAction,
                 ),
                 IconButton(
                   icon: Icon(
@@ -550,7 +555,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     color: _selectedVideo != null ? AppColors.primary : Colors.grey[600],
                   ),
                   onPressed: _pickVideo,
-                  tooltip: 'Ajouter une vidéo',
+                  tooltip: l10n.addVideoAction,
                 ),
                 const Spacer(),
                 // Visibility selector
@@ -576,7 +581,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          _isPublic ? 'Public' : 'Anonyme',
+                          _isPublic ? l10n.visibilityPublic : l10n.visibilityAnonymous,
                           style: TextStyle(
                             color: Colors.grey[700],
                             fontSize: 14,

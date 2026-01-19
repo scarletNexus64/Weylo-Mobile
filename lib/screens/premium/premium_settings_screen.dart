@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/premium_service.dart';
 import '../../services/widgets/common/widgets.dart';
 
@@ -34,6 +35,7 @@ class _PremiumSettingsScreenState extends State<PremiumSettingsScreen> {
   }
 
   Future<void> _toggleAutoRenew() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       if (_status?.autoRenew == true) {
         await _premiumService.disableAutoRenew();
@@ -46,8 +48,8 @@ class _PremiumSettingsScreenState extends State<PremiumSettingsScreen> {
           SnackBar(
             content: Text(
               _status?.autoRenew == true
-                  ? 'Renouvellement automatique activé'
-                  : 'Renouvellement automatique désactivé',
+                  ? l10n.autoRenewEnabled
+                  : l10n.autoRenewDisabled,
             ),
           ),
         );
@@ -55,7 +57,7 @@ class _PremiumSettingsScreenState extends State<PremiumSettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
         );
       }
     }
@@ -63,9 +65,10 @@ class _PremiumSettingsScreenState extends State<PremiumSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Réglages Premium'),
+        title: Text(l10n.premiumSettings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -77,17 +80,17 @@ class _PremiumSettingsScreenState extends State<PremiumSettingsScreen> {
               padding: const EdgeInsets.all(16),
               children: [
                 ListTile(
-                  title: const Text('Statut'),
-                  subtitle: Text(_status?.isActive == true ? 'Actif' : 'Inactif'),
+                  title: Text(l10n.statusLabel),
+                  subtitle: Text(_status?.isActive == true ? l10n.statusActive : l10n.statusInactive),
                   trailing: TextButton(
                     onPressed: () => context.push('/premium'),
-                    child: const Text('Voir'),
+                    child: Text(l10n.viewAction),
                   ),
                 ),
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('Renouvellement automatique'),
-                  subtitle: const Text('Renouveler automatiquement votre abonnement'),
+                  title: Text(l10n.autoRenewTitle),
+                  subtitle: Text(l10n.autoRenewSubtitle),
                   value: _status?.autoRenew ?? false,
                   onChanged: (_) => _toggleAutoRenew(),
                 ),

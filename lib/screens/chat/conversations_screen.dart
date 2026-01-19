@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
 import '../../models/conversation.dart';
@@ -139,9 +140,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conversations'),
+        title: Text(l10n.conversationsTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -160,10 +162,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                 : _hasError
                     ? ErrorState(onRetry: _loadConversations)
                     : _conversations.isEmpty
-                        ? const EmptyState(
+                        ? EmptyState(
                             icon: Icons.chat_bubble_outline,
-                            title: 'Aucune conversation',
-                            subtitle: 'Commencez une conversation avec quelqu\'un',
+                            title: l10n.emptyConversationsTitle,
+                            subtitle: l10n.emptyConversationsSubtitle,
                           )
                         : SmartRefresher(
                             controller: _refreshController,
@@ -202,6 +204,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             // Start new conversation
             context.push('/new-chat');
           },
+          tooltip: l10n.newConversationFab,
           backgroundColor: Colors.transparent,
           elevation: 0,
           child: const Icon(Icons.chat, color: Colors.white),
@@ -253,6 +256,7 @@ class _ConversationSearchSheetState extends State<_ConversationSearchSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       maxChildSize: 0.9,
@@ -265,7 +269,7 @@ class _ConversationSearchSheetState extends State<_ConversationSearchSheet> {
             child: TextField(
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Rechercher dans les conversations...',
+                hintText: l10n.searchConversationsHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -279,8 +283,8 @@ class _ConversationSearchSheetState extends State<_ConversationSearchSheet> {
                 ? Center(
                     child: Text(
                       _searchQuery.isEmpty
-                        ? 'Aucune conversation'
-                        : 'Aucun résultat trouvé',
+                        ? l10n.emptyConversationsTitle
+                        : l10n.noResultsFound,
                     ),
                   )
                 : ListView.builder(
@@ -350,8 +354,8 @@ class _ConversationTile extends StatelessWidget {
           Expanded(
             child: Text(
               conversation.isIdentityRevealed
-                  ? otherUser?.fullName ?? 'Utilisateur'
-                  : 'Anonyme',
+                  ? otherUser?.fullName ?? AppLocalizations.of(context)!.userFallback
+                  : AppLocalizations.of(context)!.anonymousConversation,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: conversation.unreadCount > 0
                     ? FontWeight.bold

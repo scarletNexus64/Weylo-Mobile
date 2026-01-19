@@ -5,34 +5,35 @@ import 'package:timeago/timeago.dart' as timeago;
 class Helpers {
   // Format currency in FCFA
   static String formatCurrency(num amount) {
-    final formatter = NumberFormat('#,###', 'fr_FR');
+    final formatter = NumberFormat('#,###', Intl.getCurrentLocale());
     return '${formatter.format(amount)} FCFA';
   }
 
   // Format number with separator
   static String formatNumber(num number) {
-    final formatter = NumberFormat('#,###', 'fr_FR');
+    final formatter = NumberFormat('#,###', Intl.getCurrentLocale());
     return formatter.format(number);
   }
 
   // Get time ago string
   static String getTimeAgo(DateTime dateTime) {
-    return timeago.format(dateTime, locale: 'fr');
+    final locale = Intl.getCurrentLocale().startsWith('fr') ? 'fr' : 'en';
+    return timeago.format(dateTime, locale: locale);
   }
 
   // Format date
   static String formatDate(DateTime dateTime, {String pattern = 'dd/MM/yyyy'}) {
-    return DateFormat(pattern, 'fr_FR').format(dateTime);
+    return DateFormat(pattern, Intl.getCurrentLocale()).format(dateTime);
   }
 
   // Format date and time
   static String formatDateTime(DateTime dateTime) {
-    return DateFormat('dd/MM/yyyy HH:mm', 'fr_FR').format(dateTime);
+    return DateFormat('dd/MM/yyyy HH:mm', Intl.getCurrentLocale()).format(dateTime);
   }
 
   // Format time
   static String formatTime(DateTime dateTime) {
-    return DateFormat('HH:mm', 'fr_FR').format(dateTime);
+    return DateFormat('HH:mm', Intl.getCurrentLocale()).format(dateTime);
   }
 
   // Get initials from name

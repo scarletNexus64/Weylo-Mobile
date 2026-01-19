@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/group_service.dart';
 
@@ -31,6 +32,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   Future<void> _pickImage() async {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -39,7 +41,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera),
-              title: const Text('Prendre une photo'),
+              title: Text(l10n.takePhotoAction),
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await _imagePicker.pickImage(
@@ -57,7 +59,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Choisir dans la galerie'),
+              title: Text(l10n.chooseFromGalleryAction),
               onTap: () async {
                 Navigator.pop(ctx);
                 final image = await _imagePicker.pickImage(
@@ -76,7 +78,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             if (_selectedImage != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Supprimer la photo', style: TextStyle(color: Colors.red)),
+                title: Text(l10n.removePhotoAction, style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(ctx);
                   setState(() {
@@ -91,6 +93,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   Future<void> _createGroup() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -108,7 +111,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Groupe créé avec succès!')),
+          SnackBar(content: Text(l10n.groupCreatedSuccess)),
         );
         context.pop();
         context.push('/group/${group.id}');
@@ -116,7 +119,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
         );
       }
     } finally {
@@ -128,9 +131,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Créer un groupe'),
+        title: Text(l10n.createGroupTitle),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _createGroup,
@@ -140,7 +144,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Créer'),
+                : Text(l10n.createAction),
           ),
         ],
       ),
@@ -201,18 +205,18 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             // Group Name
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nom du groupe',
-                hintText: 'Ex: Amis de l\'université',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.group),
+              decoration: InputDecoration(
+                labelText: l10n.groupNameLabel,
+                hintText: l10n.groupNameHint,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.group),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Le nom du groupe est requis';
+                  return l10n.groupNameRequiredError;
                 }
                 if (value.trim().length < 3) {
-                  return 'Le nom doit contenir au moins 3 caractères';
+                  return l10n.groupNameMinLengthError(3);
                 }
                 return null;
               },
@@ -224,11 +228,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               controller: _descriptionController,
               maxLines: 3,
               maxLength: 200,
-              decoration: const InputDecoration(
-                labelText: 'Description (optionnel)',
-                hintText: 'Décrivez le but de ce groupe...',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.description),
+              decoration: InputDecoration(
+                labelText: l10n.groupDescriptionLabel,
+                hintText: l10n.groupDescriptionHint,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.description),
               ),
             ),
             const SizedBox(height: 16),
@@ -237,8 +241,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.people),
-              title: const Text('Nombre maximum de membres'),
-              subtitle: Text('$_maxMembers membres'),
+              title: Text(l10n.maxMembersTitle),
+              subtitle: Text(l10n.membersCount(_maxMembers)),
               trailing: SizedBox(
                 width: 200,
                 child: Slider(
@@ -258,11 +262,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             // Public/Private Toggle
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Groupe public'),
+              title: Text(l10n.publicGroupTitle),
               subtitle: Text(
                 _isPublic
-                    ? 'Tout le monde peut découvrir et rejoindre ce groupe'
-                    : 'Seules les personnes avec le code d\'invitation peuvent rejoindre',
+                    ? l10n.publicGroupSubtitle
+                    : l10n.privateGroupSubtitle,
               ),
               value: _isPublic,
               onChanged: (value) {
@@ -282,14 +286,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: AppColors.primary),
-                  SizedBox(width: 12),
+                  const Icon(Icons.info_outline, color: AppColors.primary),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Un code d\'invitation sera généré automatiquement pour votre groupe.',
-                      style: TextStyle(fontSize: 13),
+                      l10n.groupInviteCodeInfo,
+                      style: const TextStyle(fontSize: 13),
                     ),
                   ),
                 ],

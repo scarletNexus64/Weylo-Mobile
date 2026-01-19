@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/conversation.dart';
 import '../../services/chat_service.dart';
 import '../../services/widgets/gifts/gift_bottom_sheet.dart';
@@ -37,7 +38,7 @@ class _SendGiftScreenState extends State<SendGiftScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.toString();
+        _error = AppLocalizations.of(context)!.errorMessage(e.toString());
         _isLoading = false;
       });
     }
@@ -48,7 +49,7 @@ class _SendGiftScreenState extends State<SendGiftScreen> {
     final recipient = conversation.otherParticipant;
     if (recipient == null) {
       setState(() {
-        _error = 'Impossible de déterminer le destinataire';
+        _error = AppLocalizations.of(context)!.giftRecipientUnknown;
       });
       return;
     }
@@ -68,9 +69,10 @@ class _SendGiftScreenState extends State<SendGiftScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Envoyer un cadeau'),
+        title: Text(l10n.sendGift),
       ),
       body: Center(
         child: _isLoading
@@ -84,7 +86,7 @@ class _SendGiftScreenState extends State<SendGiftScreen> {
                       style: const TextStyle(color: Colors.red),
                     ),
                   )
-                : const Text('Chargement...'),
+                : Text(l10n.loading),
       ),
     );
   }

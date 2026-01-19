@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../voice_effects_service.dart';
 
@@ -157,6 +158,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -285,7 +287,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Appuyez pour enregistrer',
+              l10n.pressToRecordLabel,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 12,
@@ -297,7 +299,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              'Effet: ${VoiceEffectsService.getEffectName(_currentEffect)}',
+              l10n.effectLabel(VoiceEffectsService.getEffectName(_currentEffect)),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 12,

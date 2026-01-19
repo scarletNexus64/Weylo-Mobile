@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../l10n/app_localizations.dart';
 
 class LinkText extends StatelessWidget {
   final String text;
@@ -119,6 +120,7 @@ class _LinkPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final uri = Uri.tryParse(url);
     final host = uri?.host ?? url;
     final display = uri?.path.isNotEmpty == true ? '$host${uri?.path}' : host;
@@ -150,7 +152,7 @@ class _LinkPreviewCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Ouvrir',
+                l10n.openAction,
                 style: TextStyle(
                   color: fg,
                   fontWeight: FontWeight.w600,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../models/message.dart';
@@ -18,6 +19,7 @@ class MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: message.isRead ? 0 : 2,
       child: InkWell(
@@ -112,7 +114,7 @@ class MessageCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Identité révélée: ${message.sender!.fullName}',
+                        l10n.identityRevealed(message.sender!.fullName),
                         style: const TextStyle(
                           color: AppColors.success,
                           fontSize: 12,
@@ -167,6 +169,7 @@ class MessageCard extends StatelessWidget {
   }
 
   Widget _buildSenderInfo(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (isReceived) {
       if (message.isIdentityRevealed && message.sender != null) {
         return Text(
@@ -181,7 +184,7 @@ class MessageCard extends StatelessWidget {
           const Icon(Icons.person_off, size: 16, color: AppColors.textSecondary),
           const SizedBox(width: 4),
           Text(
-            'Anonyme',
+            l10n.anonymousUser,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               fontStyle: FontStyle.italic,
@@ -191,7 +194,7 @@ class MessageCard extends StatelessWidget {
       );
     } else {
       return Text(
-        'À ${message.recipient?.fullName ?? 'Utilisateur'}',
+        l10n.toRecipient(message.recipient?.fullName ?? l10n.userFallback),
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w600,
         ),

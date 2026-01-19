@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user.dart';
 import '../../models/confession.dart';
@@ -75,6 +76,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
@@ -82,7 +84,7 @@ class _SearchScreenState extends State<SearchScreen>
           controller: _searchController,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: 'Rechercher des personnes ou publications...',
+            hintText: l10n.searchHint,
             border: InputBorder.none,
             hintStyle: TextStyle(color: Colors.grey[500]),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -122,7 +124,7 @@ class _SearchScreenState extends State<SearchScreen>
                 children: [
                   const Icon(Icons.person, size: 18),
                   const SizedBox(width: 8),
-                  Text('Personnes (${_users.length})'),
+                  Text(l10n.peopleTabCount(_users.length)),
                 ],
               ),
             ),
@@ -132,7 +134,7 @@ class _SearchScreenState extends State<SearchScreen>
                 children: [
                   const Icon(Icons.article, size: 18),
                   const SizedBox(width: 8),
-                  Text('Publications (${_posts.length})'),
+                  Text(l10n.postsTabCount(_posts.length)),
                 ],
               ),
             ),
@@ -154,6 +156,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -161,7 +164,7 @@ class _SearchScreenState extends State<SearchScreen>
           Icon(Icons.search, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 16),
           Text(
-            'Rechercher sur Weylo',
+            l10n.searchEmptyTitle,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -170,7 +173,7 @@ class _SearchScreenState extends State<SearchScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Trouvez des personnes ou des publications',
+            l10n.searchEmptySubtitle,
             style: TextStyle(
               color: Colors.grey[500],
             ),
@@ -181,6 +184,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildUsersList() {
+    final l10n = AppLocalizations.of(context)!;
     if (_users.isEmpty) {
       return Center(
         child: Column(
@@ -189,7 +193,7 @@ class _SearchScreenState extends State<SearchScreen>
             Icon(Icons.person_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'Aucun utilisateur trouve',
+              l10n.searchNoUsers,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ],
@@ -211,6 +215,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildPostsList() {
+    final l10n = AppLocalizations.of(context)!;
     if (_posts.isEmpty) {
       return Center(
         child: Column(
@@ -219,7 +224,7 @@ class _SearchScreenState extends State<SearchScreen>
             Icon(Icons.article_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'Aucune publication trouvee',
+              l10n.searchNoPosts,
               style: TextStyle(color: Colors.grey[600]),
             ),
           ],

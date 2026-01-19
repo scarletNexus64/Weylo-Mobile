@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/story.dart';
 import '../../../providers/auth_provider.dart';
@@ -94,6 +95,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthProvider>().user;
 
     if (_isLoading) {
@@ -128,7 +130,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           if (index == 0) {
-            return _buildMyStoryCard(context, user);
+            return _buildMyStoryCard(context, user, l10n);
           }
           final userStories = _stories[index - 1];
           return _StoryCard(
@@ -148,7 +150,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildMyStoryCard(BuildContext context, user) {
+  Widget _buildMyStoryCard(BuildContext context, user, AppLocalizations l10n) {
     final hasStory = _myStories.isNotEmpty;
     final lastStory = hasStory ? _myStories.first : null;
 
@@ -262,7 +264,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
                   left: 8,
                   right: 8,
                   child: Text(
-                    'Mon statut',
+                    l10n.myStatusLabel,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -287,6 +289,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
   }
 
   Widget _buildAvatarBackground(user) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
@@ -294,7 +297,7 @@ class _StoriesBarState extends State<StoriesBar> with WidgetsBindingObserver {
       child: Center(
         child: AvatarWidget(
           imageUrl: user?.avatar,
-          name: user?.fullName ?? 'Moi',
+          name: user?.fullName ?? l10n.meLabel,
           size: 50,
         ),
       ),
@@ -313,9 +316,10 @@ class _StoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isAnonymous = userStories.isAnonymous;
     final isHidden = isAnonymous && !userStories.isIdentityRevealed;
-    final displayName = isHidden ? 'Anonyme' : userStories.user.fullName;
+    final displayName = isHidden ? l10n.userAnonymous : userStories.user.fullName;
     final hasUnviewed = userStories.hasUnviewed;
     final preview = userStories.preview;
 
