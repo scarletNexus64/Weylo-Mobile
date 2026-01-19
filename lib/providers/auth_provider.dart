@@ -194,13 +194,22 @@ class AuthProvider extends ChangeNotifier {
     // Merge with existing settings
     final currentSettings = _user!.settings ?? UserSettings();
     final newSettings = UserSettings(
-      notificationsEnabled: settings['notifications_enabled'] ?? currentSettings.notificationsEnabled,
-      emailNotifications: settings['email_notifications'] ?? currentSettings.emailNotifications,
-      pushNotifications: settings['push_notifications'] ?? currentSettings.pushNotifications,
-      showOnlineStatus: settings['show_online_status'] ?? currentSettings.showOnlineStatus,
-      allowAnonymousMessages: settings['allow_anonymous_messages'] ?? currentSettings.allowAnonymousMessages,
-      showNameOnPosts: settings['show_name_on_posts'] ?? currentSettings.showNameOnPosts,
-      showPhotoOnPosts: settings['show_photo_on_posts'] ?? currentSettings.showPhotoOnPosts,
+      notificationsEnabled:
+          settings['notifications_enabled'] ??
+          currentSettings.notificationsEnabled,
+      emailNotifications:
+          settings['email_notifications'] ?? currentSettings.emailNotifications,
+      pushNotifications:
+          settings['push_notifications'] ?? currentSettings.pushNotifications,
+      showOnlineStatus:
+          settings['show_online_status'] ?? currentSettings.showOnlineStatus,
+      allowAnonymousMessages:
+          settings['allow_anonymous_messages'] ??
+          currentSettings.allowAnonymousMessages,
+      showNameOnPosts:
+          settings['show_name_on_posts'] ?? currentSettings.showNameOnPosts,
+      showPhotoOnPosts:
+          settings['show_photo_on_posts'] ?? currentSettings.showPhotoOnPosts,
       language: settings['language'] ?? currentSettings.language,
       theme: settings['theme'] ?? currentSettings.theme,
     );

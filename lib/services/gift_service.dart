@@ -78,11 +78,10 @@ class GiftService {
       data['message'] = message;
     }
 
-    final response = await _apiClient.post(
-      ApiConstants.giftsSend,
-      data: data,
+    final response = await _apiClient.post(ApiConstants.giftsSend, data: data);
+    return GiftTransaction.fromJson(
+      response.data['transaction'] ?? response.data,
     );
-    return GiftTransaction.fromJson(response.data['transaction'] ?? response.data);
   }
 
   Future<GiftTransaction> sendGiftInConversation({
@@ -104,7 +103,9 @@ class GiftService {
       ApiConstants.chatGift(conversationId),
       data: data,
     );
-    return GiftTransaction.fromJson(response.data['transaction'] ?? response.data);
+    return GiftTransaction.fromJson(
+      response.data['transaction'] ?? response.data,
+    );
   }
 
   Future<GiftStats> getStats() async {

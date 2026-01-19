@@ -64,14 +64,25 @@ class _EarningsScreenState extends State<EarningsScreen> {
                   _buildTotalsCard(),
                   const SizedBox(height: 16),
                   if (_overview != null) ...[
-                    _buildPeriodCard(l10n.creatorFundLabel, _overview!.creatorFund, AppColors.primary),
+                    _buildPeriodCard(
+                      l10n.creatorFundLabel,
+                      _overview!.creatorFund,
+                      AppColors.primary,
+                    ),
                     const SizedBox(height: 12),
-                    _buildPeriodCard(l10n.adRevenueLabel, _overview!.adRevenue, AppColors.success),
+                    _buildPeriodCard(
+                      l10n.adRevenueLabel,
+                      _overview!.adRevenue,
+                      AppColors.success,
+                    ),
                   ],
                   const SizedBox(height: 24),
                   Text(
                     l10n.earningsHistoryTitle,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _buildPayoutsList(),
@@ -93,9 +104,9 @@ class _EarningsScreenState extends State<EarningsScreen> {
         gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(16),
       ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
             l10n.earningsTotalsLabel,
             style: const TextStyle(color: Colors.white70, fontSize: 12),
@@ -112,7 +123,11 @@ class _EarningsScreenState extends State<EarningsScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              _buildTotalChip(l10n.creatorFundLabel, totalCreator, Colors.white),
+              _buildTotalChip(
+                l10n.creatorFundLabel,
+                totalCreator,
+                Colors.white,
+              ),
               const SizedBox(width: 8),
               _buildTotalChip(l10n.adsLabel, totalAds, Colors.white),
             ],
@@ -136,7 +151,11 @@ class _EarningsScreenState extends State<EarningsScreen> {
     );
   }
 
-  Widget _buildPeriodCard(String title, MonetizationPeriodStats stats, Color color) {
+  Widget _buildPeriodCard(
+    String title,
+    MonetizationPeriodStats stats,
+    Color color,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
@@ -165,7 +184,10 @@ class _EarningsScreenState extends State<EarningsScreen> {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
               const Spacer(),
               Text(
@@ -206,7 +228,10 @@ class _EarningsScreenState extends State<EarningsScreen> {
           children: [
             Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+            Text(
+              label,
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
           ],
         ),
       ),

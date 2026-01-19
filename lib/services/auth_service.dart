@@ -13,10 +13,7 @@ class AuthService {
   }) async {
     final response = await _apiClient.post(
       ApiConstants.login,
-      data: {
-        'login': identifier,
-        'password': password,
-      },
+      data: {'login': identifier, 'password': password},
     );
 
     final authResponse = AuthResponse.fromJson(response.data);
@@ -102,10 +99,7 @@ class AuthService {
   }) async {
     final response = await _apiClient.post(
       ApiConstants.verifyIdentity,
-      data: {
-        'phone': phone,
-        'first_name': firstName,
-      },
+      data: {'phone': phone, 'first_name': firstName},
     );
     return response.data['success'] ?? false;
   }
@@ -152,12 +146,7 @@ class AuthResponse {
   final String? token;
   final User? user;
 
-  AuthResponse({
-    this.success = false,
-    this.message,
-    this.token,
-    this.user,
-  });
+  AuthResponse({this.success = false, this.message, this.token, this.user});
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
     return AuthResponse(

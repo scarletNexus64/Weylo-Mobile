@@ -78,7 +78,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             if (_selectedImage != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: Text(l10n.removePhotoAction, style: const TextStyle(color: Colors.red)),
+                title: Text(
+                  l10n.removePhotoAction,
+                  style: const TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   setState(() {
@@ -110,9 +113,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.groupCreatedSuccess)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.groupCreatedSuccess)));
         context.pop();
         context.push('/group/${group.id}');
       }
@@ -163,7 +166,9 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        gradient: _selectedImage == null ? AppColors.primaryGradient : null,
+                        gradient: _selectedImage == null
+                            ? AppColors.primaryGradient
+                            : null,
                         borderRadius: BorderRadius.circular(20),
                         image: _selectedImage != null
                             ? DecorationImage(

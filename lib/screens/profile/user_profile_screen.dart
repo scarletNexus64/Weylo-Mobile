@@ -90,8 +90,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           body: isLoading && user == null
               ? const Center(child: CircularProgressIndicator())
               : user == null
-                  ? _buildErrorState(profileProvider)
-                  : _buildProfileContent(user, profileProvider, isOwnProfile),
+              ? _buildErrorState(profileProvider)
+              : _buildProfileContent(user, profileProvider, isOwnProfile),
         );
       },
     );
@@ -209,9 +209,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   ) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-      ),
+      decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
       child: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -260,12 +258,16 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             const SizedBox(height: 12),
             // Name - Afficher "Anonyme" si l'utilisateur a choisi de ne pas montrer son nom
             Text(
-              (user.settings?.showNameOnPosts ?? true) ? user.fullName : l10n.userAnonymous,
+              (user.settings?.showNameOnPosts ?? true)
+                  ? user.fullName
+                  : l10n.userAnonymous,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontStyle: (user.settings?.showNameOnPosts ?? true) ? FontStyle.normal : FontStyle.italic,
+                fontStyle: (user.settings?.showNameOnPosts ?? true)
+                    ? FontStyle.normal
+                    : FontStyle.italic,
               ),
             ),
             // Afficher le username seulement si l'utilisateur est visible
@@ -373,10 +375,14 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           decoration: BoxDecoration(
             gradient: isFollowing ? null : AppColors.primaryGradient,
             borderRadius: BorderRadius.circular(25),
-            border: isFollowing ? Border.all(color: Colors.white, width: 2) : null,
+            border: isFollowing
+                ? Border.all(color: Colors.white, width: 2)
+                : null,
           ),
           child: Material(
-            color: isFollowing ? Colors.white.withOpacity(0.2) : Colors.transparent,
+            color: isFollowing
+                ? Colors.white.withOpacity(0.2)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(25),
             child: InkWell(
               onTap: provider.isFollowLoading
@@ -390,7 +396,10 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     },
               borderRadius: BorderRadius.circular(25),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 12,
+                ),
                 child: provider.isFollowLoading
                     ? const SizedBox(
                         width: 16,
@@ -440,7 +449,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.mail_outline, size: 18, color: Colors.white),
+                    const Icon(
+                      Icons.mail_outline,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       l10n.message,
@@ -516,8 +529,10 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 CachedNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.cover,
-                  placeholder: (context, _) => _buildConfessionPlaceholder(hasVideo: hasVideo),
-                  errorWidget: (context, _, __) => _buildConfessionPlaceholder(hasVideo: hasVideo),
+                  placeholder: (context, _) =>
+                      _buildConfessionPlaceholder(hasVideo: hasVideo),
+                  errorWidget: (context, _, __) =>
+                      _buildConfessionPlaceholder(hasVideo: hasVideo),
                 )
               else if (hasVideo)
                 _buildVideoThumbnail(videoUrl)
@@ -601,11 +616,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     return FutureBuilder<Uint8List?>(
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-          return Image.memory(
-            snapshot.data!,
-            fit: BoxFit.cover,
-          );
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.data != null) {
+          return Image.memory(snapshot.data!, fit: BoxFit.cover);
         }
         return _buildConfessionPlaceholder(hasVideo: true);
       },
@@ -657,7 +670,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SendMessageScreen(recipientUsername: user.username),
+        builder: (context) =>
+            SendMessageScreen(recipientUsername: user.username),
       ),
     );
   }
@@ -681,9 +695,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
               try {
                 await _userService.blockUser(username);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.userBlocked)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(l10n.userBlocked)));
                 }
               } catch (e) {
                 if (mounted) {
@@ -718,9 +732,18 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                 value: reason,
                 items: [
                   DropdownMenuItem(value: 'spam', child: Text(l10n.reportSpam)),
-                  DropdownMenuItem(value: 'harassment', child: Text(l10n.reportHarassment)),
-                  DropdownMenuItem(value: 'inappropriate', child: Text(l10n.reportInappropriate)),
-                  DropdownMenuItem(value: 'other', child: Text(l10n.reportOther)),
+                  DropdownMenuItem(
+                    value: 'harassment',
+                    child: Text(l10n.reportHarassment),
+                  ),
+                  DropdownMenuItem(
+                    value: 'inappropriate',
+                    child: Text(l10n.reportInappropriate),
+                  ),
+                  DropdownMenuItem(
+                    value: 'other',
+                    child: Text(l10n.reportOther),
+                  ),
                 ],
                 onChanged: (value) {
                   if (value != null) {
@@ -760,9 +783,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                     description: controller.text,
                   );
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.reportSent)),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(l10n.reportSent)));
                   }
                 } catch (e) {
                   if (mounted) {
@@ -876,10 +899,7 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
           children: [
             const Icon(Icons.lock_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(
-              l10n.giftsPrivate,
-              style: TextStyle(color: Colors.grey),
-            ),
+            Text(l10n.giftsPrivate, style: TextStyle(color: Colors.grey)),
           ],
         ),
       );
@@ -892,15 +912,9 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(
-              l10n.giftsLoadError,
-              style: TextStyle(color: Colors.grey),
-            ),
+            Text(l10n.giftsLoadError, style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadGifts,
-              child: Text(l10n.retry),
-            ),
+            ElevatedButton(onPressed: _loadGifts, child: Text(l10n.retry)),
           ],
         ),
       );
@@ -911,7 +925,11 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.card_giftcard_outlined, size: 64, color: Colors.grey),
+            const Icon(
+              Icons.card_giftcard_outlined,
+              size: 64,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.profileNoGiftsTitle,
@@ -955,7 +973,10 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: Text(
                   gift?.name ?? l10n.giftDefaultName,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
@@ -963,7 +984,10 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
               ),
               if (sender != null)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4.0,
+                    vertical: 2.0,
+                  ),
                   child: Text(
                     l10n.giftFromUserLower(sender.username),
                     style: TextStyle(fontSize: 10, color: Colors.grey[600]),

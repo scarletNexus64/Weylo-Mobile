@@ -53,7 +53,9 @@ class Group {
       avatarUrl: json['avatar_url'] ?? json['avatarUrl'],
       creator: json['creator'] != null ? User.fromJson(json['creator']) : null,
       members: json['members'] != null
-          ? (json['members'] as List).map((m) => GroupMember.fromJson(m)).toList()
+          ? (json['members'] as List)
+                .map((m) => GroupMember.fromJson(m))
+                .toList()
           : null,
       lastMessage: json['last_message'] != null
           ? GroupMessage.fromJson(json['last_message'])
@@ -181,7 +183,8 @@ class GroupMessage {
         'type': replyToMessage!.type,
         'media_url': replyToMessage!.mediaUrl,
         'sender_id': replyToMessage!.senderId,
-        if (replyToMessage!.sender != null) 'sender': replyToMessage!.sender!.toJson(),
+        if (replyToMessage!.sender != null)
+          'sender': replyToMessage!.sender!.toJson(),
       };
     }
 

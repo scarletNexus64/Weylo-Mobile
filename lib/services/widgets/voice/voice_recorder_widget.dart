@@ -183,9 +183,7 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary
-                          : Colors.grey[200],
+                      color: isSelected ? AppColors.primary : Colors.grey[200],
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -216,82 +214,78 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
 
         // Recording controls
         Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Cancel button (only when recording)
-              if (_isRecording)
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.red),
-                  onPressed: _cancelRecording,
-                  iconSize: 32,
-                ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Cancel button (only when recording)
+            if (_isRecording)
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.red),
+                onPressed: _cancelRecording,
+                iconSize: 32,
+              ),
 
-              const SizedBox(width: 16),
+            const SizedBox(width: 16),
 
-              // Record button
-              GestureDetector(
-                onTap: _isRecording ? _stopRecording : _startRecording,
-                child: AnimatedBuilder(
-                  animation: _pulseAnimation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _isRecording ? _pulseAnimation.value : 1.0,
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: _isRecording ? Colors.red : AppColors.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: (_isRecording
-                                      ? Colors.red
-                                      : AppColors.primary)
-                                  .withOpacity(0.3),
-                              blurRadius: 20,
-                              spreadRadius: 5,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          _isRecording ? Icons.stop : Icons.mic,
-                          color: Colors.white,
-                          size: 32,
-                        ),
+            // Record button
+            GestureDetector(
+              onTap: _isRecording ? _stopRecording : _startRecording,
+              child: AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _isRecording ? _pulseAnimation.value : 1.0,
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: _isRecording ? Colors.red : AppColors.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                (_isRecording ? Colors.red : AppColors.primary)
+                                    .withOpacity(0.3),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
+                      child: Icon(
+                        _isRecording ? Icons.stop : Icons.mic,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  );
+                },
               ),
+            ),
 
-              const SizedBox(width: 16),
+            const SizedBox(width: 16),
 
-              // Duration display (only when recording)
-              SizedBox(
-                width: 48,
-                child: _isRecording
-                    ? Text(
-                        _formatDuration(_recordDuration),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.red,
-                        ),
-                      )
-                    : const SizedBox(),
-              ),
-            ],
-          ),
+            // Duration display (only when recording)
+            SizedBox(
+              width: 48,
+              child: _isRecording
+                  ? Text(
+                      _formatDuration(_recordDuration),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    )
+                  : const SizedBox(),
+            ),
+          ],
+        ),
 
         if (!_isRecording)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               l10n.pressToRecordLabel,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ),
 
@@ -299,11 +293,10 @@ class _VoiceRecorderWidgetState extends State<VoiceRecorderWidget>
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              l10n.effectLabel(VoiceEffectsService.getEffectName(_currentEffect)),
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
+              l10n.effectLabel(
+                VoiceEffectsService.getEffectName(_currentEffect),
               ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ),
       ],

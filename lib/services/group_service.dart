@@ -96,11 +96,7 @@ class GroupService {
       final response = await _apiClient.put(
         '${ApiConstants.groups}/$groupId',
         data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
       return Group.fromJson(response.data['group'] ?? response.data);
     }
@@ -126,7 +122,9 @@ class GroupService {
   }
 
   Future<bool> leaveGroup(int groupId) async {
-    final response = await _apiClient.post('${ApiConstants.groups}/$groupId/leave');
+    final response = await _apiClient.post(
+      '${ApiConstants.groups}/$groupId/leave',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -268,7 +266,9 @@ class GroupService {
   }
 
   Future<bool> markAsRead(int groupId) async {
-    final response = await _apiClient.post('${ApiConstants.groups}/$groupId/read');
+    final response = await _apiClient.post(
+      '${ApiConstants.groups}/$groupId/read',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -292,7 +292,9 @@ class GroupService {
   }
 
   Future<List<GroupMember>> getMembers(int groupId) async {
-    final response = await _apiClient.get('${ApiConstants.groups}/$groupId/members');
+    final response = await _apiClient.get(
+      '${ApiConstants.groups}/$groupId/members',
+    );
     final data = response.data['members'] ?? response.data['data'] ?? [];
     return (data as List).map((m) => GroupMember.fromJson(m)).toList();
   }
@@ -304,7 +306,11 @@ class GroupService {
     return response.data['success'] ?? true;
   }
 
-  Future<GroupMember> updateMemberRole(int groupId, int memberId, String role) async {
+  Future<GroupMember> updateMemberRole(
+    int groupId,
+    int memberId,
+    String role,
+  ) async {
     final response = await _apiClient.put(
       '${ApiConstants.groups}/$groupId/members/$memberId/role',
       data: {'role': role},

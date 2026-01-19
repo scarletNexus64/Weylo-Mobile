@@ -1,5 +1,7 @@
 enum SubscriptionType { conversation, message, story }
+
 enum SubscriptionStatus { active, pending, expired, cancelled }
+
 enum PremiumPassStatus { active, pending, expired, cancelled }
 
 class PremiumSubscription {
@@ -25,7 +27,8 @@ class PremiumSubscription {
     required this.createdAt,
   });
 
-  bool get isActive => status == SubscriptionStatus.active &&
+  bool get isActive =>
+      status == SubscriptionStatus.active &&
       (expiresAt == null || DateTime.now().isBefore(expiresAt!));
 
   String get typeLabel {
@@ -107,7 +110,8 @@ class PremiumPass {
     required this.createdAt,
   });
 
-  bool get isActive => status == PremiumPassStatus.active && DateTime.now().isBefore(expiresAt);
+  bool get isActive =>
+      status == PremiumPassStatus.active && DateTime.now().isBefore(expiresAt);
 
   int get daysRemaining {
     if (!isActive) return 0;
@@ -163,7 +167,9 @@ class PremiumPricing {
   factory PremiumPricing.fromJson(Map<String, dynamic> json) {
     return PremiumPricing(
       passPrice: (json['pass_price'] ?? json['passPrice'] ?? 5000).toDouble(),
-      subscriptionPrice: (json['subscription_price'] ?? json['subscriptionPrice'] ?? 450).toDouble(),
+      subscriptionPrice:
+          (json['subscription_price'] ?? json['subscriptionPrice'] ?? 450)
+              .toDouble(),
       currency: json['currency'] ?? 'FCFA',
     );
   }

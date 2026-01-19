@@ -16,8 +16,12 @@ class ApiClient {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
-        connectTimeout: const Duration(milliseconds: AppConstants.connectionTimeout),
-        receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
+        connectTimeout: const Duration(
+          milliseconds: AppConstants.connectionTimeout,
+        ),
+        receiveTimeout: const Duration(
+          milliseconds: AppConstants.receiveTimeout,
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -39,7 +43,9 @@ class ApiClient {
         },
         onResponse: (response, handler) {
           if (kDebugMode) {
-            print('RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+            print(
+              'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
+            );
           }
           return handler.next(response);
         },
@@ -150,11 +156,7 @@ class ApiClient {
         path,
         data: data,
         onSendProgress: onSendProgress,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
     } on DioException catch (e) {
       throw _handleError(e);
@@ -168,7 +170,9 @@ class ApiClient {
       case DioExceptionType.receiveTimeout:
         return NetworkException(message: 'Délai de connexion dépassé');
       case DioExceptionType.connectionError:
-        return NetworkException(message: 'Impossible de se connecter au serveur');
+        return NetworkException(
+          message: 'Impossible de se connecter au serveur',
+        );
       case DioExceptionType.badResponse:
         return _handleResponseError(error.response);
       case DioExceptionType.cancel:
@@ -195,9 +199,10 @@ class ApiClient {
     // These are expected during WebSocket connections and shouldn't be shown to users
     if (statusCode == 403 &&
         (response.requestOptions.path.contains('broadcasting/auth') ||
-         response.requestOptions.path.contains('pusher') ||
-         response.requestOptions.path.contains('reverb'))) {
-      if (kDebugMode) print('WebSocket 403 error suppressed (expected during auth)');
+            response.requestOptions.path.contains('pusher') ||
+            response.requestOptions.path.contains('reverb'))) {
+      if (kDebugMode)
+        print('WebSocket 403 error suppressed (expected during auth)');
       // Return a silent exception that won't show to users
       return AppException(message: '', statusCode: 403);
     }

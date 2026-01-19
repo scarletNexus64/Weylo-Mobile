@@ -14,7 +14,8 @@ class SubscriptionsScreen extends StatefulWidget {
   State<SubscriptionsScreen> createState() => _SubscriptionsScreenState();
 }
 
-class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTickerProviderStateMixin {
+class _SubscriptionsScreenState extends State<SubscriptionsScreen>
+    with SingleTickerProviderStateMixin {
   final PremiumService _premiumService = PremiumService();
   late TabController _tabController;
 
@@ -61,9 +62,9 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
       await _premiumService.cancelSubscription(subscription.id);
       await _loadData();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.subscriptionCancelled)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.subscriptionCancelled)));
       }
     } catch (e) {
       if (mounted) {
@@ -96,10 +97,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
           ? const LoadingWidget()
           : TabBarView(
               controller: _tabController,
-              children: [
-                _buildPremiumPassTab(),
-                _buildSubscriptionsTab(),
-              ],
+              children: [_buildPremiumPassTab(), _buildSubscriptionsTab()],
             ),
     );
   }
@@ -130,10 +128,13 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> with SingleTi
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  _passStatus?.isActive == true ? l10n.statusActive : l10n.statusInactive,
+                  _passStatus?.isActive == true
+                      ? l10n.statusActive
+                      : l10n.statusInactive,
                   style: const TextStyle(color: Colors.white70),
                 ),
-                if (_passStatus?.daysRemaining != null && _passStatus!.daysRemaining > 0) ...[
+                if (_passStatus?.daysRemaining != null &&
+                    _passStatus!.daysRemaining > 0) ...[
                   const SizedBox(height: 8),
                   Text(
                     l10n.premiumDaysRemaining(_passStatus!.daysRemaining),

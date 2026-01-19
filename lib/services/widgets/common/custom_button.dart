@@ -47,9 +47,10 @@ class _CustomButtonState extends State<CustomButton>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -81,7 +82,9 @@ class _CustomButtonState extends State<CustomButton>
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                widget.isOutlined ? (widget.color ?? AppColors.primary) : Colors.white,
+                widget.isOutlined
+                    ? (widget.color ?? AppColors.primary)
+                    : Colors.white,
               ),
             ),
           )
@@ -90,7 +93,11 @@ class _CustomButtonState extends State<CustomButton>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (widget.icon != null) ...[
-                Icon(widget.icon, size: widget.isSmall ? 18 : 20, color: widget.isOutlined ? null : Colors.white),
+                Icon(
+                  widget.icon,
+                  size: widget.isSmall ? 18 : 20,
+                  color: widget.isOutlined ? null : Colors.white,
+                ),
                 const SizedBox(width: 8),
               ],
               Flexible(
@@ -106,7 +113,11 @@ class _CustomButtonState extends State<CustomButton>
               ),
               if (widget.suffixIcon != null) ...[
                 const SizedBox(width: 8),
-                Icon(widget.suffixIcon, size: widget.isSmall ? 18 : 20, color: widget.isOutlined ? null : Colors.white),
+                Icon(
+                  widget.suffixIcon,
+                  size: widget.isSmall ? 18 : 20,
+                  color: widget.isOutlined ? null : Colors.white,
+                ),
               ],
             ],
           );
@@ -114,9 +125,15 @@ class _CustomButtonState extends State<CustomButton>
     // Pour les boutons outlined, on utilise le style classique
     if (widget.isOutlined) {
       return GestureDetector(
-        onTapDown: widget.onPressed != null && !widget.isLoading ? _onTapDown : null,
-        onTapUp: widget.onPressed != null && !widget.isLoading ? _onTapUp : null,
-        onTapCancel: widget.onPressed != null && !widget.isLoading ? _onTapCancel : null,
+        onTapDown: widget.onPressed != null && !widget.isLoading
+            ? _onTapDown
+            : null,
+        onTapUp: widget.onPressed != null && !widget.isLoading
+            ? _onTapUp
+            : null,
+        onTapCancel: widget.onPressed != null && !widget.isLoading
+            ? _onTapCancel
+            : null,
         child: AnimatedBuilder(
           animation: _scaleAnimation,
           builder: (context, _) {
@@ -142,7 +159,8 @@ class _CustomButtonState extends State<CustomButton>
                       borderRadius: BorderRadius.circular(10),
                       child: Center(
                         child: ShaderMask(
-                          shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                          shaderCallback: (bounds) =>
+                              AppColors.primaryGradient.createShader(bounds),
                           child: child,
                         ),
                       ),
@@ -158,9 +176,13 @@ class _CustomButtonState extends State<CustomButton>
 
     // Pour les boutons normaux, on utilise le dégradé
     return GestureDetector(
-      onTapDown: widget.onPressed != null && !widget.isLoading ? _onTapDown : null,
+      onTapDown: widget.onPressed != null && !widget.isLoading
+          ? _onTapDown
+          : null,
       onTapUp: widget.onPressed != null && !widget.isLoading ? _onTapUp : null,
-      onTapCancel: widget.onPressed != null && !widget.isLoading ? _onTapCancel : null,
+      onTapCancel: widget.onPressed != null && !widget.isLoading
+          ? _onTapCancel
+          : null,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, _) {
@@ -171,7 +193,9 @@ class _CustomButtonState extends State<CustomButton>
               height: buttonHeight,
               decoration: BoxDecoration(
                 gradient: widget.useGradient ? AppColors.primaryGradient : null,
-                color: widget.useGradient ? null : (widget.color ?? AppColors.primary),
+                color: widget.useGradient
+                    ? null
+                    : (widget.color ?? AppColors.primary),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -232,12 +256,14 @@ class _GradientButtonState extends State<GradientButton>
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _elevationAnimation = Tween<double>(begin: 8.0, end: 2.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _elevationAnimation = Tween<double>(
+      begin: 8.0,
+      end: 2.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -264,9 +290,13 @@ class _GradientButtonState extends State<GradientButton>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: widget.onPressed != null && !widget.isLoading ? _onTapDown : null,
+      onTapDown: widget.onPressed != null && !widget.isLoading
+          ? _onTapDown
+          : null,
       onTapUp: widget.onPressed != null && !widget.isLoading ? _onTapUp : null,
-      onTapCancel: widget.onPressed != null && !widget.isLoading ? _onTapCancel : null,
+      onTapCancel: widget.onPressed != null && !widget.isLoading
+          ? _onTapCancel
+          : null,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -277,7 +307,9 @@ class _GradientButtonState extends State<GradientButton>
               height: 50,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: widget.gradientColors ?? [AppColors.primary, AppColors.secondary],
+                  colors:
+                      widget.gradientColors ??
+                      [AppColors.primary, AppColors.secondary],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -297,7 +329,9 @@ class _GradientButtonState extends State<GradientButton>
                         width: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : Row(
@@ -359,9 +393,10 @@ class _AnimatedIconButtonState extends State<AnimatedIconButton>
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.8).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.8,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -469,14 +504,18 @@ class _AnimatedLikeButtonState extends State<AnimatedLikeButton>
               children: [
                 Icon(
                   widget.isLiked ? Icons.favorite : Icons.favorite_outline,
-                  color: widget.isLiked ? AppColors.error : AppColors.textSecondary,
+                  color: widget.isLiked
+                      ? AppColors.error
+                      : AppColors.textSecondary,
                   size: 22,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   '${widget.count}',
                   style: TextStyle(
-                    color: widget.isLiked ? AppColors.error : AppColors.textSecondary,
+                    color: widget.isLiked
+                        ? AppColors.error
+                        : AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

@@ -13,7 +13,9 @@ class PremiumService {
   }
 
   Future<List<PremiumSubscription>> getActiveSubscriptions() async {
-    final response = await _apiClient.get(ApiConstants.premiumSubscriptionsActive);
+    final response = await _apiClient.get(
+      ApiConstants.premiumSubscriptionsActive,
+    );
     final data = response.data['subscriptions'] ?? response.data['data'] ?? [];
     return (data as List).map((s) => PremiumSubscription.fromJson(s)).toList();
   }
@@ -22,21 +24,29 @@ class PremiumService {
     final response = await _apiClient.post(
       '${ApiConstants.premium}/subscribe/message/$messageId',
     );
-    return PremiumSubscription.fromJson(response.data['subscription'] ?? response.data);
+    return PremiumSubscription.fromJson(
+      response.data['subscription'] ?? response.data,
+    );
   }
 
-  Future<PremiumSubscription> subscribeToConversation(int conversationId) async {
+  Future<PremiumSubscription> subscribeToConversation(
+    int conversationId,
+  ) async {
     final response = await _apiClient.post(
       '${ApiConstants.premium}/subscribe/conversation/$conversationId',
     );
-    return PremiumSubscription.fromJson(response.data['subscription'] ?? response.data);
+    return PremiumSubscription.fromJson(
+      response.data['subscription'] ?? response.data,
+    );
   }
 
   Future<PremiumSubscription> subscribeToStory(int storyId) async {
     final response = await _apiClient.post(
       '${ApiConstants.premium}/subscribe/story/$storyId',
     );
-    return PremiumSubscription.fromJson(response.data['subscription'] ?? response.data);
+    return PremiumSubscription.fromJson(
+      response.data['subscription'] ?? response.data,
+    );
   }
 
   Future<bool> cancelSubscription(int subscriptionId) async {
@@ -73,12 +83,16 @@ class PremiumService {
   }
 
   Future<bool> enableAutoRenew() async {
-    final response = await _apiClient.post('${ApiConstants.premiumPass}/auto-renew/enable');
+    final response = await _apiClient.post(
+      '${ApiConstants.premiumPass}/auto-renew/enable',
+    );
     return response.data['success'] ?? true;
   }
 
   Future<bool> disableAutoRenew() async {
-    final response = await _apiClient.post('${ApiConstants.premiumPass}/auto-renew/disable');
+    final response = await _apiClient.post(
+      '${ApiConstants.premiumPass}/auto-renew/disable',
+    );
     return response.data['success'] ?? true;
   }
 

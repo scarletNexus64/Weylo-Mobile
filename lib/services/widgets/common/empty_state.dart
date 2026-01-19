@@ -48,9 +48,9 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
@@ -82,11 +82,7 @@ class ErrorState extends StatelessWidget {
   final String? message;
   final VoidCallback? onRetry;
 
-  const ErrorState({
-    super.key,
-    this.message,
-    this.onRetry,
-  });
+  const ErrorState({super.key, this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context) {

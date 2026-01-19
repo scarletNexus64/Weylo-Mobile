@@ -233,9 +233,13 @@
   "emptyConversationsSubtitle": "Commencez une conversation avec quelqu'un",
   "searchConversationsHint": "Rechercher dans les conversations...",
   "noResultsFound": "Aucun résultat trouvé",
+  "todayLabel": "Aujourd'hui",
+  "yesterdayLabel": "Hier",
   "anonymousConversation": "Anonyme",
   "newConversationFab": "Démarrer une nouvelle conversation",
   "anonymousMessage": "Message anonyme",
+  "youLabel": "Vous",
+  "contactLabel": "Contact",
   "replyTo": "Répondre à",
   "reply": "Réponse",
   "audioPlaybackError": "Erreur lecture audio : {details}",
@@ -277,6 +281,15 @@
     }
   },
   "streakDays": "{days} jours de streak",
+  "@streakExpiresIn": {
+    "description": "Libellé indiquant le temps restant avant l’expiration du streak",
+    "placeholders": {
+      "hours": {},
+      "minutes": {}
+    }
+  },
+  "streakExpiresIn": "Expire dans {hours}h {minutes}m",
+  "streakExpired": "Le streak est terminé",
   "copyAction": "Copier",
   "deleteAction": "Supprimer",
   "@deleteConversationConfirm": {

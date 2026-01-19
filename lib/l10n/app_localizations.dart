@@ -1088,6 +1088,18 @@ abstract class AppLocalizations {
   /// **'No results found'**
   String get noResultsFound;
 
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayLabel;
+
+  /// No description provided for @yesterdayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get yesterdayLabel;
+
   /// No description provided for @anonymousConversation.
   ///
   /// In en, this message translates to:
@@ -1105,6 +1117,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Anonymous message'**
   String get anonymousMessage;
+
+  /// No description provided for @youLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get youLabel;
+
+  /// No description provided for @contactLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contactLabel;
 
   /// No description provided for @replyTo.
   ///
@@ -1261,6 +1285,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{days} day streak'**
   String streakDays(Object days);
+
+  /// Label showing how much time is left before the streak expires
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {hours}h {minutes}m'**
+  String streakExpiresIn(Object hours, Object minutes);
+
+  /// No description provided for @streakExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak ended'**
+  String get streakExpired;
 
   /// No description provided for @copyAction.
   ///

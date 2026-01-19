@@ -25,7 +25,8 @@ class ChatService {
       final response = await _apiClient.get(ApiConstants.chatConversations);
       _log('getConversations RAW response: ${response.data}');
 
-      final data = response.data['conversations'] ?? response.data['data'] ?? [];
+      final data =
+          response.data['conversations'] ?? response.data['data'] ?? [];
       return (data as List).map((c) => Conversation.fromJson(c)).toList();
     } catch (e) {
       _log('Error fetching conversations: $e');
@@ -67,8 +68,12 @@ class ChatService {
   }
 
   Future<Conversation> getConversation(int id) async {
-    final response = await _apiClient.get('${ApiConstants.chatConversations}/$id');
-    return Conversation.fromJson(response.data['conversation'] ?? response.data);
+    final response = await _apiClient.get(
+      '${ApiConstants.chatConversations}/$id',
+    );
+    return Conversation.fromJson(
+      response.data['conversation'] ?? response.data,
+    );
   }
 
   Future<Conversation> startConversation(String username) async {
@@ -76,7 +81,9 @@ class ChatService {
       ApiConstants.chatConversations,
       data: {'username': username},
     );
-    return Conversation.fromJson(response.data['conversation'] ?? response.data);
+    return Conversation.fromJson(
+      response.data['conversation'] ?? response.data,
+    );
   }
 
   Future<PaginatedChatMessages> getMessages(
@@ -218,7 +225,9 @@ class ChatService {
   }
 
   Future<bool> markAsRead(int conversationId) async {
-    final response = await _apiClient.post('${ApiConstants.chatConversations}/$conversationId/read');
+    final response = await _apiClient.post(
+      '${ApiConstants.chatConversations}/$conversationId/read',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -227,10 +236,15 @@ class ChatService {
     Conversation? currentConversation,
     int? currentUserId,
   }) async {
-    final response = await _apiClient.post('${ApiConstants.chatConversations}/$conversationId/reveal');
-    
-    final responseData = response.data is Map<String, dynamic> ? response.data : <String, dynamic>{};
-    final convData = responseData['conversation'] ?? responseData['data'] ?? responseData;
+    final response = await _apiClient.post(
+      '${ApiConstants.chatConversations}/$conversationId/reveal',
+    );
+
+    final responseData = response.data is Map<String, dynamic>
+        ? response.data
+        : <String, dynamic>{};
+    final convData =
+        responseData['conversation'] ?? responseData['data'] ?? responseData;
 
     // Si on a l'objet complet, on le retourne
     if (convData is Map && convData.isNotEmpty) {
@@ -241,12 +255,14 @@ class ChatService {
     if (currentConversation != null) {
       return currentConversation.copyWith(isIdentityRevealed: true);
     }
-    
+
     return Conversation.fromJson(responseData);
   }
 
   Future<bool> deleteConversation(int conversationId) async {
-    final response = await _apiClient.delete('${ApiConstants.chatConversations}/$conversationId');
+    final response = await _apiClient.delete(
+      '${ApiConstants.chatConversations}/$conversationId',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -258,12 +274,17 @@ class ChatService {
   }
 
   Future<UserStatus> getUserStatus(String username) async {
-    final response = await _apiClient.get('${ApiConstants.chatUserStatus}/$username');
+    final response = await _apiClient.get(
+      '${ApiConstants.chatUserStatus}/$username',
+    );
     return UserStatus.fromJson(response.data);
   }
 
   Future<void> updatePresence({required bool isOnline}) async {
-    await _apiClient.post(ApiConstants.chatPresence, data: {'is_online': isOnline});
+    await _apiClient.post(
+      ApiConstants.chatPresence,
+      data: {'is_online': isOnline},
+    );
   }
 }
 
@@ -331,7 +352,9 @@ class UserStatus {
   factory UserStatus.fromJson(Map<String, dynamic> json) {
     return UserStatus(
       isOnline: json['is_online'] ?? false,
-      lastSeenAt: json['last_seen_at'] != null ? DateTime.parse(json['last_seen_at']) : null,
+      lastSeenAt: json['last_seen_at'] != null
+          ? DateTime.parse(json['last_seen_at'])
+          : null,
     );
   }
 }

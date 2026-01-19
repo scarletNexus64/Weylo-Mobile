@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -29,14 +28,35 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
   StreamSubscription<WebSocketMessage>? _messageSubscription;
 
   List<Conversation> _conversations = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
   bool _hasError = false;
+  bool _hasLoadedForSession = false;
 
   @override
   void initState() {
     super.initState();
-    _loadConversations();
     _subscribeToWebSocketEvents();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = Provider.of<AuthProvider>(context);
+    if (auth.isAuthenticated) {
+      if (!_hasLoadedForSession) {
+        _hasLoadedForSession = true;
+        _loadConversations();
+      }
+    } else {
+      if (_hasLoadedForSession) {
+        _hasLoadedForSession = false;
+        setState(() {
+          _conversations = [];
+          _isLoading = false;
+          _hasError = false;
+        });
+      }
+    }
   }
 
   @override
@@ -85,7 +105,9 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     if (conversationId == 0) return;
 
     final currentUserId = context.read<AuthProvider>().user?.id ?? 0;
-    final existingIndex = _conversations.indexWhere((conv) => conv.id == conversationId);
+    final existingIndex = _conversations.indexWhere(
+      (conv) => conv.id == conversationId,
+    );
 
     if (existingIndex == -1) {
       try {
@@ -96,7 +118,9 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
           _sortConversations();
         });
       } catch (e) {
-        debugPrint('[Conversations] Failed to fetch conversation $conversationId: $e');
+        debugPrint(
+          '[Conversations] Failed to fetch conversation $conversationId: $e',
+        );
       }
       return;
     }
@@ -134,7 +158,8 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _ConversationSearchSheet(conversations: _conversations),
+      builder: (context) =>
+          _ConversationSearchSheet(conversations: _conversations),
     );
   }
 
@@ -153,9 +178,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       ),
       body: Column(
         children: [
-          // Stories bar
           const StoriesBar(),
-          // Conversations list
           Expanded(
             child: _isLoading
                 ? const LoadingWidget()
@@ -171,13 +194,15 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                             controller: _refreshController,
                             onRefresh: _onRefresh,
                             child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8),
                               itemCount: _conversations.length,
                               itemBuilder: (context, index) {
                                 return _ConversationTile(
                                   conversation: _conversations[index],
                                   onTap: () {
-                                    context.push('/chat/${_conversations[index].id}');
+                                    context
+                                        .push('/chat/${_conversations[index].id}');
                                   },
                                 );
                               },
@@ -201,7 +226,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
         child: FloatingActionButton(
           heroTag: 'conversations_fab',
           onPressed: () {
-            // Start new conversation
             context.push('/new-chat');
           },
           tooltip: l10n.newConversationFab,
@@ -220,7 +244,8 @@ class _ConversationSearchSheet extends StatefulWidget {
   const _ConversationSearchSheet({required this.conversations});
 
   @override
-  State<_ConversationSearchSheet> createState() => _ConversationSearchSheetState();
+  State<_ConversationSearchSheet> createState() =>
+      _ConversationSearchSheetState();
 }
 
 class _ConversationSearchSheetState extends State<_ConversationSearchSheet> {
@@ -244,11 +269,12 @@ class _ConversationSearchSheetState extends State<_ConversationSearchSheet> {
           final otherUser = conversation.getOtherParticipant(currentUserId);
           final username = otherUser?.username.toLowerCase() ?? '';
           final fullName = otherUser?.fullName.toLowerCase() ?? '';
-          final lastMessage = conversation.lastMessage?.content.toLowerCase() ?? '';
+          final lastMessage =
+              conversation.lastMessage?.content.toLowerCase() ?? '';
 
           return username.contains(_searchQuery) ||
-                 fullName.contains(_searchQuery) ||
-                 lastMessage.contains(_searchQuery);
+              fullName.contains(_searchQuery) ||
+              lastMessage.contains(_searchQuery);
         }).toList();
       }
     });
@@ -283,8 +309,8 @@ class _ConversationSearchSheetState extends State<_ConversationSearchSheet> {
                 ? Center(
                     child: Text(
                       _searchQuery.isEmpty
-                        ? l10n.emptyConversationsTitle
-                        : l10n.noResultsFound,
+                          ? l10n.emptyConversationsTitle
+                          : l10n.noResultsFound,
                     ),
                   )
                 : ListView.builder(
@@ -294,7 +320,9 @@ class _ConversationSearchSheetState extends State<_ConversationSearchSheet> {
                       conversation: _filteredConversations[index],
                       onTap: () {
                         Navigator.pop(context);
-                        context.push('/chat/${_filteredConversations[index].id}');
+                        context.push(
+                          '/chat/${_filteredConversations[index].id}',
+                        );
                       },
                     ),
                   ),
@@ -309,10 +337,41 @@ class _ConversationTile extends StatelessWidget {
   final Conversation conversation;
   final VoidCallback? onTap;
 
-  const _ConversationTile({
-    required this.conversation,
-    this.onTap,
-  });
+  const _ConversationTile({required this.conversation, this.onTap});
+
+  Widget? _buildSubtitle(BuildContext context) {
+    final theme = Theme.of(context);
+    final baseStyle = theme.textTheme.bodySmall;
+    final isUnread = conversation.unreadCount > 0;
+    final messageStyle = baseStyle?.copyWith(
+      color: isUnread ? AppColors.textPrimary : AppColors.textSecondary,
+      fontWeight: isUnread ? FontWeight.w500 : FontWeight.normal,
+    );
+
+    final messageWidget = conversation.lastMessage != null
+        ? Text(
+            conversation.lastMessage!.content,
+            style: messageStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          )
+        : null;
+
+    final streakIndicator = conversation.streakCount > 0
+        ? Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: _StreakStatusIndicator(conversation: conversation),
+          )
+        : null;
+
+    if (messageWidget != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [messageWidget, if (streakIndicator != null) streakIndicator],
+      );
+    }
+    return streakIndicator;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -354,7 +413,8 @@ class _ConversationTile extends StatelessWidget {
           Expanded(
             child: Text(
               conversation.isIdentityRevealed
-                  ? otherUser?.fullName ?? AppLocalizations.of(context)!.userFallback
+                  ? otherUser?.fullName ??
+                      AppLocalizations.of(context)!.userFallback
                   : AppLocalizations.of(context)!.anonymousConversation,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: conversation.unreadCount > 0
@@ -380,21 +440,7 @@ class _ConversationTile extends StatelessWidget {
           ],
         ],
       ),
-      subtitle: conversation.lastMessage != null
-          ? Text(
-              conversation.lastMessage!.content,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: conversation.unreadCount > 0
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
-                fontWeight: conversation.unreadCount > 0
-                    ? FontWeight.w500
-                    : FontWeight.normal,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
+      subtitle: _buildSubtitle(context),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -424,6 +470,91 @@ class _ConversationTile extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _StreakStatusIndicator extends StatelessWidget {
+  const _StreakStatusIndicator({required this.conversation});
+
+  final Conversation conversation;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final referenceTime =
+        conversation.lastMessageAt ??
+        conversation.updatedAt ??
+        conversation.createdAt;
+    const streakDuration = Duration(hours: 24);
+    final expiryTime = referenceTime.add(streakDuration);
+    final now = DateTime.now();
+    final remaining = expiryTime.difference(now);
+    final isExpired = remaining <= Duration.zero;
+    int boundedRemainingSeconds;
+    if (remaining.isNegative) {
+      boundedRemainingSeconds = 0;
+    } else if (remaining.inSeconds > streakDuration.inSeconds) {
+      boundedRemainingSeconds = streakDuration.inSeconds;
+    } else {
+      boundedRemainingSeconds = remaining.inSeconds;
+    }
+    final progress = streakDuration.inSeconds > 0
+        ? boundedRemainingSeconds / streakDuration.inSeconds
+        : 0.0;
+    final flameColor = Helpers.getFlameColor(conversation.flameLevel.name);
+    final indicatorColor = flameColor == Colors.transparent
+        ? AppColors.primary
+        : flameColor;
+    final backgroundColor = indicatorColor.withOpacity(0.25);
+    if (isExpired) {
+      return Row(
+        children: [
+          const Icon(
+            Icons.hourglass_disabled,
+            size: 14,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            l10n.streakExpired,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      );
+    }
+
+    final hoursLeft = remaining.inHours;
+    final minutesLeft = remaining.inMinutes % 60;
+    final showHourglass = remaining <= const Duration(hours: 3);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinearProgressIndicator(
+          value: progress,
+          color: indicatorColor,
+          backgroundColor: backgroundColor,
+          minHeight: 4,
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            if (showHourglass) ...[
+              const Icon(
+                Icons.hourglass_bottom,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              l10n.streakExpiresIn(hoursLeft, minutesLeft),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

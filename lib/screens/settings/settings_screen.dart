@@ -16,14 +16,15 @@ class SettingsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final themeProvider = context.watch<ThemeProvider>();
     final authProvider = context.watch<AuthProvider>();
-    final currentLanguage = authProvider.currentUser?.settings?.language ?? 'fr';
-    final languageLabel = currentLanguage == 'fr' ? l10n.languageFrench : l10n.languageEnglish;
+    final currentLanguage =
+        authProvider.currentUser?.settings?.language ?? 'fr';
+    final languageLabel = currentLanguage == 'fr'
+        ? l10n.languageFrench
+        : l10n.languageEnglish;
     final user = authProvider.currentUser;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settingsTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         children: [
           // Account section
@@ -169,10 +170,7 @@ class SettingsScreen extends StatelessWidget {
           Center(
             child: Text(
               l10n.appVersion('1.0.0'),
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
             ),
           ),
 
@@ -216,21 +214,16 @@ class SettingsScreen extends StatelessWidget {
       leading: Icon(icon, color: textColor ?? Colors.grey[700]),
       title: Text(
         title,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w500,
-        ),
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             )
           : null,
-      trailing: trailing ?? (onTap != null ? const Icon(Icons.chevron_right) : null),
+      trailing:
+          trailing ?? (onTap != null ? const Icon(Icons.chevron_right) : null),
       onTap: onTap,
     );
   }
@@ -238,7 +231,8 @@ class SettingsScreen extends StatelessWidget {
   void _showLanguageDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeProvider = context.read<LocaleProvider>();
-    final currentLanguage = context.read<AuthProvider>().currentUser?.settings?.language ?? 'fr';
+    final currentLanguage =
+        context.read<AuthProvider>().currentUser?.settings?.language ?? 'fr';
 
     showDialog(
       context: context,
@@ -290,9 +284,11 @@ class SettingsScreen extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(language == 'fr'
-                ? l10n.languageChangedToFrench
-                : l10n.languageChangedToEnglish),
+            content: Text(
+              language == 'fr'
+                  ? l10n.languageChangedToFrench
+                  : l10n.languageChangedToEnglish,
+            ),
           ),
         );
       }
@@ -343,16 +339,11 @@ class AccountInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.accountInfoTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.accountInfoTitle)),
       body: ListView(
         children: [
           const SizedBox(height: 8),
-          UserInfoCard(
-            user: user,
-            onEdit: () => context.push('/edit-profile'),
-          ),
+          UserInfoCard(user: user, onEdit: () => context.push('/edit-profile')),
         ],
       ),
     );
@@ -447,18 +438,12 @@ class UserInfoCard extends StatelessWidget {
                     child: Text(
                       value,
                       textAlign: TextAlign.right,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                   if (isEditable) ...[
                     const SizedBox(width: 6),
-                    const Icon(
-                      Icons.edit,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
+                    const Icon(Icons.edit, size: 14, color: AppColors.primary),
                   ],
                 ],
               ),

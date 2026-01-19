@@ -9,7 +9,13 @@ class StoryReplyInput extends StatefulWidget {
   final int storyId;
   final bool isExpanded;
   final VoidCallback onTap;
-  final Function(String content, {bool isAnonymous, File? voiceFile, String? voiceEffect}) onSend;
+  final Function(
+    String content, {
+    bool isAnonymous,
+    File? voiceFile,
+    String? voiceEffect,
+  })
+  onSend;
   final VoidCallback onClose;
 
   const StoryReplyInput({
@@ -68,10 +74,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
           children: [
             Text(
               l10n.storyReplyPlaceholder,
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.black54, fontSize: 14),
             ),
             const Spacer(),
             // Quick emoji reactions
@@ -155,8 +158,9 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
                           _isAnonymous ? l10n.userAnonymous : l10n.visibleLabel,
                           style: TextStyle(
                             fontSize: 12,
-                            color:
-                                _isAnonymous ? AppColors.primary : Colors.grey,
+                            color: _isAnonymous
+                                ? AppColors.primary
+                                : Colors.grey,
                           ),
                         ),
                       ],
@@ -168,10 +172,7 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
           ),
 
           // Voice recording or text input
-          if (_isRecordingVoice)
-            _buildVoiceRecorder()
-          else
-            _buildTextInput(),
+          if (_isRecordingVoice) _buildVoiceRecorder() else _buildTextInput(),
 
           // Bottom actions
           Padding(
@@ -203,9 +204,9 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
                   ElevatedButton(
                     onPressed: _controller.text.isNotEmpty
                         ? () => widget.onSend(
-                              _controller.text,
-                              isAnonymous: _isAnonymous,
-                            )
+                            _controller.text,
+                            isAnonymous: _isAnonymous,
+                          )
                         : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -268,17 +269,16 @@ class _StoryReplyInputState extends State<StoryReplyInput> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary
-                        : Colors.grey[200],
+                    color: isSelected ? AppColors.primary : Colors.grey[200],
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     VoiceEffectsService.getEffectName(effect),
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),

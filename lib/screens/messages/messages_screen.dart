@@ -17,7 +17,8 @@ class MessagesScreen extends StatefulWidget {
   State<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProviderStateMixin {
+class _MessagesScreenState extends State<MessagesScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final MessageService _messageService = MessageService();
   final RefreshController _receivedRefreshController = RefreshController();
@@ -98,7 +99,10 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
                   if (_stats != null && _stats!.unreadCount > 0) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         gradient: AppColors.primaryGradient,
                         borderRadius: BorderRadius.circular(12),
@@ -123,14 +127,14 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
       body: _isLoading
           ? const LoadingWidget()
           : _hasError
-              ? ErrorState(onRetry: _loadData)
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildMessagesList(_receivedMessages, isReceived: true),
-                    _buildMessagesList(_sentMessages, isReceived: false),
-                  ],
-                ),
+          ? ErrorState(onRetry: _loadData)
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildMessagesList(_receivedMessages, isReceived: true),
+                _buildMessagesList(_sentMessages, isReceived: false),
+              ],
+            ),
       floatingActionButton: Container(
         decoration: BoxDecoration(
           gradient: AppColors.primaryGradient,
@@ -154,9 +158,14 @@ class _MessagesScreenState extends State<MessagesScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildMessagesList(List<AnonymousMessage> messages, {required bool isReceived}) {
+  Widget _buildMessagesList(
+    List<AnonymousMessage> messages, {
+    required bool isReceived,
+  }) {
     final l10n = AppLocalizations.of(context)!;
-    final controller = isReceived ? _receivedRefreshController : _sentRefreshController;
+    final controller = isReceived
+        ? _receivedRefreshController
+        : _sentRefreshController;
     final emptyState = EmptyState(
       icon: Icons.mail_outline,
       title: isReceived ? l10n.emptyInboxTitle : l10n.emptySentTitle,

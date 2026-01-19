@@ -36,11 +36,19 @@ class ConfessionService {
   }) async {
     try {
       // First try to get user info to obtain username
-      final userResponse = await _apiClient.get('${ApiConstants.userById}/$userId');
-      final username = userResponse.data['user']?['username'] ?? userResponse.data['username'];
+      final userResponse = await _apiClient.get(
+        '${ApiConstants.userById}/$userId',
+      );
+      final username =
+          userResponse.data['user']?['username'] ??
+          userResponse.data['username'];
 
       if (username != null) {
-        return getUserConfessionsByUsername(username, page: page, perPage: perPage);
+        return getUserConfessionsByUsername(
+          username,
+          page: page,
+          perPage: perPage,
+        );
       }
 
       // Fallback: return empty list if user not found
@@ -196,10 +204,7 @@ class ConfessionService {
     }
 
     // No media, use regular JSON
-    final data = <String, dynamic>{
-      'type': type,
-      'is_anonymous': isAnonymous,
-    };
+    final data = <String, dynamic>{'type': type, 'is_anonymous': isAnonymous};
 
     if (content != null && content.isNotEmpty) {
       data['content'] = content;
@@ -217,17 +222,23 @@ class ConfessionService {
   }
 
   Future<Confession> likeConfession(int confessionId) async {
-    final response = await _apiClient.post('${ApiConstants.confessions}/$confessionId/like');
+    final response = await _apiClient.post(
+      '${ApiConstants.confessions}/$confessionId/like',
+    );
     return Confession.fromJson(response.data['confession'] ?? response.data);
   }
 
   Future<Confession> unlikeConfession(int confessionId) async {
-    final response = await _apiClient.delete('${ApiConstants.confessions}/$confessionId/like');
+    final response = await _apiClient.delete(
+      '${ApiConstants.confessions}/$confessionId/like',
+    );
     return Confession.fromJson(response.data['confession'] ?? response.data);
   }
 
   Future<Confession> revealIdentity(int confessionId) async {
-    final response = await _apiClient.post('${ApiConstants.confessions}/$confessionId/reveal');
+    final response = await _apiClient.post(
+      '${ApiConstants.confessions}/$confessionId/reveal',
+    );
     return Confession.fromJson(response.data['confession'] ?? response.data);
   }
 
@@ -245,7 +256,9 @@ class ConfessionService {
   }
 
   Future<List<ConfessionComment>> getComments(int confessionId) async {
-    final response = await _apiClient.get('${ApiConstants.confessions}/$confessionId/comments');
+    final response = await _apiClient.get(
+      '${ApiConstants.confessions}/$confessionId/comments',
+    );
     final data = response.data['comments'] ?? response.data['data'] ?? [];
     return (data as List).map((c) => ConfessionComment.fromJson(c)).toList();
   }
@@ -294,7 +307,9 @@ class ConfessionService {
         '${ApiConstants.confessions}/$confessionId/comments',
         data: formData,
       );
-      return ConfessionComment.fromJson(response.data['comment'] ?? response.data);
+      return ConfessionComment.fromJson(
+        response.data['comment'] ?? response.data,
+      );
     }
 
     final response = await _apiClient.post(
@@ -305,7 +320,9 @@ class ConfessionService {
         if (parentId != null) 'parent_id': parentId,
       },
     );
-    return ConfessionComment.fromJson(response.data['comment'] ?? response.data);
+    return ConfessionComment.fromJson(
+      response.data['comment'] ?? response.data,
+    );
   }
 
   Future<bool> deleteComment(int confessionId, int commentId) async {
@@ -316,7 +333,9 @@ class ConfessionService {
   }
 
   Future<bool> deleteConfession(int confessionId) async {
-    final response = await _apiClient.delete('${ApiConstants.confessions}/$confessionId');
+    final response = await _apiClient.delete(
+      '${ApiConstants.confessions}/$confessionId',
+    );
     return response.data['success'] ?? true;
   }
 

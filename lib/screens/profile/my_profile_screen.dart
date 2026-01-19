@@ -53,7 +53,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     final authProvider = context.read<AuthProvider>();
     if (authProvider.user != null) {
       final profileProvider = context.read<ProfileProvider>();
-      profileProvider.loadProfile(authProvider.user!.username, loadConfessions: false);
+      profileProvider.loadProfile(
+        authProvider.user!.username,
+        loadConfessions: false,
+      );
       profileProvider.loadLikedConfessions();
       profileProvider.loadOwnConfessions();
     }
@@ -63,7 +66,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     final authProvider = context.read<AuthProvider>();
     if (authProvider.user == null) return;
     final profileProvider = context.read<ProfileProvider>();
-    await profileProvider.loadProfile(authProvider.user!.username, loadConfessions: false);
+    await profileProvider.loadProfile(
+      authProvider.user!.username,
+      loadConfessions: false,
+    );
     await profileProvider.loadLikedConfessions();
     await profileProvider.loadOwnConfessions();
     await _loadReceivedGifts();
@@ -141,9 +147,18 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                             Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
                         indicatorColor: Theme.of(context).colorScheme.primary,
                         tabs: [
-                          Tab(icon: const Icon(Icons.grid_on), text: l10n.profilePostsTab),
-                          Tab(icon: const Icon(Icons.favorite_border), text: l10n.profileLikesTab),
-                          Tab(icon: const Icon(Icons.card_giftcard), text: l10n.profileGiftsTab),
+                          Tab(
+                            icon: const Icon(Icons.grid_on),
+                            text: l10n.profilePostsTab,
+                          ),
+                          Tab(
+                            icon: const Icon(Icons.favorite_border),
+                            text: l10n.profileLikesTab,
+                          ),
+                          Tab(
+                            icon: const Icon(Icons.card_giftcard),
+                            text: l10n.profileGiftsTab,
+                          ),
                         ],
                       ),
                     ),
@@ -197,7 +212,9 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                               ),
                             )
                           : ShaderMask(
-                              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                              shaderCallback: (bounds) => AppColors
+                                  .primaryGradient
+                                  .createShader(bounds),
                               child: Text(
                                 user.initials,
                                 style: const TextStyle(
@@ -260,10 +277,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   const SizedBox(height: 4),
                   Text(
                     user.bio!,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
                 ],
               ],
@@ -291,7 +305,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   borderRadius: BorderRadius.circular(6),
                   child: Center(
                     child: ShaderMask(
-                      shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                      shaderCallback: (bounds) =>
+                          AppColors.primaryGradient.createShader(bounds),
                       child: Text(
                         l10n.profileEditProfile,
                         style: TextStyle(
@@ -392,18 +407,9 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         children: [
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
         ],
       ),
     );
@@ -422,10 +428,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
             const SizedBox(height: 16),
             Text(
               l10n.profileNoPostsTitle,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -452,7 +455,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     );
   }
 
-  Widget _buildConfessionTile(Confession confession, ProfileProvider profileProvider) {
+  Widget _buildConfessionTile(
+    Confession confession,
+    ProfileProvider profileProvider,
+  ) {
     final imageUrl = _resolveMediaUrl(confession.imageUrl);
     final videoUrl = _resolveMediaUrl(confession.videoUrl);
     final hasImage = confession.hasImage && imageUrl.isNotEmpty;
@@ -476,8 +482,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 CachedNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.cover,
-                  placeholder: (context, _) => _buildConfessionPlaceholder(hasVideo: hasVideo),
-                  errorWidget: (context, _, __) => _buildConfessionPlaceholder(hasVideo: hasVideo),
+                  placeholder: (context, _) =>
+                      _buildConfessionPlaceholder(hasVideo: hasVideo),
+                  errorWidget: (context, _, __) =>
+                      _buildConfessionPlaceholder(hasVideo: hasVideo),
                 )
               else if (hasVideo)
                 _buildVideoThumbnail(videoUrl)
@@ -499,7 +507,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 left: 6,
                 top: 6,
                 child: InkWell(
-                  onTap: () => _showPostOptions(context, confession, profileProvider),
+                  onTap: () =>
+                      _showPostOptions(context, confession, profileProvider),
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
                     decoration: BoxDecoration(
@@ -560,7 +569,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
             children: [
               ListTile(
                 leading: ShaderMask(
-                  shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                  shaderCallback: (bounds) =>
+                      AppColors.primaryGradient.createShader(bounds),
                   child: const Icon(Icons.trending_up, color: Colors.white),
                 ),
                 title: Text(l10n.profilePromote),
@@ -591,8 +601,14 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                title: Text(l10n.profileDelete, style: const TextStyle(color: AppColors.error)),
+                leading: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.error,
+                ),
+                title: Text(
+                  l10n.profileDelete,
+                  style: const TextStyle(color: AppColors.error),
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
                   _confirmDelete(context, confession, profileProvider);
@@ -647,7 +663,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 }
               }
             },
-            child: Text(l10n.profileDelete, style: const TextStyle(color: AppColors.error)),
+            child: Text(
+              l10n.profileDelete,
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -690,11 +709,9 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     return FutureBuilder<Uint8List?>(
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-          return Image.memory(
-            snapshot.data!,
-            fit: BoxFit.cover,
-          );
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.data != null) {
+          return Image.memory(snapshot.data!, fit: BoxFit.cover);
         }
         return _buildConfessionPlaceholder(hasVideo: true);
       },
@@ -749,10 +766,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 const SizedBox(height: 16),
                 Text(
                   l10n.profileNoLikesTitle,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -773,14 +787,14 @@ class _MyProfileScreenState extends State<MyProfileScreen>
             return ConfessionCard(
               confession: confession,
               onTap: () {
-            context.push('/confession/${confession.id}');
-          },
-          onComment: () {
-            context.push('/confession/${confession.id}');
+                context.push('/confession/${confession.id}');
+              },
+              onComment: () {
+                context.push('/confession/${confession.id}');
+              },
+            );
           },
         );
-      },
-    );
       },
     );
   }
@@ -796,14 +810,15 @@ class _MyProfileScreenState extends State<MyProfileScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.card_giftcard_outlined, size: 64, color: Colors.grey),
+            const Icon(
+              Icons.card_giftcard_outlined,
+              size: 64,
+              color: Colors.grey,
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.profileNoGiftsTitle,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -871,12 +886,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                     sender != null
                         ? l10n.giftFromUser(sender.username)
                         : l10n.giftAnonymous,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
-                  if (transaction.message != null && transaction.message!.isNotEmpty) ...[
+                  if (transaction.message != null &&
+                      transaction.message!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       transaction.message!,
@@ -907,10 +920,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 const SizedBox(height: 4),
                 Text(
                   _formatDate(context, transaction.createdAt),
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.grey[500], fontSize: 11),
                 ),
               ],
             ),
@@ -1049,10 +1059,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 const SizedBox(height: 24),
                 Text(
                   l10n.shareProfileTitle,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -1163,18 +1170,12 @@ class _MyProfileScreenState extends State<MyProfileScreen>
             const SizedBox(height: 16),
             Text(
               '@$username',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
               link,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
           ],

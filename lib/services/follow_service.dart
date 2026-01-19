@@ -17,7 +17,10 @@ class FollowService {
   }
 
   /// Get followers list
-  Future<Map<String, dynamic>> getFollowers(String username, {int page = 1}) async {
+  Future<Map<String, dynamic>> getFollowers(
+    String username, {
+    int page = 1,
+  }) async {
     final response = await _api.get(
       ApiConstants.userFollowers(username),
       queryParameters: {'page': page},
@@ -26,7 +29,10 @@ class FollowService {
   }
 
   /// Get following list
-  Future<Map<String, dynamic>> getFollowing(String username, {int page = 1}) async {
+  Future<Map<String, dynamic>> getFollowing(
+    String username, {
+    int page = 1,
+  }) async {
     final response = await _api.get(
       ApiConstants.userFollowing(username),
       queryParameters: {'page': page},

@@ -11,7 +11,8 @@ class StoryService {
 
   Future<List<UserStories>> getFeed() async {
     final response = await _apiClient.get(ApiConstants.stories);
-    final data = response.data['stories'] ?? response.data['data'] ?? response.data;
+    final data =
+        response.data['stories'] ?? response.data['data'] ?? response.data;
 
     // Handle case where data is a Map instead of List
     if (data is Map) {
@@ -25,7 +26,8 @@ class StoryService {
 
   Future<List<Story>> getMyStories() async {
     final response = await _apiClient.get(ApiConstants.storiesMyStories);
-    final data = response.data['stories'] ?? response.data['data'] ?? response.data;
+    final data =
+        response.data['stories'] ?? response.data['data'] ?? response.data;
 
     // Handle case where data is a Map instead of List
     if (data is Map) {
@@ -38,8 +40,11 @@ class StoryService {
   }
 
   Future<List<Story>> getUserStories(String username) async {
-    final response = await _apiClient.get('${ApiConstants.stories}/user/$username');
-    final data = response.data['stories'] ?? response.data['data'] ?? response.data;
+    final response = await _apiClient.get(
+      '${ApiConstants.stories}/user/$username',
+    );
+    final data =
+        response.data['stories'] ?? response.data['data'] ?? response.data;
 
     // Handle case where data is a Map instead of List
     if (data is Map) {
@@ -53,7 +58,8 @@ class StoryService {
 
   Future<List<Story>> getUserStoriesById(int userId) async {
     final response = await _apiClient.get(ApiConstants.storiesByUserId(userId));
-    final data = response.data['stories'] ?? response.data['data'] ?? response.data;
+    final data =
+        response.data['stories'] ?? response.data['data'] ?? response.data;
 
     // Handle case where data is a Map instead of List
     if (data is Map) {
@@ -194,7 +200,9 @@ class StoryService {
   }
 
   Future<bool> viewStory(int storyId) async {
-    final response = await _apiClient.post('${ApiConstants.stories}/$storyId/view');
+    final response = await _apiClient.post(
+      '${ApiConstants.stories}/$storyId/view',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -204,13 +212,17 @@ class StoryService {
   }
 
   Future<List<StoryView>> getViewers(int storyId) async {
-    final response = await _apiClient.get('${ApiConstants.stories}/$storyId/viewers');
+    final response = await _apiClient.get(
+      '${ApiConstants.stories}/$storyId/viewers',
+    );
     final data = response.data['viewers'] ?? response.data['data'] ?? [];
     return (data as List).map((v) => StoryView.fromJson(v)).toList();
   }
 
   Future<bool> deleteStory(int storyId) async {
-    final response = await _apiClient.delete('${ApiConstants.stories}/$storyId');
+    final response = await _apiClient.delete(
+      '${ApiConstants.stories}/$storyId',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -222,24 +234,29 @@ class StoryService {
   // ==================== COMMENTS ====================
 
   Future<List<StoryComment>> getComments(int storyId) async {
-    final response = await _apiClient.get('${ApiConstants.stories}/$storyId/comments');
+    final response = await _apiClient.get(
+      '${ApiConstants.stories}/$storyId/comments',
+    );
     final data = response.data['comments'] ?? response.data['data'] ?? [];
     return (data as List).map((c) => StoryComment.fromJson(c)).toList();
   }
 
-  Future<StoryComment> addComment(int storyId, String content, {int? parentId}) async {
+  Future<StoryComment> addComment(
+    int storyId,
+    String content, {
+    int? parentId,
+  }) async {
     final response = await _apiClient.post(
       '${ApiConstants.stories}/$storyId/comments',
-      data: {
-        'content': content,
-        if (parentId != null) 'parent_id': parentId,
-      },
+      data: {'content': content, if (parentId != null) 'parent_id': parentId},
     );
     return StoryComment.fromJson(response.data['comment'] ?? response.data);
   }
 
   Future<bool> deleteComment(int storyId, int commentId) async {
-    final response = await _apiClient.delete('${ApiConstants.stories}/$storyId/comments/$commentId');
+    final response = await _apiClient.delete(
+      '${ApiConstants.stories}/$storyId/comments/$commentId',
+    );
     return response.data['success'] ?? true;
   }
 }

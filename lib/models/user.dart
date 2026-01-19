@@ -92,7 +92,8 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? 0,
-      firstName: json['first_name'] ??
+      firstName:
+          json['first_name'] ??
           json['firstName'] ??
           json['full_name'] ??
           json['fullName'] ??
@@ -103,9 +104,16 @@ class User {
       phone: json['phone'],
       avatar: json['avatar'] ?? json['avatar_url'],
       bio: json['bio'],
-      walletBalance: _parseDouble(json['wallet_balance'] ?? json['walletBalance']),
+      walletBalance: _parseDouble(
+        json['wallet_balance'] ?? json['walletBalance'],
+      ),
       isPremium: json['is_premium'] ?? json['isPremium'] ?? false,
-      isVerified: json['is_verified'] ?? json['isVerified'] ?? json['is_premium'] ?? json['isPremium'] ?? false,
+      isVerified:
+          json['is_verified'] ??
+          json['isVerified'] ??
+          json['is_premium'] ??
+          json['isPremium'] ??
+          false,
       premiumExpiresAt: json['premium_expires_at'] != null
           ? DateTime.parse(json['premium_expires_at'])
           : null,
@@ -115,9 +123,8 @@ class User {
       settings: json['settings'] != null
           ? UserSettings.fromJson(json['settings'])
           : null,
-      isIdentityRevealed: json['is_identity_revealed'] ??
-          json['isIdentityRevealed'] ??
-          false,
+      isIdentityRevealed:
+          json['is_identity_revealed'] ?? json['isIdentityRevealed'] ?? false,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
@@ -129,7 +136,8 @@ class User {
       isFollowing: json['is_following'] ?? json['isFollowing'],
       isFollowedBy: json['is_followed_by'] ?? json['isFollowedBy'],
       confessionsCount: json['confessions_count'] ?? json['confessionsCount'],
-      messagesReceivedCount: json['messages_received_count'] ?? json['messagesReceivedCount'],
+      messagesReceivedCount:
+          json['messages_received_count'] ?? json['messagesReceivedCount'],
       fullNameOverride: json['full_name'] ?? json['fullName'],
     );
   }
@@ -216,7 +224,8 @@ class User {
       isFollowing: isFollowing ?? this.isFollowing,
       isFollowedBy: isFollowedBy ?? this.isFollowedBy,
       confessionsCount: confessionsCount ?? this.confessionsCount,
-      messagesReceivedCount: messagesReceivedCount ?? this.messagesReceivedCount,
+      messagesReceivedCount:
+          messagesReceivedCount ?? this.messagesReceivedCount,
       fullNameOverride: fullNameOverride ?? this.fullNameOverride,
     );
   }

@@ -131,9 +131,9 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
       setState(() {
         _isSending = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorMessage(e.toString()))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.errorMessage(e.toString()))));
     }
   }
 
@@ -164,10 +164,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
           const SizedBox(height: 16),
           Text(
             l10n.giftSentTitle,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
@@ -176,9 +173,7 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
               widget.recipientUsername,
             ),
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(color: Colors.grey[600]),
           ),
         ],
       ),
@@ -374,8 +369,12 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
                 width: double.infinity,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: _selectedGift != null && !_isSending ? AppColors.primaryGradient : null,
-                  color: _selectedGift != null && !_isSending ? null : Colors.grey[300],
+                  gradient: _selectedGift != null && !_isSending
+                      ? AppColors.primaryGradient
+                      : null,
+                  color: _selectedGift != null && !_isSending
+                      ? null
+                      : Colors.grey[300],
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: _selectedGift != null && !_isSending
                       ? [
@@ -390,7 +389,9 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: _selectedGift != null && !_isSending ? _sendGift : null,
+                    onTap: _selectedGift != null && !_isSending
+                        ? _sendGift
+                        : null,
                     borderRadius: BorderRadius.circular(12),
                     child: Center(
                       child: _isSending
@@ -409,7 +410,9 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: _selectedGift != null ? Colors.white : Colors.grey,
+                                color: _selectedGift != null
+                                    ? Colors.white
+                                    : Colors.grey,
                               ),
                             ),
                     ),
@@ -461,12 +464,9 @@ class _GiftBottomSheetState extends State<GiftBottomSheet> {
     }
 
     return ShaderMask(
-      shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
-      child: const Icon(
-        Icons.card_giftcard,
-        size: 48,
-        color: Colors.white,
-      ),
+      shaderCallback: (bounds) =>
+          AppColors.primaryGradient.createShader(bounds),
+      child: const Icon(Icons.card_giftcard, size: 48, color: Colors.white),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'user.dart';
 
 enum StoryType { image, video, text }
+
 enum StoryStatus { active, expired }
 
 class Story {
@@ -36,7 +37,8 @@ class Story {
     required this.createdAt,
   });
 
-  bool get isExpired => status == StoryStatus.expired || DateTime.now().isAfter(expiresAt);
+  bool get isExpired =>
+      status == StoryStatus.expired || DateTime.now().isAfter(expiresAt);
   bool get isText => type == StoryType.text;
   bool get isImage => type == StoryType.image;
   bool get isVideo => type == StoryType.video;
@@ -49,7 +51,9 @@ class Story {
       mediaUrl: json['media_url'] ?? json['mediaUrl'],
       content: json['content'],
       duration: json['duration'] ?? 5,
-      status: json['status'] == 'expired' ? StoryStatus.expired : StoryStatus.active,
+      status: json['status'] == 'expired'
+          ? StoryStatus.expired
+          : StoryStatus.active,
       viewsCount: json['views_count'] ?? json['viewsCount'] ?? 0,
       backgroundColor: json['background_color'] ?? json['backgroundColor'],
       expiresAt: json['expires_at'] != null
@@ -190,7 +194,8 @@ class UserStories {
     }
 
     // Utiliser real_user_id si disponible, sinon user.id
-    final realUserId = json['real_user_id'] ?? json['realUserId'] ?? userData?['id'] ?? 0;
+    final realUserId =
+        json['real_user_id'] ?? json['realUserId'] ?? userData?['id'] ?? 0;
 
     // Parse preview
     StoryPreview? preview;
@@ -200,16 +205,24 @@ class UserStories {
 
     return UserStories(
       user: user,
-      realUserId: realUserId is int ? realUserId : int.tryParse(realUserId.toString()) ?? 0,
+      realUserId: realUserId is int
+          ? realUserId
+          : int.tryParse(realUserId.toString()) ?? 0,
       stories: stories,
-      hasUnviewed: json['has_new'] ?? json['has_unviewed'] ?? json['hasUnviewed'] ?? !(json['all_viewed'] ?? true),
+      hasUnviewed:
+          json['has_new'] ??
+          json['has_unviewed'] ??
+          json['hasUnviewed'] ??
+          !(json['all_viewed'] ?? true),
       isAnonymous: json['is_anonymous'] ?? json['isAnonymous'] ?? false,
-      isIdentityRevealed: json['identity_revealed'] ??
+      isIdentityRevealed:
+          json['identity_revealed'] ??
           json['is_identity_revealed'] ??
           json['identityRevealed'] ??
           json['isIdentityRevealed'] ??
           false,
-      storiesCount: json['stories_count'] ?? json['storiesCount'] ?? stories.length,
+      storiesCount:
+          json['stories_count'] ?? json['storiesCount'] ?? stories.length,
       latestStoryAt: json['latest_story_at'] != null
           ? DateTime.parse(json['latest_story_at'])
           : null,
@@ -262,7 +275,9 @@ class StoryComment {
       likesCount: json['likes_count'] ?? json['likesCount'] ?? 0,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       replies: json['replies'] != null && json['replies'] is List
-          ? (json['replies'] as List).map((r) => StoryComment.fromJson(r)).toList()
+          ? (json['replies'] as List)
+                .map((r) => StoryComment.fromJson(r))
+                .toList()
           : null,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])

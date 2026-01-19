@@ -28,7 +28,10 @@ class Helpers {
 
   // Format date and time
   static String formatDateTime(DateTime dateTime) {
-    return DateFormat('dd/MM/yyyy HH:mm', Intl.getCurrentLocale()).format(dateTime);
+    return DateFormat(
+      'dd/MM/yyyy HH:mm',
+      Intl.getCurrentLocale(),
+    ).format(dateTime);
   }
 
   // Format time
@@ -71,7 +74,9 @@ class Helpers {
 
   // Validate phone (Cameroon format)
   static bool isValidPhone(String phone) {
-    return RegExp(r'^(6[5-9][0-9]{7}|2[0-9]{8})$').hasMatch(phone.replaceAll(RegExp(r'[\s\-\+]'), ''));
+    return RegExp(
+      r'^(6[5-9][0-9]{7}|2[0-9]{8})$',
+    ).hasMatch(phone.replaceAll(RegExp(r'[\s\-\+]'), ''));
   }
 
   // Validate username
@@ -86,7 +91,11 @@ class Helpers {
   }
 
   // Show snackbar
-  static void showSnackBar(BuildContext context, String message, {bool isError = false}) {
+  static void showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

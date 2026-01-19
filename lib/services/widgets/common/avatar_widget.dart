@@ -37,10 +37,7 @@ class AvatarWidget extends StatelessWidget {
         shape: BoxShape.circle,
         color: bgColor,
         border: isPremium
-            ? Border.all(
-                color: AppColors.premiumGold,
-                width: 2,
-              )
+            ? Border.all(color: AppColors.premiumGold, width: 2)
             : null,
       ),
       child: imageUrl != null && imageUrl!.isNotEmpty
@@ -51,7 +48,8 @@ class AvatarWidget extends StatelessWidget {
                 height: size,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => _buildPlaceholder(initials),
-                errorWidget: (context, url, error) => _buildPlaceholder(initials),
+                errorWidget: (context, url, error) =>
+                    _buildPlaceholder(initials),
               ),
             )
           : _buildPlaceholder(initials),
@@ -89,11 +87,7 @@ class AvatarWidget extends StatelessWidget {
                   color: AppColors.premiumGold,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.star,
-                  size: size * 0.2,
-                  color: Colors.white,
-                ),
+                child: Icon(Icons.star, size: size * 0.2, color: Colors.white),
               ),
             ),
         ],
@@ -101,10 +95,7 @@ class AvatarWidget extends StatelessWidget {
     }
 
     if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: avatar,
-      );
+      return GestureDetector(onTap: onTap, child: avatar);
     }
 
     return avatar;
@@ -153,20 +144,13 @@ class StoryAvatarWidget extends StatelessWidget {
           shape: BoxShape.circle,
           gradient: hasUnviewedStory ? AppColors.storyGradient : null,
           border: !hasUnviewedStory
-              ? Border.all(
-                  color: AppColors.textHint,
-                  width: 2,
-                )
+              ? Border.all(color: AppColors.textHint, width: 2)
               : null,
         ),
         padding: const EdgeInsets.all(3),
         child: Stack(
           children: [
-            AvatarWidget(
-              imageUrl: imageUrl,
-              name: name,
-              size: size,
-            ),
+            AvatarWidget(imageUrl: imageUrl, name: name, size: size),
             if (isMyStory)
               Positioned(
                 right: 0,
@@ -182,11 +166,7 @@ class StoryAvatarWidget extends StatelessWidget {
                       width: 2,
                     ),
                   ),
-                  child: Icon(
-                    Icons.add,
-                    size: size * 0.2,
-                    color: Colors.white,
-                  ),
+                  child: Icon(Icons.add, size: size * 0.2, color: Colors.white),
                 ),
               ),
           ],

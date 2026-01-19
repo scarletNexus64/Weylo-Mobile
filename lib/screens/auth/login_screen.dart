@@ -72,9 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Title
                       Text(
                         l10n.loginWelcome,
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
@@ -96,12 +95,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: AppColors.error),
+                              const Icon(
+                                Icons.error_outline,
+                                color: AppColors.error,
+                              ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   authProvider.error!,
-                                  style: const TextStyle(color: AppColors.error),
+                                  style: const TextStyle(
+                                    color: AppColors.error,
+                                  ),
                                 ),
                               ),
                             ],

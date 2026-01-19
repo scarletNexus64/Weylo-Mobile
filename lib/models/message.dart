@@ -46,10 +46,13 @@ class AnonymousMessage {
       content: json['content'] ?? '',
       replyToMessageId: json['reply_to_message_id'] ?? json['replyToMessageId'],
       isRead: json['is_read'] ?? json['isRead'] ?? false,
-      isIdentityRevealed: json['is_identity_revealed'] ?? json['isIdentityRevealed'] ?? false,
+      isIdentityRevealed:
+          json['is_identity_revealed'] ?? json['isIdentityRevealed'] ?? false,
       revealedViaSubscriptionId: json['revealed_via_subscription_id'],
       sender: json['sender'] != null ? User.fromJson(json['sender']) : null,
-      recipient: json['recipient'] != null ? User.fromJson(json['recipient']) : null,
+      recipient: json['recipient'] != null
+          ? User.fromJson(json['recipient'])
+          : null,
       replyToMessage: json['reply_to_message'] != null
           ? AnonymousMessage.fromJson(json['reply_to_message'])
           : null,

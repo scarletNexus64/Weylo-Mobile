@@ -19,11 +19,7 @@ class GradientIcon extends StatelessWidget {
     return ShaderMask(
       shaderCallback: (bounds) =>
           (gradient ?? AppColors.primaryGradient).createShader(bounds),
-      child: Icon(
-        icon,
-        size: size,
-        color: Colors.white,
-      ),
+      child: Icon(icon, size: size, color: Colors.white),
     );
   }
 }

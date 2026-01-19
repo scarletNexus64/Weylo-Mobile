@@ -537,6 +537,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noResultsFound => 'Aucun résultat trouvé';
 
   @override
+  String get todayLabel => 'Aujourd\'hui';
+
+  @override
+  String get yesterdayLabel => 'Hier';
+
+  @override
   String get anonymousConversation => 'Anonyme';
 
   @override
@@ -544,6 +550,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get anonymousMessage => 'Message anonyme';
+
+  @override
+  String get youLabel => 'Vous';
+
+  @override
+  String get contactLabel => 'Contact';
 
   @override
   String get replyTo => 'Répondre à';
@@ -630,6 +642,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String streakDays(Object days) {
     return '$days jours de streak';
   }
+
+  @override
+  String streakExpiresIn(Object hours, Object minutes) {
+    return 'Expire dans ${hours}h ${minutes}m';
+  }
+
+  @override
+  String get streakExpired => 'Le streak est terminé';
 
   @override
   String get copyAction => 'Copier';

@@ -57,7 +57,9 @@ class PromotionService {
 
   /// Cancel a promotion
   Future<Map<String, dynamic>> cancelPromotion(int promotionId) async {
-    final response = await _api.delete(ApiConstants.cancelPromotion(promotionId));
+    final response = await _api.delete(
+      ApiConstants.cancelPromotion(promotionId),
+    );
     return response.data;
   }
 

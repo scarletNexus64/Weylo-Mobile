@@ -16,7 +16,9 @@ class UserService {
   }
 
   Future<User> getUserByUsername(String username) async {
-    final response = await _apiClient.get('${ApiConstants.userByUsername}/$username');
+    final response = await _apiClient.get(
+      '${ApiConstants.userByUsername}/$username',
+    );
     return User.fromJson(response.data['user'] ?? response.data);
   }
 
@@ -39,10 +41,7 @@ class UserService {
     if (email != null) data['email'] = email;
     if (phone != null) data['phone'] = phone;
 
-    final response = await _apiClient.put(
-      ApiConstants.userProfile,
-      data: data,
-    );
+    final response = await _apiClient.put(ApiConstants.userProfile, data: data);
 
     final user = User.fromJson(response.data['user'] ?? response.data);
     await _storage.saveUser(user);
@@ -108,11 +107,17 @@ class UserService {
   }
 
   Future<bool> blockUser(String username) async {
-    final response = await _apiClient.post('${ApiConstants.users}/$username/block');
+    final response = await _apiClient.post(
+      '${ApiConstants.users}/$username/block',
+    );
     return response.data['success'] ?? true;
   }
 
-  Future<bool> reportUser(String username, {required String reason, String? description}) async {
+  Future<bool> reportUser(
+    String username, {
+    required String reason,
+    String? description,
+  }) async {
     final response = await _apiClient.post(
       ApiConstants.userReport(username),
       data: {
@@ -125,7 +130,9 @@ class UserService {
   }
 
   Future<bool> unblockUser(String username) async {
-    final response = await _apiClient.delete('${ApiConstants.users}/$username/block');
+    final response = await _apiClient.delete(
+      '${ApiConstants.users}/$username/block',
+    );
     return response.data['success'] ?? true;
   }
 
@@ -186,15 +193,19 @@ class DashboardStats {
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
     return DashboardStats(
-      messagesReceived: json['messages_received'] ?? json['messagesReceived'] ?? 0,
+      messagesReceived:
+          json['messages_received'] ?? json['messagesReceived'] ?? 0,
       messagesSent: json['messages_sent'] ?? json['messagesSent'] ?? 0,
       unreadMessages: json['unread_messages'] ?? json['unreadMessages'] ?? 0,
-      confessionsReceived: json['confessions_received'] ?? json['confessionsReceived'] ?? 0,
+      confessionsReceived:
+          json['confessions_received'] ?? json['confessionsReceived'] ?? 0,
       confessionsSent: json['confessions_sent'] ?? json['confessionsSent'] ?? 0,
-      conversationsCount: json['conversations_count'] ?? json['conversationsCount'] ?? 0,
+      conversationsCount:
+          json['conversations_count'] ?? json['conversationsCount'] ?? 0,
       groupsCount: json['groups_count'] ?? json['groupsCount'] ?? 0,
       storiesCount: json['stories_count'] ?? json['storiesCount'] ?? 0,
-      walletBalance: (json['wallet_balance'] ?? json['walletBalance'] ?? 0).toDouble(),
+      walletBalance: (json['wallet_balance'] ?? json['walletBalance'] ?? 0)
+          .toDouble(),
     );
   }
 }

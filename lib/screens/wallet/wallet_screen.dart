@@ -16,7 +16,8 @@ class WalletScreen extends StatefulWidget {
   State<WalletScreen> createState() => _WalletScreenState();
 }
 
-class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderStateMixin {
+class _WalletScreenState extends State<WalletScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final WalletService _walletService = WalletService();
 
@@ -112,7 +113,9 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  Helpers.formatCurrency(user?.walletBalance ?? 0),
+                                  Helpers.formatCurrency(
+                                    user?.walletBalance ?? 0,
+                                  ),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 36,
@@ -126,7 +129,8 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                                       child: _ActionButton(
                                         icon: Icons.add,
                                         label: l10n.depositAction,
-                                        onTap: () => _showDepositDialog(context),
+                                        onTap: () =>
+                                            _showDepositDialog(context),
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -134,7 +138,8 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                                       child: _ActionButton(
                                         icon: Icons.arrow_upward,
                                         label: l10n.withdrawAction,
-                                        onTap: () => _showWithdrawDialog(context),
+                                        onTap: () =>
+                                            _showWithdrawDialog(context),
                                       ),
                                     ),
                                   ],
@@ -144,18 +149,24 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                           ),
                           if (_stats != null)
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
                               child: Row(
                                 children: [
                                   _StatItem(
                                     label: l10n.totalDepositsLabel,
-                                    value: Helpers.formatCurrency(_stats!.totalDeposits),
+                                    value: Helpers.formatCurrency(
+                                      _stats!.totalDeposits,
+                                    ),
                                     color: AppColors.success,
                                   ),
                                   const SizedBox(width: 12),
                                   _StatItem(
                                     label: l10n.totalWithdrawalsLabel,
-                                    value: Helpers.formatCurrency(_stats!.totalWithdrawals),
+                                    value: Helpers.formatCurrency(
+                                      _stats!.totalWithdrawals,
+                                    ),
                                     color: AppColors.warning,
                                   ),
                                 ],
@@ -181,10 +192,7 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                 },
                 body: TabBarView(
                   controller: _tabController,
-                  children: [
-                    _buildTransactionsList(),
-                    _buildWithdrawalsList(),
-                  ],
+                  children: [_buildTransactionsList(), _buildWithdrawalsList()],
                 ),
               ),
             ),
@@ -261,9 +269,9 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
           children: [
             Text(
               l10n.depositTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Container(
@@ -306,7 +314,10 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
               onPressed: () async {
                 final amount = double.tryParse(amountController.text);
                 if (amount == null || amount < 500) {
-                  Helpers.showErrorSnackBar(context, l10n.minimumAmountLabel('500 FCFA'));
+                  Helpers.showErrorSnackBar(
+                    context,
+                    l10n.minimumAmountLabel('500 FCFA'),
+                  );
                   return;
                 }
 
@@ -318,7 +329,9 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                   if (mounted) {
                     Navigator.pop(context);
                     // Open payment URL
-                    context.push('/payment?url=${Uri.encodeComponent(response.paymentUrl)}');
+                    context.push(
+                      '/payment?url=${Uri.encodeComponent(response.paymentUrl)}',
+                    );
                   }
                 } catch (e) {
                   Helpers.showErrorSnackBar(context, l10n.depositInitError);
@@ -353,88 +366,107 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            Text(
-              l10n.withdrawRequestTitle,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+              Text(
+                l10n.withdrawRequestTitle,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.warning.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                  Icon(Icons.account_balance_wallet, color: AppColors.warning, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.withdrawViaCinetpay,
-                    style: TextStyle(
+                    Icon(
+                      Icons.account_balance_wallet,
                       color: AppColors.warning,
-                      fontWeight: FontWeight.w500,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.withdrawViaCinetpay,
+                      style: TextStyle(
+                        color: AppColors.warning,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: l10n.amountLabel,
-                hintText: l10n.amountExample,
-                prefixIcon: const Icon(Icons.attach_money),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: l10n.amountLabel,
+                  hintText: l10n.amountExample,
+                  prefixIcon: const Icon(Icons.attach_money),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: selectedProvider,
-              decoration: InputDecoration(
-                labelText: l10n.withdrawMethodLabel,
-                prefixIcon: const Icon(Icons.account_balance),
-              ),
-              items: [
-                DropdownMenuItem(value: 'mtn', child: Text(l10n.mtnMobileMoneyLabel)),
-                DropdownMenuItem(value: 'orange', child: Text(l10n.orangeMoneyLabel)),
-              ],
-              onChanged: (value) {
-                setModalState(() {
-                  selectedProvider = value!;
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedProvider,
+                decoration: InputDecoration(
+                  labelText: l10n.withdrawMethodLabel,
+                  prefixIcon: const Icon(Icons.account_balance),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'mtn',
+                    child: Text(l10n.mtnMobileMoneyLabel),
+                  ),
+                  DropdownMenuItem(
+                    value: 'orange',
+                    child: Text(l10n.orangeMoneyLabel),
+                  ),
+                ],
+                onChanged: (value) {
+                  setModalState(() {
+                    selectedProvider = value!;
                   });
                 },
               ),
               const SizedBox(height: 16),
-            TextField(
-              controller: phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                labelText: l10n.phoneNumberLabel,
-                hintText: l10n.phoneNumberHint,
-                prefixIcon: const Icon(Icons.phone),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: l10n.phoneNumberLabel,
+                  hintText: l10n.phoneNumberHint,
+                  prefixIcon: const Icon(Icons.phone),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.minimumAmountLabel('1 000 FCFA'),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.minimumAmountLabel('1 000 FCFA'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
-                final amount = double.tryParse(amountController.text);
-                if (amount == null || amount < 1000) {
-                  Helpers.showErrorSnackBar(context, l10n.minimumAmountLabel('1 000 FCFA'));
-                  return;
-                }
+                  final amount = double.tryParse(amountController.text);
+                  if (amount == null || amount < 1000) {
+                    Helpers.showErrorSnackBar(
+                      context,
+                      l10n.minimumAmountLabel('1 000 FCFA'),
+                    );
+                    return;
+                  }
 
-                if (phoneController.text.isEmpty) {
-                  Helpers.showErrorSnackBar(context, l10n.phoneNumberRequiredError);
-                  return;
-                }
+                  if (phoneController.text.isEmpty) {
+                    Helpers.showErrorSnackBar(
+                      context,
+                      l10n.phoneNumberRequiredError,
+                    );
+                    return;
+                  }
 
                   try {
                     await _walletService.requestWithdrawal(
@@ -444,11 +476,17 @@ class _WalletScreenState extends State<WalletScreen> with SingleTickerProviderSt
                     );
                     if (mounted) {
                       Navigator.pop(context);
-                      Helpers.showSuccessSnackBar(context, l10n.withdrawRequestSent);
+                      Helpers.showSuccessSnackBar(
+                        context,
+                        l10n.withdrawRequestSent,
+                      );
                       _loadData();
                     }
                   } catch (e) {
-                    Helpers.showErrorSnackBar(context, l10n.withdrawRequestError);
+                    Helpers.showErrorSnackBar(
+                      context,
+                      l10n.withdrawRequestError,
+                    );
                   }
                 },
                 child: Text(l10n.withdrawAction),
@@ -466,11 +504,7 @@ class _ActionButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
 
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
+  const _ActionButton({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -522,10 +556,7 @@ class _StatItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(label, style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 4),
               Text(
                 value,
@@ -558,7 +589,9 @@ class _TransactionTile extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: (isCredit ? AppColors.success : AppColors.error).withOpacity(0.1),
+            color: (isCredit ? AppColors.success : AppColors.error).withOpacity(
+              0.1,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -613,10 +646,7 @@ class _WithdrawalTile extends StatelessWidget {
             color: _statusColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            Icons.account_balance,
-            color: _statusColor,
-          ),
+          child: Icon(Icons.account_balance, color: _statusColor),
         ),
         title: Text(Helpers.formatCurrency(withdrawal.amount)),
         subtitle: Column(
@@ -662,7 +692,11 @@ class _WalletTabBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: tabBar,

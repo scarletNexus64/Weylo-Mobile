@@ -15,7 +15,8 @@ class ConfessionsScreen extends StatefulWidget {
   State<ConfessionsScreen> createState() => _ConfessionsScreenState();
 }
 
-class _ConfessionsScreenState extends State<ConfessionsScreen> with SingleTickerProviderStateMixin {
+class _ConfessionsScreenState extends State<ConfessionsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ConfessionService _confessionService = ConfessionService();
   final RefreshController _refreshController = RefreshController();
@@ -83,7 +84,9 @@ class _ConfessionsScreenState extends State<ConfessionsScreen> with SingleTicker
     }
 
     try {
-      final result = await _confessionService.getPublicConfessions(page: _currentPage + 1);
+      final result = await _confessionService.getPublicConfessions(
+        page: _currentPage + 1,
+      );
       setState(() {
         _publicConfessions.addAll(result.confessions);
         _currentPage++;
@@ -99,13 +102,19 @@ class _ConfessionsScreenState extends State<ConfessionsScreen> with SingleTicker
     try {
       Confession updatedConfession;
       if (confession.isLiked) {
-        updatedConfession = await _confessionService.unlikeConfession(confession.id);
+        updatedConfession = await _confessionService.unlikeConfession(
+          confession.id,
+        );
       } else {
-        updatedConfession = await _confessionService.likeConfession(confession.id);
+        updatedConfession = await _confessionService.likeConfession(
+          confession.id,
+        );
       }
 
       setState(() {
-        final index = _publicConfessions.indexWhere((c) => c.id == confession.id);
+        final index = _publicConfessions.indexWhere(
+          (c) => c.id == confession.id,
+        );
         if (index != -1) {
           _publicConfessions[index] = updatedConfession;
         }
@@ -133,15 +142,15 @@ class _ConfessionsScreenState extends State<ConfessionsScreen> with SingleTicker
       body: _isLoading
           ? const LoadingWidget()
           : _hasError
-              ? ErrorState(onRetry: _loadData)
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildConfessionsList(_publicConfessions, enableLoadMore: true),
-                    _buildConfessionsList(_receivedConfessions, isReceived: true),
-                    _buildConfessionsList(_sentConfessions, isSent: true),
-                  ],
-                ),
+          ? ErrorState(onRetry: _loadData)
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildConfessionsList(_publicConfessions, enableLoadMore: true),
+                _buildConfessionsList(_receivedConfessions, isReceived: true),
+                _buildConfessionsList(_sentConfessions, isSent: true),
+              ],
+            ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'confessions_fab',
         onPressed: () => context.push('/create-confession'),
@@ -163,13 +172,13 @@ class _ConfessionsScreenState extends State<ConfessionsScreen> with SingleTicker
         title: isReceived
             ? l10n.noConfessionsReceivedTitle
             : isSent
-                ? l10n.noConfessionsSentTitle
-                : l10n.noConfessionsTitle,
+            ? l10n.noConfessionsSentTitle
+            : l10n.noConfessionsTitle,
         subtitle: isReceived
             ? l10n.noConfessionsReceivedSubtitle
             : isSent
-                ? l10n.noConfessionsSentSubtitle
-                : l10n.noConfessionsSubtitle,
+            ? l10n.noConfessionsSentSubtitle
+            : l10n.noConfessionsSubtitle,
         buttonText: l10n.createConfessionAction,
         onButtonPressed: () => context.push('/create-confession'),
       );
