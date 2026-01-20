@@ -4,8 +4,10 @@ import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/user.dart';
 import '../../models/confession.dart';
+import '../../models/conversation.dart';
 import '../../services/user_service.dart';
 import '../../services/confession_service.dart';
+import '../../services/chat_service.dart';
 import '../../services/widgets/common/avatar_widget.dart';
 import '../../services/widgets/common/premium_badge.dart';
 
@@ -21,17 +23,24 @@ class _SearchScreenState extends State<SearchScreen>
   final TextEditingController _searchController = TextEditingController();
   final UserService _userService = UserService();
   final ConfessionService _confessionService = ConfessionService();
+  final ChatService _chatService = ChatService();
   late TabController _tabController;
 
-  List<User> _users = [];
+  List<User> _defaultUsers = [];
+  List<User> _searchResults = [];
   List<Confession> _posts = [];
-  bool _isLoading = false;
+  bool _isInitialLoading = true;
+  bool _isUsersSearching = false;
+  bool _isPostsLoading = false;
   String _searchQuery = '';
+  String _lastQuery = '';
+  Map<String, ConversationIndex> _conversationIndex = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadInitialUsers();
   }
 
   @override
@@ -41,43 +50,102 @@ class _SearchScreenState extends State<SearchScreen>
     super.dispose();
   }
 
-  Future<void> _search(String query) async {
-    if (query.trim().isEmpty) {
+  Future<void> _loadInitialUsers() async {
+    setState(() {
+      _isInitialLoading = true;
+    });
+
+    try {
+      final usersFuture = _userService.searchUsers('', perPage: 1000);
+      final conversationsFuture = _chatService.getConversations();
+      final results = await Future.wait([usersFuture, conversationsFuture]);
+      final users = results[0] as List<User>;
+      final conversations = results[1] as List<Conversation>;
+      final conversationIndex = await _chatService.getConversationsIndexByUsername(
+        conversations: conversations,
+      );
+      if (!mounted) return;
       setState(() {
-        _users = [];
-        _posts = [];
-        _searchQuery = '';
+        _defaultUsers = users;
+        _conversationIndex = conversationIndex;
       });
+    } catch (e) {
+      debugPrint('Failed to load users for search: $e');
+      if (!mounted) return;
+      setState(() {
+        _defaultUsers = [];
+        _conversationIndex = {};
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isInitialLoading = false;
+      });
+    }
+  }
+
+  Future<void> _search(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      _resetSearchState();
       return;
     }
 
     setState(() {
-      _isLoading = true;
-      _searchQuery = query;
+      _searchQuery = trimmed;
     });
 
-    try {
-      // Search users and posts in parallel
-      final results = await Future.wait([
-        _userService.searchUsers(query),
-        _confessionService.searchConfessions(query),
-      ]);
+    final shouldSearchUsers = trimmed.length >= 2;
+    setState(() {
+      _isPostsLoading = true;
+      _isUsersSearching = shouldSearchUsers;
+      _lastQuery = shouldSearchUsers ? trimmed : '';
+    });
 
+    final userSearchFuture = shouldSearchUsers
+        ? _userService.searchUsers(trimmed, perPage: 100)
+        : Future.value(<User>[]);
+
+    try {
+      final results =
+          await Future.wait([userSearchFuture, _confessionService.searchConfessions(trimmed)]);
+      final posts = results[1] as List<Confession>;
+      posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      if (!mounted) return;
       setState(() {
-        _users = results[0] as List<User>;
-        _posts = results[1] as List<Confession>;
-        _isLoading = false;
+        _searchResults = shouldSearchUsers ? results[0] as List<User> : [];
+        _posts = posts;
       });
     } catch (e) {
+      debugPrint('Search failed: $e');
+    } finally {
+      if (!mounted) return;
       setState(() {
-        _isLoading = false;
+        _isPostsLoading = false;
+        _isUsersSearching = false;
       });
     }
+  }
+
+  void _resetSearchState() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+      _lastQuery = '';
+      _posts = [];
+      _searchResults = [];
+      _isPostsLoading = false;
+      _isUsersSearching = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final userCount =
+        _lastQuery.isEmpty ? _defaultUsers.length : _searchResults.length;
+    final postCount = _searchQuery.isEmpty ? 0 : _posts.length;
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
@@ -94,12 +162,17 @@ class _SearchScreenState extends State<SearchScreen>
             ),
           ),
           onChanged: (value) {
-            if (value.length >= 2) {
-              _search(value);
-            } else if (value.isEmpty) {
+            final trimmed = value.trim();
+            if (trimmed.isEmpty) {
+              _resetSearchState();
+            } else if (trimmed.length >= 2) {
+              _search(trimmed);
+            } else {
               setState(() {
-                _users = [];
+                _searchQuery = '';
+                _lastQuery = '';
                 _posts = [];
+                _searchResults = [];
               });
             }
           },
@@ -109,14 +182,7 @@ class _SearchScreenState extends State<SearchScreen>
           if (_searchController.text.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear),
-              onPressed: () {
-                _searchController.clear();
-                setState(() {
-                  _users = [];
-                  _posts = [];
-                  _searchQuery = '';
-                });
-              },
+              onPressed: _resetSearchState,
             ),
         ],
         bottom: TabBar(
@@ -128,7 +194,7 @@ class _SearchScreenState extends State<SearchScreen>
                 children: [
                   const Icon(Icons.person, size: 18),
                   const SizedBox(width: 8),
-                  Text(l10n.peopleTabCount(_users.length)),
+                  Text(l10n.peopleTabCount(userCount)),
                 ],
               ),
             ),
@@ -138,20 +204,18 @@ class _SearchScreenState extends State<SearchScreen>
                 children: [
                   const Icon(Icons.article, size: 18),
                   const SizedBox(width: 8),
-                  Text(l10n.postsTabCount(_posts.length)),
+                  Text(l10n.postsTabCount(postCount)),
                 ],
               ),
             ),
           ],
         ),
       ),
-      body: _isLoading
+      body: _isInitialLoading
           ? const Center(child: CircularProgressIndicator())
-          : _searchQuery.isEmpty
-          ? _buildEmptyState()
           : TabBarView(
               controller: _tabController,
-              children: [_buildUsersList(), _buildPostsList()],
+              children: [_buildUsersPanel(), _buildPostsTab()],
             ),
     );
   }
@@ -182,32 +246,73 @@ class _SearchScreenState extends State<SearchScreen>
     );
   }
 
-  Widget _buildUsersList() {
+  Widget _buildUsersPanel() {
     final l10n = AppLocalizations.of(context)!;
-    if (_users.isEmpty) {
+
+    if (_isUsersSearching) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final hasQuery = _lastQuery.isNotEmpty;
+    final users = hasQuery ? _searchResults : _defaultUsers;
+
+    if (users.isEmpty) {
+      final message = hasQuery ? l10n.noUsersFound : l10n.noUsersAvailable;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.person_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(l10n.searchNoUsers, style: TextStyle(color: Colors.grey[600])),
+            Text(message, style: TextStyle(color: Colors.grey[600])),
           ],
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _users.length,
-      itemBuilder: (context, index) {
-        final user = _users[index];
-        return _UserSearchTile(
+    final sections = _buildUserSections(l10n, users);
+    final sectionWidgets = <Widget>[];
+
+    for (final section in sections) {
+      if (section.users.isEmpty) continue;
+      sectionWidgets.add(_buildSectionHeader(section));
+      for (var i = 0; i < section.users.length; i++) {
+        final user = section.users[i];
+        final index = _conversationIndex[user.username];
+        final bool shouldReveal = (index?.hasConversation ?? false) && (index?.isIdentityRevealed ?? false);
+
+        sectionWidgets.add(_UserSearchTile(
           user: user,
+          isIdentityRevealed: shouldReveal,
           onTap: () => context.push('/u/${user.username}'),
-        );
-      },
+        ));
+        if (i < section.users.length - 1) {
+          sectionWidgets.add(const Divider(height: 0));
+        }
+      }
+      sectionWidgets.add(const SizedBox(height: 12));
+    }
+
+    if (sectionWidgets.isEmpty) {
+      final fallback = hasQuery ? l10n.noUsersFound : l10n.noUsersAvailable;
+      return Center(child: Text(fallback, style: TextStyle(color: Colors.grey[600])));
+    }
+
+    return ListView(
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
+      children: sectionWidgets,
     );
+  }
+
+  Widget _buildPostsTab() {
+    if (_searchQuery.isEmpty) {
+      return _buildEmptyState();
+    }
+    if (_isPostsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return _buildPostsList();
   }
 
   Widget _buildPostsList() {
@@ -237,38 +342,169 @@ class _SearchScreenState extends State<SearchScreen>
       },
     );
   }
+
+  Widget _buildSectionHeader(_UserSection section) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: section.accentColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                section.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${section.users.length}',
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
+            ],
+          ),
+          if (section.helper.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                section.helper,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  List<_UserSection> _buildUserSections(
+    AppLocalizations l10n,
+    List<User> users,
+  ) {
+    final revealed = <User>[];
+    final anonymous = <User>[];
+    final withoutConversation = <User>[];
+
+    for (final user in users) {
+      final username = user.username;
+      final index = _conversationIndex[username];
+      final hasConversation = index?.hasConversation ?? false;
+      final isIdentityRevealed = index?.isIdentityRevealed ?? false;
+
+      if (hasConversation) {
+        if (isIdentityRevealed) {
+          revealed.add(user);
+        } else {
+          anonymous.add(user);
+        }
+      } else {
+        withoutConversation.add(user);
+      }
+    }
+
+    void sortByName(List<User> list) => list.sort(
+          (a, b) => _userDisplayName(a)
+              .toLowerCase()
+              .compareTo(_userDisplayName(b).toLowerCase()),
+        );
+
+    sortByName(revealed);
+    sortByName(anonymous);
+    sortByName(withoutConversation);
+
+    return [
+      _UserSection(
+        title: l10n.revealedConversations,
+        helper: l10n.revealedConversationsHelper,
+        accentColor: Colors.green,
+        users: revealed,
+      ),
+      _UserSection(
+        title: l10n.anonymousConversations,
+        helper: l10n.anonymousConversationsHelper,
+        accentColor: Colors.orange,
+        users: anonymous,
+      ),
+      _UserSection(
+        title: l10n.noConversation,
+        helper: l10n.noConversationHelper,
+        accentColor: Colors.blue,
+        users: withoutConversation,
+      ),
+    ];
+  }
+
+  String _userDisplayName(User user) {
+    final name = user.fullName;
+    if (name.isNotEmpty) return name;
+    return user.username;
+  }
+}
+
+class _UserSection {
+  final String title;
+  final String helper;
+  final Color accentColor;
+  final List<User> users;
+
+  const _UserSection({
+    required this.title,
+    required this.helper,
+    required this.accentColor,
+    required this.users,
+  });
 }
 
 class _UserSearchTile extends StatelessWidget {
   final User user;
   final VoidCallback? onTap;
+  final bool isIdentityRevealed;
 
-  const _UserSearchTile({required this.user, this.onTap});
+  const _UserSearchTile({
+    required this.user,
+    this.onTap,
+    this.isIdentityRevealed = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final displayName = isIdentityRevealed ? user.fullName : l10n.userAnonymous;
+    final subtitleText =
+        isIdentityRevealed ? '@${user.username}' : l10n.maskedUsername;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         onTap: onTap,
         leading: AvatarWidget(
-          imageUrl: user.avatar,
+          imageUrl: isIdentityRevealed ? user.avatar : '',
           name: user.fullName,
           size: 48,
         ),
         title: Row(
           children: [
             Text(
-              user.fullName,
+              displayName,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            if (user.isPremium) ...[
+            if (user.isPremium && isIdentityRevealed) ...[
               const SizedBox(width: 4),
               const VerifiedBadge(size: 14),
             ],
           ],
         ),
-        subtitle: Text('@${user.username}'),
+        subtitle: Text(subtitleText),
         trailing: const Icon(Icons.chevron_right),
       ),
     );

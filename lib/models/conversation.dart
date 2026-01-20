@@ -51,13 +51,18 @@ class Conversation {
     return participantTwo ?? participantOne;
   }
 
-  /// Retourne le nom à afficher selon que l'identité est révélée ou non
-  String getDisplayName(int currentUserId) {
+  /// Retourne le nom à afficher selon que l'identité est révélée ou non.
+  /// Permet de fournir des étiquettes personnalisées pour l'anonymat et le fallback.
+  String getDisplayName(
+    int currentUserId, {
+    String anonymousLabel = 'Anonyme',
+    String fallbackLabel = 'User',
+  }) {
     if (isIdentityRevealed) {
       final other = getOtherParticipant(currentUserId);
-      return other?.fullName ?? 'Utilisateur';
+      return other?.fullName ?? fallbackLabel;
     }
-    return 'Anonyme';
+    return anonymousLabel;
   }
 
   /// Retourne l'initiale de l'utilisateur pour l'affichage anonyme

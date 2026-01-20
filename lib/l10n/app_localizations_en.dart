@@ -455,6 +455,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maskedInfo => 'Information hidden';
 
   @override
+  String get maskedUsername => '@hidden';
+
+  @override
   String get statusNew => 'New';
 
   @override

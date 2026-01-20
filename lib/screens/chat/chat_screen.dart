@@ -13,10 +13,10 @@ import 'package:video_player/video_player.dart';
 import 'package:lottie/lottie.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import '../../core/constants/api_constants.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/utils/media_utils.dart';
 import '../../models/conversation.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/chat_service.dart';
@@ -220,35 +220,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
-
-  String _resolveMediaUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    final cleaned = url.replaceAll('\\', '/');
-    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-    final baseUri = Uri.parse(base);
-
-    if (cleaned.startsWith('http')) {
-      final mediaUri = Uri.parse(cleaned);
-      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
-        final rewritten = mediaUri.replace(
-          scheme: baseUri.scheme,
-          host: baseUri.host,
-          port: baseUri.hasPort ? baseUri.port : null,
-        );
-        return Uri.encodeFull(rewritten.toString());
-      }
-      return Uri.encodeFull(cleaned);
-    }
-    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
-
-    if (cleaned.startsWith('/storage/')) {
-      return Uri.encodeFull('$base$cleaned');
-    }
-    if (cleaned.startsWith('storage/')) {
-      return Uri.encodeFull('$base/$cleaned');
-    }
-    return Uri.encodeFull('$base/storage/$cleaned');
-  }
 
   Future<void> _toggleVoicePlayback(
     int messageId,
@@ -592,7 +563,11 @@ class _ChatScreenState extends State<ChatScreen> {
                           children: [
                             Flexible(
                               child: Text(
-                                _conversation?.getDisplayName(currentUserId) ??
+                                _conversation?.getDisplayName(
+                                      currentUserId,
+                                      anonymousLabel: l10n.userAnonymous,
+                                      fallbackLabel: l10n.userFallback,
+                                    ) ??
                                     l10n.userFallback,
                                 style: const TextStyle(fontSize: 16),
                                 overflow: TextOverflow.ellipsis,
@@ -666,7 +641,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   message.senderId == currentUserId ||
                                   (message.sender?.id == currentUserId &&
                                       currentUserId != 0);
-                              final mediaUrl = _resolveMediaUrl(
+                              final mediaUrl = resolveMediaUrl(
                                 message.mediaUrl,
                               );
                               final localReply = _localReplyPreview[message.id];
@@ -727,61 +702,100 @@ class _ChatScreenState extends State<ChatScreen> {
                                         });
                                       },
                                       onDelete: isMe
-                                      ? () async {
-                                          final confirm = await showDialog<bool>(
-                                            context: context,
-                                            builder: (dialogContext) => AlertDialog(
-                                              title: Text(
-                                                AppLocalizations.of(dialogContext)!.deleteMessageTitle,
-                                              ),
-                                              content: Text(
-                                                AppLocalizations.of(dialogContext)!.deleteMessageConfirm,
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(dialogContext, false),
-                                                  child: Text(AppLocalizations.of(dialogContext)!.cancel),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(dialogContext, true),
-                                                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                                                  child: Text(AppLocalizations.of(dialogContext)!.deleteAction),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                          if (confirm != true) return;
-                                          try {
-                                            await _chatService.deleteMessage(
-                                              widget.conversationId,
-                                              message.id,
-                                            );
-                                            setState(() {
-                                              _messages.removeWhere((item) => item.id == message.id);
-                                            });
-                                            if (mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    AppLocalizations.of(context)!.messageDeleted,
-                                                  ),
-                                                ),
+                                          ? () async {
+                                              final confirm = await showDialog<bool>(
+                                                context: context,
+                                                builder: (dialogContext) =>
+                                                    AlertDialog(
+                                                      title: Text(
+                                                        AppLocalizations.of(
+                                                          dialogContext,
+                                                        )!.deleteMessageTitle,
+                                                      ),
+                                                      content: Text(
+                                                        AppLocalizations.of(
+                                                          dialogContext,
+                                                        )!.deleteMessageConfirm,
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                dialogContext,
+                                                                false,
+                                                              ),
+                                                          child: Text(
+                                                            AppLocalizations.of(
+                                                              dialogContext,
+                                                            )!.cancel,
+                                                          ),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                dialogContext,
+                                                                true,
+                                                              ),
+                                                          style:
+                                                              TextButton.styleFrom(
+                                                                foregroundColor:
+                                                                    Colors.red,
+                                                              ),
+                                                          child: Text(
+                                                            AppLocalizations.of(
+                                                              dialogContext,
+                                                            )!.deleteAction,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
                                               );
+                                              if (confirm != true) return;
+                                              try {
+                                                await _chatService
+                                                    .deleteMessage(
+                                                      widget.conversationId,
+                                                      message.id,
+                                                    );
+                                                setState(() {
+                                                  _messages.removeWhere(
+                                                    (item) =>
+                                                        item.id == message.id,
+                                                  );
+                                                });
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        AppLocalizations.of(
+                                                          context,
+                                                        )!.messageDeleted,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        AppLocalizations.of(
+                                                          context,
+                                                        )!.errorMessage(
+                                                          e.toString(),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              }
                                             }
-                                          } catch (e) {
-                                            if (mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    AppLocalizations.of(context)!.errorMessage(e.toString()),
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          }
-                                        }
-                                      : null,
-                                ),
+                                          : null,
+                                    ),
                                   ),
                                 ],
                               );
@@ -1342,7 +1356,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
 class _MessageBubble extends StatelessWidget {
   static final Map<String, Future<Uint8List?>> _videoThumbCache = {};
-  
+
   final ChatMessage message;
   final bool isMe;
   final String statusLabel;
@@ -1398,11 +1412,10 @@ class _MessageBubble extends StatelessWidget {
                 if (message.replyTo != null || localReply != null)
                   _buildReplyPreview(context),
 
-              if (message.isGift)
-                _buildGiftPreview(context),
+                if (message.isGift) _buildGiftPreview(context),
                 if (message.hasImage && (mediaUrl ?? '').isNotEmpty)
                   _buildImagePreview(),
-                
+
                 if (message.hasVideo && (mediaUrl ?? '').isNotEmpty)
                   _buildVideoPreview(context, mediaUrl!),
 
@@ -1410,7 +1423,10 @@ class _MessageBubble extends StatelessWidget {
                   _buildAudioPlayer(),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   child: Wrap(
                     alignment: WrapAlignment.end,
                     crossAxisAlignment: WrapCrossAlignment.end,
@@ -1418,7 +1434,7 @@ class _MessageBubble extends StatelessWidget {
                     runSpacing: 4,
                     children: [
                       LinkText(
-                        text: message.content, 
+                        text: message.content,
                         style: TextStyle(
                           color: isMe ? Colors.white : AppColors.textPrimary,
                           fontSize: 15,
@@ -1435,8 +1451,8 @@ class _MessageBubble extends StatelessWidget {
                             Helpers.formatTime(message.createdAt),
                             style: TextStyle(
                               fontSize: 11,
-                              color: isMe 
-                                  ? Colors.white.withOpacity(0.7) 
+                              color: isMe
+                                  ? Colors.white.withOpacity(0.7)
                                   : AppColors.textSecondary,
                             ),
                           ),
@@ -1467,7 +1483,10 @@ class _MessageBubble extends StatelessWidget {
         color: Colors.black.withOpacity(0.05),
         borderRadius: BorderRadius.circular(10),
         border: Border(
-          left: BorderSide(color: isMe ? Colors.white70 : AppColors.primary, width: 4),
+          left: BorderSide(
+            color: isMe ? Colors.white70 : AppColors.primary,
+            width: 4,
+          ),
         ),
       ),
       child: Column(
@@ -1475,13 +1494,22 @@ class _MessageBubble extends StatelessWidget {
         children: [
           Text(
             localReply?.title ?? (isMe ? l10n.youLabel : l10n.contactLabel),
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: isMe ? Colors.white : AppColors.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: isMe ? Colors.white : AppColors.primary,
+            ),
           ),
           Text(
             message.replyTo?.content ?? localReply?.content ?? '',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12, color: isMe ? Colors.white.withOpacity(0.9) : AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: 12,
+              color: isMe
+                  ? Colors.white.withOpacity(0.9)
+                  : AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -1501,8 +1529,13 @@ class _MessageBubble extends StatelessWidget {
   }
 
   Widget _buildVideoPreview(BuildContext context, String url) {
-    final future = _videoThumbCache.putIfAbsent(url, () => 
-      VideoThumbnail.thumbnailData(video: url, imageFormat: ImageFormat.JPEG, quality: 70)
+    final future = _videoThumbCache.putIfAbsent(
+      url,
+      () => VideoThumbnail.thumbnailData(
+        video: url,
+        imageFormat: ImageFormat.JPEG,
+        quality: 70,
+      ),
     );
     return GestureDetector(
       onTap: onOpenVideo,
@@ -1513,9 +1546,14 @@ class _MessageBubble extends StatelessWidget {
           children: [
             FutureBuilder<Uint8List?>(
               future: future,
-              builder: (context, snap) => snap.hasData 
-                ? Image.memory(snap.data!, height: 200, width: double.infinity, fit: BoxFit.cover)
-                : Container(height: 200, color: Colors.black12),
+              builder: (context, snap) => snap.hasData
+                  ? Image.memory(
+                      snap.data!,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(height: 200, color: Colors.black12),
             ),
             const Icon(Icons.play_circle_filled, size: 50, color: Colors.white),
           ],
@@ -1551,7 +1589,9 @@ class _MessageBubble extends StatelessWidget {
                 )
               else
                 Icon(
-                  isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+                  isPlaying
+                      ? Icons.pause_circle_filled
+                      : Icons.play_circle_fill,
                   color: barColor,
                   size: 24,
                 ),
@@ -1577,7 +1617,10 @@ class _MessageBubble extends StatelessWidget {
                 statusLabel.isNotEmpty
                     ? statusLabel
                     : Helpers.formatTime(message.createdAt),
-                style: TextStyle(fontSize: 12, color: barColor.withOpacity(0.85)),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: barColor.withOpacity(0.85),
+                ),
               ),
             ],
           ),
@@ -1588,32 +1631,8 @@ class _MessageBubble extends StatelessWidget {
 
   Widget _buildGiftPreview(BuildContext context) {
     final gift = message.gift;
-    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-
-    String resolveGiftUrl(String? url) {
-      if (url == null || url.isEmpty) return '';
-      final cleaned = url.replaceAll('\\', '/');
-      final baseUri = Uri.parse(base);
-      if (cleaned.startsWith('http')) {
-        final mediaUri = Uri.parse(cleaned);
-        if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
-          final rewritten = mediaUri.replace(
-            scheme: baseUri.scheme,
-            host: baseUri.host,
-            port: baseUri.hasPort ? baseUri.port : null,
-          );
-          return Uri.encodeFull(rewritten.toString());
-        }
-        return Uri.encodeFull(cleaned);
-      }
-      if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
-      if (cleaned.startsWith('/storage/')) return Uri.encodeFull('$base$cleaned');
-      if (cleaned.startsWith('storage/')) return Uri.encodeFull('$base/$cleaned');
-      return Uri.encodeFull('$base/storage/$cleaned');
-    }
-
-    final animationUrl = resolveGiftUrl(gift?.animation);
-    final iconUrl = resolveGiftUrl(gift?.icon);
+    final animationUrl = resolveMediaUrl(gift?.animation);
+    final iconUrl = resolveMediaUrl(gift?.icon);
 
     Widget media;
     if (animationUrl.isNotEmpty) {
@@ -1624,10 +1643,8 @@ class _MessageBubble extends StatelessWidget {
           width: 96,
           height: 96,
           fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => const Icon(
-            Icons.card_giftcard,
-            size: 48,
-          ),
+          errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.card_giftcard, size: 48),
         );
       } else {
         media = CachedNetworkImage(
@@ -1635,7 +1652,8 @@ class _MessageBubble extends StatelessWidget {
           width: 96,
           height: 96,
           fit: BoxFit.contain,
-          errorWidget: (context, url, error) => const Icon(Icons.card_giftcard, size: 48),
+          errorWidget: (context, url, error) =>
+              const Icon(Icons.card_giftcard, size: 48),
         );
       }
     } else if (iconUrl.isNotEmpty) {
@@ -1644,7 +1662,8 @@ class _MessageBubble extends StatelessWidget {
         width: 72,
         height: 72,
         fit: BoxFit.contain,
-        errorWidget: (context, url, error) => const Icon(Icons.card_giftcard, size: 48),
+        errorWidget: (context, url, error) =>
+            const Icon(Icons.card_giftcard, size: 48),
       );
     } else {
       media = const Icon(Icons.card_giftcard, size: 48);
@@ -1671,15 +1690,15 @@ class _MessageBubble extends StatelessWidget {
                   Text(
                     gift.name,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${gift.price.toInt()} FCFA',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -1700,7 +1719,9 @@ class _MessageBubble extends StatelessWidget {
   void _showMessageOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         final l10n = AppLocalizations.of(ctx)!;
         return SafeArea(
@@ -1710,7 +1731,10 @@ class _MessageBubble extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.reply),
                 title: Text(l10n.replyAction),
-                onTap: () { Navigator.pop(ctx); onReply?.call(); },
+                onTap: () {
+                  Navigator.pop(ctx);
+                  onReply?.call();
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.copy),

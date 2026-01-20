@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/media_utils.dart';
 import '../../../models/confession.dart';
 import '../../../providers/auth_provider.dart';
 import '../../confession_service.dart';
@@ -58,7 +58,8 @@ class PromotePostModal extends StatefulWidget {
   State<PromotePostModal> createState() => _PromotePostModalState();
 }
 
-class _PromotePostModalState extends State<PromotePostModal> with SingleTickerProviderStateMixin {
+class _PromotePostModalState extends State<PromotePostModal>
+    with SingleTickerProviderStateMixin {
   final ConfessionService _confessionService = ConfessionService();
   final PromotionService _promotionService = PromotionService();
   final Map<String, Future<Uint8List?>> _videoThumbCache = {};
@@ -135,18 +136,22 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
     if (user == null) return;
     setState(() => _isLoadingVideos = true);
     try {
-      final result = await _confessionService.getUserConfessionsByUsername(user.username);
+      final result = await _confessionService.getUserConfessionsByUsername(
+        user.username,
+      );
       final videos = result.confessions
           .where((c) => c.hasVideo && c.isPublic && c.isApproved)
           .toList();
       final preselected = videos.firstWhere(
         (c) => c.id == widget.confessionId,
-        orElse: () => videos.isNotEmpty ? videos.first : Confession(
-          id: widget.confessionId,
-          authorId: user.id,
-          content: '',
-          createdAt: DateTime.now(),
-        ),
+        orElse: () => videos.isNotEmpty
+            ? videos.first
+            : Confession(
+                id: widget.confessionId,
+                authorId: user.id,
+                content: '',
+                createdAt: DateTime.now(),
+              ),
       );
       setState(() {
         _myVideos = videos;
@@ -245,20 +250,30 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
         'age_range': _selectedAgeRange,
         'locations': locations.isNotEmpty ? locations : null,
         'interests': _selectedInterests,
-        'language': _languageController.text.trim().isEmpty ? null : _languageController.text.trim(),
+        'language': _languageController.text.trim().isEmpty
+            ? null
+            : _languageController.text.trim(),
         'device_type': _selectedDevice,
         'budget_mode': _budgetMode == BudgetMode.daily ? 'daily' : 'total',
         'daily_budget': _budgetMode == BudgetMode.daily ? _dailyBudget : null,
-        'total_budget': _budgetMode == BudgetMode.total ? _totalBudget : _computedTotalBudget(),
+        'total_budget': _budgetMode == BudgetMode.total
+            ? _totalBudget
+            : _computedTotalBudget(),
         'duration_days': _durationDays,
         'cta_label': _ctaLabel(),
-        'website_url': _selectedGoal == PromotionGoal.website ? _websiteController.text.trim() : null,
+        'website_url': _selectedGoal == PromotionGoal.website
+            ? _websiteController.text.trim()
+            : null,
         'branded_content': _brandedContent,
-        'payment_method': _paymentMethod == PaymentMethod.card ? 'card' : 'wallet',
+        'payment_method': _paymentMethod == PaymentMethod.card
+            ? 'card'
+            : 'wallet',
         'estimated_views': estimates['views'],
         'estimated_reach': estimates['reach'],
         'estimated_cpv': estimates['cpv'],
-        'confession_ids': _selectedVideos.map((confession) => confession.id).toList(),
+        'confession_ids': _selectedVideos
+            .map((confession) => confession.id)
+            .toList(),
       };
       await _promotionService.promotePost(
         _selectedVideos.first.id,
@@ -299,7 +314,9 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
   }
 
   void _syncBudgetText() {
-    final amount = _budgetMode == BudgetMode.daily ? _dailyBudget : _totalBudget;
+    final amount = _budgetMode == BudgetMode.daily
+        ? _dailyBudget
+        : _totalBudget;
     _budgetController.text = amount.toStringAsFixed(0);
   }
 
@@ -310,11 +327,7 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
     final views = budget * 3.2 * audienceFactor * goalFactor;
     final reach = views * 0.7;
     final cpv = budget == 0 ? 0.0 : budget / views;
-    return {
-      'views': views,
-      'reach': reach,
-      'cpv': cpv,
-    };
+    return {'views': views, 'reach': reach, 'cpv': cpv};
   }
 
   String _ctaLabel() {
@@ -335,30 +348,6 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
     }
   }
 
-  String _resolveMediaUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    final cleaned = url.replaceAll('\\', '/');
-    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-    final baseUri = Uri.parse(base);
-
-    if (cleaned.startsWith('http')) {
-      final mediaUri = Uri.parse(cleaned);
-      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
-        final rewritten = mediaUri.replace(
-          scheme: baseUri.scheme,
-          host: baseUri.host,
-          port: baseUri.hasPort ? baseUri.port : null,
-        );
-        return Uri.encodeFull(rewritten.toString());
-      }
-      return Uri.encodeFull(cleaned);
-    }
-    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
-    if (cleaned.startsWith('/storage/')) return Uri.encodeFull('$base$cleaned');
-    if (cleaned.startsWith('storage/')) return Uri.encodeFull('$base/$cleaned');
-    return Uri.encodeFull('$base/storage/$cleaned');
-  }
-
   Widget _buildVideoThumb(String url) {
     final future = _videoThumbCache.putIfAbsent(
       url,
@@ -372,7 +361,8 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
     return FutureBuilder<Uint8List?>(
       future: future,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.data != null) {
           return Image.memory(snapshot.data!, fit: BoxFit.cover);
         }
         return Container(
@@ -477,17 +467,23 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
                   ),
                   itemBuilder: (context, index) {
                     final confession = _myVideos[index];
-                    final videoUrl = _resolveMediaUrl(confession.videoUrl);
-                    final isSelected = _selectedVideos.any((c) => c.id == confession.id);
+                    final videoUrl = resolveMediaUrl(confession.videoUrl);
+                    final isSelected = _selectedVideos.any(
+                      (c) => c.id == confession.id,
+                    );
                     return GestureDetector(
                       onTap: () {
                         setState(() {
                           if (isSelected) {
-                            _selectedVideos.removeWhere((c) => c.id == confession.id);
+                            _selectedVideos.removeWhere(
+                              (c) => c.id == confession.id,
+                            );
                           } else {
                             if (_selectedVideos.length >= 5) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Maximum 5 vidéos.')),
+                                const SnackBar(
+                                  content: Text('Maximum 5 vidéos.'),
+                                ),
                               );
                               return;
                             }
@@ -509,12 +505,16 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
                               height: 22,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isSelected ? AppColors.primary : Colors.white70,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : Colors.white70,
                               ),
                               child: Icon(
                                 isSelected ? Icons.check : Icons.add,
                                 size: 14,
-                                color: isSelected ? Colors.white : Colors.black87,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.black87,
                               ),
                             ),
                           ),
@@ -533,12 +533,32 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
   Widget _buildObjectivePage() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final objectives = [
-      _objectiveTile(PromotionGoal.videoViews, 'Plus de vues vidéo', Icons.play_circle),
-      _objectiveTile(PromotionGoal.profileViews, 'Plus de vues sur le profil', Icons.person),
+      _objectiveTile(
+        PromotionGoal.videoViews,
+        'Plus de vues vidéo',
+        Icons.play_circle,
+      ),
+      _objectiveTile(
+        PromotionGoal.profileViews,
+        'Plus de vues sur le profil',
+        Icons.person,
+      ),
       _objectiveTile(PromotionGoal.followers, 'Plus d\'abonnés', Icons.people),
-      _objectiveTile(PromotionGoal.messages, 'Plus de messages directs', Icons.message),
-      _objectiveTile(PromotionGoal.website, 'Plus de visites sur un site', Icons.language),
-      _objectiveTile(PromotionGoal.conversions, 'Plus de conversions', Icons.shopping_cart),
+      _objectiveTile(
+        PromotionGoal.messages,
+        'Plus de messages directs',
+        Icons.message,
+      ),
+      _objectiveTile(
+        PromotionGoal.website,
+        'Plus de visites sur un site',
+        Icons.language,
+      ),
+      _objectiveTile(
+        PromotionGoal.conversions,
+        'Plus de conversions',
+        Icons.shopping_cart,
+      ),
     ];
 
     return FadeTransition(
@@ -553,7 +573,9 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
           const SizedBox(height: 8),
           Text(
             'On adapte automatiquement le CTA à l\'objectif.',
-            style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.grey[600]),
+            style: TextStyle(
+              color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],
+            ),
           ),
           const SizedBox(height: 16),
           ...objectives,
@@ -577,7 +599,9 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
               : (isDark ? AppColors.surfaceDark : Colors.white),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.grey.withOpacity(0.2),
+            color: isSelected
+                ? AppColors.primary
+                : Colors.grey.withOpacity(0.2),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -598,7 +622,9 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimary,
                 ),
               ),
             ),
@@ -624,7 +650,9 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
           const SizedBox(height: 8),
           Text(
             'L\'audience automatique est recommandée pour de meilleurs résultats.',
-            style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.grey[600]),
+            style: TextStyle(
+              color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -633,7 +661,8 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
                 child: _audienceModeButton(
                   label: 'Automatique',
                   selected: _audienceMode == AudienceMode.auto,
-                  onTap: () => setState(() => _audienceMode = AudienceMode.auto),
+                  onTap: () =>
+                      setState(() => _audienceMode = AudienceMode.auto),
                 ),
               ),
               const SizedBox(width: 12),
@@ -641,7 +670,8 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
                 child: _audienceModeButton(
                   label: 'Personnalisée',
                   selected: _audienceMode == AudienceMode.custom,
-                  onTap: () => setState(() => _audienceMode = AudienceMode.custom),
+                  onTap: () =>
+                      setState(() => _audienceMode = AudienceMode.custom),
                 ),
               ),
             ],
@@ -730,7 +760,9 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
           const SizedBox(height: 8),
           Text(
             'Définissez le budget et la durée de votre campagne (1 à 7 jours).',
-            style: TextStyle(color: isDark ? AppColors.textSecondaryDark : Colors.grey[600]),
+            style: TextStyle(
+              color: isDark ? AppColors.textSecondaryDark : Colors.grey[600],
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -768,7 +800,9 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
               prefixText: 'FCFA ',
               prefixStyle: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
               ),
               border: const OutlineInputBorder(),
             ),
@@ -785,7 +819,10 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
             },
           ),
           const SizedBox(height: 16),
-          Text('Durée: $_durationDays jours', style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            'Durée: $_durationDays jours',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
           Slider(
             value: _durationDays.toDouble(),
             min: 1,
@@ -835,8 +872,10 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final estimates = _estimateMetrics();
     final totalBudget = _computedTotalBudget();
-    final selectedPreview = _selectedVideos.isNotEmpty ? _selectedVideos.first : null;
-    final previewUrl = _resolveMediaUrl(selectedPreview?.videoUrl);
+    final selectedPreview = _selectedVideos.isNotEmpty
+        ? _selectedVideos.first
+        : null;
+    final previewUrl = resolveMediaUrl(selectedPreview?.videoUrl);
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -851,14 +890,16 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
           if (selectedPreview != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: SizedBox(
-                height: 200,
-                child: _buildVideoThumb(previewUrl),
-              ),
+              child: SizedBox(height: 200, child: _buildVideoThumb(previewUrl)),
             ),
           const SizedBox(height: 16),
           _summaryRow('Objectif', _goalLabel(_selectedGoal)),
-          _summaryRow('Audience', _audienceMode == AudienceMode.auto ? 'Automatique' : 'Personnalisée'),
+          _summaryRow(
+            'Audience',
+            _audienceMode == AudienceMode.auto
+                ? 'Automatique'
+                : 'Personnalisée',
+          ),
           _summaryRow('Durée', '$_durationDays jours'),
           _summaryRow('Budget total', _currency.format(totalBudget)),
           _summaryRow('CTA', _ctaLabel()),
@@ -934,14 +975,18 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
                         'Solde portefeuille: ${_currency.format(_walletBalance)}',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Portefeuille: ${_currency.format(_walletBalance)}',
                         style: TextStyle(
-                          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -966,10 +1011,14 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.primary.withOpacity(0.08),
+        color: isDark
+            ? AppColors.surfaceDark
+            : AppColors.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? AppColors.dividerDark : AppColors.primary.withOpacity(0.2),
+          color: isDark
+              ? AppColors.dividerDark
+              : AppColors.primary.withOpacity(0.2),
         ),
       ),
       child: Row(
@@ -1021,10 +1070,14 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
           labelText: label,
           hintText: hint,
           hintStyle: TextStyle(
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondary,
           ),
           labelStyle: TextStyle(
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondary,
           ),
           border: const OutlineInputBorder(),
         ),
@@ -1047,10 +1100,14 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
           labelText: label,
           border: const OutlineInputBorder(),
           labelStyle: TextStyle(
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondary,
           ),
         ),
-        items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+        items: items
+            .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+            .toList(),
         onChanged: (value) {
           if (value == null) return;
           onChanged(value);
@@ -1116,13 +1173,18 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
               padding: const EdgeInsets.symmetric(vertical: 14),
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: _isPromoting
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : Text(_currentStep == 4 ? 'Payer et lancer' : 'Continuer'),
           ),
@@ -1137,7 +1199,10 @@ class _PromotePostModalState extends State<PromotePostModal> with SingleTickerPr
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: const TextStyle(color: AppColors.textSecondary)),
+            child: Text(
+              label,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],

@@ -8,9 +8,9 @@ import 'package:video_player/video_player.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
-import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/helpers.dart';
+import '../../core/utils/media_utils.dart';
 import '../../models/confession.dart';
 import '../../services/confession_service.dart';
 import '../../services/deep_link_service.dart';
@@ -45,6 +45,8 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
   File? _selectedCommentImage;
   ConfessionComment? _replyToComment;
   String? _error;
+  bool _hasManualLikeState = false;
+  bool? _manualLikeState;
 
   @override
   void initState() {
@@ -72,8 +74,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         widget.confessionId,
       );
 
+      final displayConfession = _applyManualLikeState(confession);
       setState(() {
-        _confession = confession;
+        _confession = displayConfession;
         _isLoading = false;
       });
 
@@ -95,37 +98,8 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
     }
   }
 
-  String _resolveMediaUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    final cleaned = url.replaceAll('\\', '/');
-    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-    final baseUri = Uri.parse(base);
-
-    if (cleaned.startsWith('http')) {
-      final mediaUri = Uri.parse(cleaned);
-      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
-        final rewritten = mediaUri.replace(
-          scheme: baseUri.scheme,
-          host: baseUri.host,
-          port: baseUri.hasPort ? baseUri.port : null,
-        );
-        return Uri.encodeFull(rewritten.toString());
-      }
-      return Uri.encodeFull(cleaned);
-    }
-    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
-
-    if (cleaned.startsWith('/storage/')) {
-      return Uri.encodeFull('$base$cleaned');
-    }
-    if (cleaned.startsWith('storage/')) {
-      return Uri.encodeFull('$base/$cleaned');
-    }
-    return Uri.encodeFull('$base/storage/$cleaned');
-  }
-
   void _initVideoPlayer(String? url) {
-    final resolvedUrl = _resolveMediaUrl(url);
+    final resolvedUrl = resolveMediaUrl(url);
     if (resolvedUrl.isEmpty) {
       setState(() {
         _isVideoInitialized = false;
@@ -164,10 +138,24 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
       setState(() {
         _comments = comments;
         _isLoadingComments = false;
+        if (_confession != null) {
+          _confession = _confession!.copyWith(commentsCount: comments.length);
+        }
       });
     } catch (e) {
       setState(() => _isLoadingComments = false);
     }
+  }
+
+  Confession _applyManualLikeState(Confession confession) {
+    if (!_hasManualLikeState || _manualLikeState == null) {
+      return confession;
+    }
+    if (_manualLikeState == confession.isLiked) {
+      _hasManualLikeState = false;
+      return confession;
+    }
+    return confession.copyWith(isLiked: _manualLikeState);
   }
 
   Future<void> _sendComment() async {
@@ -226,12 +214,20 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         final updated = await _confessionService.unlikeConfession(
           widget.confessionId,
         );
-        setState(() => _confession = updated);
+        setState(() {
+          _manualLikeState = updated.isLiked;
+          _hasManualLikeState = true;
+          _confession = updated;
+        });
       } else {
         final updated = await _confessionService.likeConfession(
           widget.confessionId,
         );
-        setState(() => _confession = updated);
+        setState(() {
+          _manualLikeState = updated.isLiked;
+          _hasManualLikeState = true;
+          _confession = updated;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -324,7 +320,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
 
   Widget _buildConfessionCard() {
     final confession = _confession!;
-    final imageUrl = _resolveMediaUrl(confession.imageUrl);
+    final imageUrl = resolveMediaUrl(confession.imageUrl);
     final hasImage = confession.hasImage && imageUrl.isNotEmpty;
     final hasVideo = confession.hasVideo;
     final l10n = AppLocalizations.of(context)!;
@@ -388,7 +384,10 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                         if (confession.isSponsored) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.orange.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(12),
@@ -523,7 +522,10 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   if (url != null && url.isNotEmpty) {
                     final uri = Uri.tryParse(url);
                     if (uri != null) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
                       return;
                     }
                   }
@@ -590,7 +592,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildTwitterActionButton(
-                icon: confession.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                icon: confession.isLiked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
                 label: l10n.likeAction,
                 color: actionColor,
                 onTap: _toggleLike,
@@ -630,11 +634,7 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: fillColor,
-            ),
+            Icon(icon, size: 18, color: fillColor),
             const SizedBox(width: 6),
             Text(
               label,
@@ -805,154 +805,157 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
               }
             : null,
         child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: () {
-              if (comment.user != null) {
-                context.push('/u/${comment.user!.username}');
-              }
-            },
-            child: AvatarWidget(
-              imageUrl: comment.user?.avatar,
-              name: comment.user?.fullName ?? l10n.userFallback,
-              size: 36,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: () {
+                if (comment.user != null) {
+                  context.push('/u/${comment.user!.username}');
+                }
+              },
+              child: AvatarWidget(
+                imageUrl: comment.user?.avatar,
+                name: comment.user?.fullName ?? l10n.userFallback,
+                size: 36,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        if (comment.user != null) {
-                          context.push('/u/${comment.user!.username}');
-                        }
-                      },
-                      child: Text(
-                        comment.user?.fullName ?? l10n.userFallback,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (comment.user != null) {
+                            context.push('/u/${comment.user!.username}');
+                          }
+                        },
+                        child: Text(
+                          comment.user?.fullName ?? l10n.userFallback,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      if (comment.user?.isPremium == true) ...[
+                        const SizedBox(width: 4),
+                        const VerifiedBadge(size: 12),
+                      ],
+                      const Spacer(),
+                      Text(
+                        Helpers.getTimeAgo(comment.createdAt),
+                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  if (comment.parent != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 3,
+                            height: 32,
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  comment.parent?.user?.fullName ??
+                                      l10n.userAnonymous,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  comment.parent?.content ?? '',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    if (comment.user?.isPremium == true) ...[
-                      const SizedBox(width: 4),
-                      const VerifiedBadge(size: 12),
-                    ],
-                    const Spacer(),
+                  if (comment.content.isNotEmpty)
                     Text(
-                      Helpers.getTimeAgo(comment.createdAt),
-                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                      comment.content,
+                      style: const TextStyle(fontSize: 14, height: 1.4),
+                    ),
+                  if (comment.mediaFullUrl != null ||
+                      comment.mediaUrl != null) ...[
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            comment.mediaFullUrl ?? comment.mediaUrl ?? '',
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          height: 200,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          height: 200,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 4),
-                if (comment.parent != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 3,
-                          height: 32,
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                comment.parent?.user?.fullName ??
-                                    l10n.userAnonymous,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                comment.parent?.content ?? '',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                if (comment.content.isNotEmpty)
-                  Text(
-                    comment.content,
-                    style: const TextStyle(fontSize: 14, height: 1.4),
-                  ),
-                if (comment.mediaFullUrl != null ||
-                    comment.mediaUrl != null) ...[
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(
-                      imageUrl: comment.mediaFullUrl ?? comment.mediaUrl ?? '',
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        height: 200,
-                        color: Colors.grey[200],
-                        child: const Center(child: CircularProgressIndicator()),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        height: 200,
-                        color: Colors.grey[200],
-                        child: const Center(
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            color: Colors.grey,
-                          ),
-                        ),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _replyToComment = comment;
+                      });
+                    },
+                    child: Text(
+                      l10n.replyAction,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ],
-                const SizedBox(height: 6),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _replyToComment = comment;
-                    });
-                  },
-                  child: Text(
-                    l10n.replyAction,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -977,7 +980,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                   context: context,
                   builder: (dialogContext) => AlertDialog(
                     title: const Text('Supprimer le commentaire'),
-                    content: const Text('Voulez-vous supprimer ce commentaire ?'),
+                    content: const Text(
+                      'Voulez-vous supprimer ce commentaire ?',
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(dialogContext, false),
@@ -985,7 +990,9 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(dialogContext, true),
-                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red,
+                        ),
                         child: Text(l10n.deleteAction),
                       ),
                     ],
@@ -1001,7 +1008,10 @@ class _ConfessionDetailScreenState extends State<ConfessionDetailScreen> {
                     _comments.removeWhere((c) => c.id == comment.id);
                     if (_confession != null) {
                       _confession = _confession!.copyWith(
-                        commentsCount: (_confession!.commentsCount - 1).clamp(0, 1 << 30),
+                        commentsCount: (_confession!.commentsCount - 1).clamp(
+                          0,
+                          1 << 30,
+                        ),
                       );
                     }
                   });

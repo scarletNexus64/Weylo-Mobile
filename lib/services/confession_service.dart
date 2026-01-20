@@ -242,7 +242,11 @@ class ConfessionService {
     return Confession.fromJson(response.data['confession'] ?? response.data);
   }
 
-  Future<bool> reportConfession(int confessionId, {String? reason, String? description}) async {
+  Future<bool> reportConfession(
+    int confessionId, {
+    String? reason,
+    String? description,
+  }) async {
     final data = <String, dynamic>{};
     if (reason != null) data['reason'] = reason;
     if (description != null && description.isNotEmpty) {
@@ -294,7 +298,7 @@ class ConfessionService {
 
       final formData = FormData.fromMap({
         'content': content,
-        'is_anonymous': isAnonymous,
+        'is_anonymous': isAnonymous ? 1 : 0,
         if (parentId != null) 'parent_id': parentId,
         'image': await MultipartFile.fromFile(
           image.path,
@@ -352,11 +356,15 @@ class ConfessionService {
   }
 
   Future<void> markPromotionImpression(int confessionId) async {
-    await _apiClient.post('${ApiConstants.confessions}/$confessionId/promotion-impression');
+    await _apiClient.post(
+      '${ApiConstants.confessions}/$confessionId/promotion-impression',
+    );
   }
 
   Future<void> markPromotionClick(int confessionId) async {
-    await _apiClient.post('${ApiConstants.confessions}/$confessionId/promotion-click');
+    await _apiClient.post(
+      '${ApiConstants.confessions}/$confessionId/promotion-click',
+    );
   }
 
   Future<List<Confession>> searchConfessions(String query) async {
