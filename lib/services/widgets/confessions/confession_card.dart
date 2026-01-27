@@ -169,7 +169,9 @@ class _ConfessionCardState extends State<ConfessionCard>
     final actionColor = _actionIconColor(context);
 
     final cardContent = Card(
-      elevation: 1,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: widget.onTap,
@@ -259,7 +261,7 @@ class _ConfessionCardState extends State<ConfessionCard>
                                 ),
                               ),
                             ],
-                            if (confession.isAnonymous) ...[
+                            if (confession.isAnonymous && !isOwnPost) ...[
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -428,7 +430,7 @@ class _ConfessionCardState extends State<ConfessionCard>
                   ),
                   const SizedBox(width: 12),
                   _buildActionButton(
-                    icon: Icons.mode_comment_rounded,
+                    icon: Icons.mode_comment_outlined,
                     label: Helpers.formatNumber(confession.commentsCount),
                     color: actionColor,
                     onTap: widget.onComment,
@@ -439,9 +441,7 @@ class _ConfessionCardState extends State<ConfessionCard>
                     label: Helpers.formatNumber(confession.viewsCount),
                     color: actionColor,
                   ),
-                  if (confession.isSponsored &&
-                      isOwnPost &&
-                      confession.promotionId != null) ...[
+                  if (isOwnPost && confession.promotionId != null) ...[
                     const Spacer(),
                     TextButton.icon(
                       onPressed: _showPromotionStats,
@@ -733,7 +733,9 @@ class _ConfessionCardState extends State<ConfessionCard>
 
   Widget _buildAuthorInfo(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    if (confession.shouldShowAuthor && confession.author != null) {
+    final currentUser = context.read<AuthProvider>().user;
+    final isOwnPost = currentUser?.id == confession.authorId;
+    if ((confession.shouldShowAuthor || isOwnPost) && confession.author != null) {
       return NameWithBadge(
         name: confession.author!.fullName,
         isPremium: confession.author!.isPremium,

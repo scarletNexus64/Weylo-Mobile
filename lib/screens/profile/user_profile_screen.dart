@@ -15,7 +15,7 @@ import '../../providers/profile_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/gift_service.dart';
 import '../../services/user_service.dart';
-import '../../services/widgets/common/loading_overlay.dart';
+
 import '../../services/widgets/common/premium_badge.dart';
 import '../messages/send_message_screen.dart';
 
@@ -33,7 +33,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   late TabController _tabController;
   final UserService _userService = UserService();
   final Map<String, Future<Uint8List?>> _videoThumbnails = {};
-  bool _hasRefreshedOnOpen = false;
+
 
   @override
   void initState() {
@@ -44,25 +44,13 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final route = ModalRoute.of(context);
-    if (!_hasRefreshedOnOpen && (route?.isCurrent ?? false)) {
-      _hasRefreshedOnOpen = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          context.read<ProfileProvider>().loadProfile(widget.username);
-        }
-      });
-    }
-  }
+
 
   @override
   void didUpdateWidget(covariant UserProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.username != widget.username) {
-      _hasRefreshedOnOpen = false;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           context.read<ProfileProvider>().loadProfile(widget.username);
@@ -206,132 +194,155 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     bool isOwnProfile,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    return Container(
-      decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
-      child: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 40),
-            // Avatar
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey[200],
-                    child: user.avatar != null
-                        ? ClipOval(
-                            child: CachedNetworkImage(
-                              imageUrl: user.avatar!,
-                              width: 96,
-                              height: 96,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Text(
-                            user.initials,
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                  ),
-                ),
-                // Badge vérifié bleu pour les utilisateurs premium/vérifiés
-                if (user.isPremium || user.isVerified)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: const VerifiedBadge(size: 18, showTooltip: false),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Name - Afficher "Anonyme" si l'utilisateur a choisi de ne pas montrer son nom
-            Text(
-              (user.settings?.showNameOnPosts ?? true)
-                  ? user.fullName
-                  : l10n.userAnonymous,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontStyle: (user.settings?.showNameOnPosts ?? true)
-                    ? FontStyle.normal
-                    : FontStyle.italic,
+    final coverUrl = user.coverUrl;
+    return SizedBox(
+      height: 300,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (coverUrl != null && coverUrl.isNotEmpty)
+            CachedNetworkImage(
+              imageUrl: coverUrl,
+              fit: BoxFit.cover,
+            )
+          else
+            Container(
+              decoration: const BoxDecoration(
+                gradient: AppColors.primaryGradient,
               ),
             ),
-            // Afficher le username seulement si l'utilisateur est visible
-            if (user.settings?.showNameOnPosts ?? true)
-              Text(
-                '@${user.username}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withOpacity(0.8),
-                ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.45),
+                  Colors.black.withOpacity(0.15),
+                  Colors.transparent,
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
               ),
-            if (user.bio != null && user.bio!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  user.bio!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 14,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
-            // Stats
-            Row(
+            ),
+          ),
+          SafeArea(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildStatItem(
-                  '${user.followersCount}',
-                  l10n.profileFollowers,
-                  () => _showFollowersList(),
+                const SizedBox(height: 40),
+                // Avatar
+                Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[200],
+                        child: user.avatar != null
+                            ? ClipOval(
+                                child: CachedNetworkImage(
+                                  imageUrl: user.avatar!,
+                                  width: 96,
+                                  height: 96,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Text(
+                                user.initials,
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                      ),
+                    ),
+                    // Badge vérifié bleu pour les utilisateurs premium/vérifiés
+                    if (user.isPremium || user.isVerified)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: const VerifiedBadge(size: 18, showTooltip: false),
+                      ),
+                  ],
                 ),
-                Container(
-                  height: 30,
-                  width: 1,
-                  color: Colors.white.withOpacity(0.3),
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                const SizedBox(height: 12),
+                Text(
+                  user.fullName,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontStyle: FontStyle.normal,
+                  ),
                 ),
-                _buildStatItem(
-                  '${user.followingCount}',
-                  l10n.profileSubscriptions,
-                  () => _showFollowingList(),
+                Text(
+                  '@${user.username}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.85),
+                  ),
                 ),
-                Container(
-                  height: 30,
-                  width: 1,
-                  color: Colors.white.withOpacity(0.3),
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                if (user.bio != null && user.bio!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      user.bio!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                // Stats
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildStatItem(
+                      '${user.followersCount}',
+                      l10n.profileFollowers,
+                      () => _showFollowersList(),
+                    ),
+                    Container(
+                      height: 30,
+                      width: 1,
+                      color: Colors.white.withOpacity(0.3),
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    _buildStatItem(
+                      '${user.followingCount}',
+                      l10n.profileSubscriptions,
+                      () => _showFollowingList(),
+                    ),
+                    Container(
+                      height: 30,
+                      width: 1,
+                      color: Colors.white.withOpacity(0.3),
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    _buildStatItem(
+                      '${user.confessionsCount ?? 0}',
+                      l10n.profilePostsTab,
+                      null,
+                    ),
+                  ],
                 ),
-                _buildStatItem(
-                  '${user.confessionsCount ?? 0}',
-                  l10n.profilePostsTab,
-                  null,
-                ),
+                const SizedBox(height: 16),
+                // Action buttons
+                if (!isOwnProfile) _buildActionButtons(user, provider),
               ],
             ),
-            const SizedBox(height: 16),
-            // Action buttons
-            if (!isOwnProfile) _buildActionButtons(user, provider),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -922,6 +933,7 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
         final giftTransaction = _gifts![index];
         final gift = giftTransaction.gift;
         final sender = giftTransaction.sender;
+        final giftPrice = gift?.price ?? giftTransaction.amount;
 
         return Card(
           clipBehavior: Clip.antiAlias,
@@ -950,6 +962,16 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
                   textAlign: TextAlign.center,
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text(
+                  '${giftPrice.toStringAsFixed(0)} FCFA',
+                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
               if (sender != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -973,8 +995,10 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
   }
 
   Widget _buildGiftMedia(Gift gift) {
-    final animationUrl = resolveMediaUrl(gift.animation);
-    final iconUrl = resolveMediaUrl(gift.icon);
+    final rawIcon = gift.icon;
+    final isEmojiIcon = _isEmojiIcon(rawIcon);
+    final animationUrl = _resolveGiftUrl(gift.animation);
+    final iconUrl = isEmojiIcon ? '' : _resolveGiftUrl(gift.icon);
 
     if (animationUrl.isNotEmpty) {
       final lower = animationUrl.toLowerCase();
@@ -989,6 +1013,10 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
       );
     }
 
+    if (isEmojiIcon) {
+      return _buildGiftEmoji(rawIcon);
+    }
+
     if (iconUrl.isNotEmpty) {
       return CachedNetworkImage(
         imageUrl: iconUrl,
@@ -999,5 +1027,59 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
     }
 
     return const Icon(Icons.card_giftcard, size: 40);
+  }
+
+  Widget _buildGiftEmoji(String emoji) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.7, end: 1.0),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutBack,
+      builder: (context, scale, child) => Transform.scale(
+        scale: scale,
+        child: child,
+      ),
+      child: Text(
+        emoji,
+        style: const TextStyle(fontSize: 28),
+      ),
+    );
+  }
+
+  bool _isEmojiIcon(String value) {
+    if (value.isEmpty) return false;
+    final lower = value.toLowerCase();
+    if (lower.startsWith('http') || lower.contains('/') || lower.contains('.')) {
+      return false;
+    }
+    return true;
+  }
+
+  String _resolveGiftUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final cleaned = url.replaceAll('\\', '/');
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    final baseUri = Uri.parse(base);
+
+    if (cleaned.startsWith('http')) {
+      final mediaUri = Uri.parse(cleaned);
+      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
+        final rewritten = mediaUri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        );
+        return Uri.encodeFull(rewritten.toString());
+      }
+      return Uri.encodeFull(cleaned);
+    }
+    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
+
+    if (cleaned.startsWith('/storage/')) {
+      return Uri.encodeFull('$base$cleaned');
+    }
+    if (cleaned.startsWith('storage/')) {
+      return Uri.encodeFull('$base/$cleaned');
+    }
+    return Uri.encodeFull('$base/storage/$cleaned');
   }
 }

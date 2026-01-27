@@ -11,7 +11,7 @@ import 'dart:typed_data';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/utils/media_utils.dart';
+import '../../core/utils/helpers.dart';
 import '../../models/confession.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
@@ -35,6 +35,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final GiftService _giftService = GiftService();
+  final ConfessionService _confessionService = ConfessionService();
   List<GiftTransaction> _receivedGifts = [];
   bool _isLoadingGifts = false;
   final Map<String, Future<Uint8List?>> _videoThumbnails = {};
@@ -114,7 +115,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('@${user.username}'),
+            title: Text(
+              '@${user.username}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings_outlined),
@@ -185,11 +189,30 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   Widget _buildProfileHeader(user, ProfileProvider profileProvider) {
     final l10n = AppLocalizations.of(context)!;
     final profileUser = profileProvider.profileUser ?? user;
+    final coverUrl = profileUser.coverUrl;
 
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              height: 140,
+              width: double.infinity,
+              child: coverUrl != null && coverUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: coverUrl,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               // Avatar avec bordure dégradé
@@ -423,7 +446,9 @@ class _MyProfileScreenState extends State<MyProfileScreen>
 
   Widget _buildPostsTab(ProfileProvider profileProvider) {
     final l10n = AppLocalizations.of(context)!;
-    final confessions = profileProvider.userConfessions;
+    final confessions = List<Confession>.from(
+      profileProvider.userConfessions,
+    )..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     if (confessions.isEmpty) {
       return Center(
@@ -553,6 +578,36 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                     ),
                   ),
                 ),
+              Positioned(
+                right: 8,
+                bottom: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.55),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.visibility_rounded,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        Helpers.formatNumber(confession.viewsCount),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -595,17 +650,18 @@ class _MyProfileScreenState extends State<MyProfileScreen>
               ListTile(
                 leading: const Icon(Icons.share_outlined),
                 title: Text(l10n.profileShare),
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(ctx);
-                  final shareUrl = DeepLinkService.getPostShareLink(
-                    confession.id,
-                  );
-                  Share.share(
+                  final shareUrl = DeepLinkService.getPostShareLink(confession.id);
+                  await Share.share(
                     l10n.profileSharePostMessage(
-                      '${ApiConstants.baseUrl.replaceFirst(RegExp(r"/api/v1/?$"), "")}/post/${confession.id}',
+                      shareUrl,
                     ),
                     subject: l10n.profileSharePostSubject,
                   );
+                  try {
+                    await _confessionService.shareConfession(confession.id);
+                  } catch (_) {}
                 },
               ),
               ListTile(
@@ -826,6 +882,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     final l10n = AppLocalizations.of(context)!;
     final gift = transaction.gift;
     final sender = transaction.sender;
+    final giftPrice = gift?.price ?? transaction.amount;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -891,7 +948,7 @@ class _MyProfileScreenState extends State<MyProfileScreen>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${transaction.recipientAmount.toStringAsFixed(0)} FCFA',
+                  '${giftPrice.toStringAsFixed(0)} FCFA',
                   style: const TextStyle(
                     color: AppColors.success,
                     fontWeight: FontWeight.bold,
@@ -912,8 +969,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
   }
 
   Widget _buildGiftMedia(Gift gift) {
-    final animationUrl = resolveMediaUrl(gift.animation);
-    final iconUrl = resolveMediaUrl(gift.icon);
+    final rawIcon = gift.icon;
+    final isEmojiIcon = _isEmojiIcon(rawIcon);
+    final animationUrl = _resolveGiftUrl(gift.animation);
+    final iconUrl = isEmojiIcon ? '' : _resolveGiftUrl(gift.icon);
 
     if (animationUrl.isNotEmpty) {
       final lower = animationUrl.toLowerCase();
@@ -933,6 +992,10 @@ class _MyProfileScreenState extends State<MyProfileScreen>
       );
     }
 
+    if (isEmojiIcon) {
+      return _buildGiftEmoji(rawIcon);
+    }
+
     if (iconUrl.isNotEmpty) {
       return CachedNetworkImage(
         imageUrl: iconUrl,
@@ -942,7 +1005,65 @@ class _MyProfileScreenState extends State<MyProfileScreen>
       );
     }
 
-    return const Icon(Icons.card_giftcard, color: Colors.white, size: 28);
+    return const Icon(
+      Icons.card_giftcard,
+      color: Colors.white,
+      size: 28,
+    );
+  }
+
+  Widget _buildGiftEmoji(String emoji) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.7, end: 1.0),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutBack,
+      builder: (context, scale, child) => Transform.scale(
+        scale: scale,
+        child: child,
+      ),
+      child: Text(
+        emoji,
+        style: const TextStyle(fontSize: 32),
+      ),
+    );
+  }
+
+  bool _isEmojiIcon(String value) {
+    if (value.isEmpty) return false;
+    final lower = value.toLowerCase();
+    if (lower.startsWith('http') || lower.contains('/') || lower.contains('.')) {
+      return false;
+    }
+    return true;
+  }
+
+  String _resolveGiftUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    final cleaned = url.replaceAll('\\', '/');
+    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    final baseUri = Uri.parse(base);
+
+    if (cleaned.startsWith('http')) {
+      final mediaUri = Uri.parse(cleaned);
+      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
+        final rewritten = mediaUri.replace(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          port: baseUri.hasPort ? baseUri.port : null,
+        );
+        return Uri.encodeFull(rewritten.toString());
+      }
+      return Uri.encodeFull(cleaned);
+    }
+    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
+
+    if (cleaned.startsWith('/storage/')) {
+      return Uri.encodeFull('$base$cleaned');
+    }
+    if (cleaned.startsWith('storage/')) {
+      return Uri.encodeFull('$base/$cleaned');
+    }
+    return Uri.encodeFull('$base/storage/$cleaned');
   }
 
   String _formatDate(BuildContext context, DateTime date) {
@@ -981,12 +1102,13 @@ class _MyProfileScreenState extends State<MyProfileScreen>
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
         final l10n = AppLocalizations.of(ctx)!;
+        final colorScheme = Theme.of(ctx).colorScheme;
         final webLink = 'https://weylo.app/${user.username}';
         final appLink = 'weylo://m/${user.username}';
 
@@ -1007,12 +1129,16 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 const SizedBox(height: 24),
                 Text(
                   l10n.shareProfileTitle,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.shareProfileSubtitle,
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
                 ),
                 const SizedBox(height: 24),
 

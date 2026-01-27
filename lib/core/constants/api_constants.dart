@@ -4,8 +4,11 @@ class ApiConstants {
   //static const String baseUrl = 'http://10.0.2.2:8000/api/v1'; // Local Development (Android Emulator)
   //static const String wsUrl = 'wss://10.0.2.2:8000'; // Local Development (Android Emulator)
 
-  static const String baseUrl ='http://192.168.43.73:8000/api/v1'; // Local Development (Physical Device)
-  static const String wsUrl ='ws://192.168.43.73:8080'; // Local Development (Physical Device)
+  static const String baseUrl ='http://172.20.10.3:8000/api/v1'; // Local Development (Physical Device)
+  static const String wsUrl ='ws://172.20.10.3:8080'; // Local Development (Physical Device)
+
+  //static const String baseUrl ='http://192.168.1.177:8000/api/v1'; // Local Development (Physical Device)
+  //static const String wsUrl ='ws://192.168.1.177:8080'; // Local Development (Physical Device)
 
   // Reverb/Pusher Configuration
   // static const String reverbHost = 'weylo-adminpanel.space'; // Production
@@ -14,7 +17,8 @@ class ApiConstants {
   // static const String reverbScheme = 'https';  // Production
   //static const String reverbHost = '10.0.2.2'; // Local Development (Android Emulator)
   static const String reverbAppId = 'Weylo-app'; // Local Development
-  static const String reverbHost = '192.168.43.73'; // Local Development
+  static const String reverbHost = '172.20.10.3'; // Local Development
+  //static const String reverbHost = '192.168.1.177'; // Local Development
   static const int reverbPort = 6001; // Local Development
   static const String reverbAppKey = '1425cdd3ef7425fa6746d2895a233e52'; // Local Development
   static const String reverbAppSecret =
@@ -42,6 +46,9 @@ class ApiConstants {
   static const String userSettings = '/users/settings';
   static const String userPassword = '/users/password';
   static const String userAvatar = '/users/avatar';
+  static const String userCover = '/users/cover';
+  static const String userRecommendationsFromContacts =
+      '/users/recommendations/contacts';
   static const String userFcmToken = '/users/fcm-token';
   static const String userBlocked = '/users/blocked';
   static const String userByUsername = '/users/by-username';
