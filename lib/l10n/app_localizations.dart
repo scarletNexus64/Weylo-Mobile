@@ -938,6 +938,12 @@ abstract class AppLocalizations {
   /// **'Information hidden'**
   String get maskedInfo;
 
+  /// Handle placeholder when the identity is hidden
+  ///
+  /// In en, this message translates to:
+  /// **'@hidden'**
+  String get maskedUsername;
+
   /// No description provided for @statusNew.
   ///
   /// In en, this message translates to:

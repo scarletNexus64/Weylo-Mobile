@@ -6,8 +6,8 @@ import 'dart:typed_data';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:lottie/lottie.dart';
 import '../../l10n/app_localizations.dart';
-import '../../core/constants/api_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/media_utils.dart';
 import '../../models/confession.dart';
 import '../../models/gift.dart';
 import '../../models/user.dart';
@@ -118,75 +118,73 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       onRefresh: _onRefresh,
       child: NestedScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-      headerSliverBuilder: (context, innerBoxIsScrolled) {
-        return [
-          SliverAppBar(
-            expandedHeight: 380,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildProfileHeader(user, provider, isOwnProfile),
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              expandedHeight: 380,
+              pinned: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: _buildProfileHeader(user, provider, isOwnProfile),
+              ),
+              actions: [
+                if (!isOwnProfile)
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'block') {
+                        _blockUser();
+                      } else if (value == 'report') {
+                        _reportUser();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'block',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.block, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(l10n.block),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'report',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.flag, color: Colors.orange),
+                            const SizedBox(width: 8),
+                            Text(l10n.report),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
             ),
-            actions: [
-              if (!isOwnProfile)
-                PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'block') {
-                      _blockUser();
-                    } else if (value == 'report') {
-                      _reportUser();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'block',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.block, color: Colors.red),
-                          const SizedBox(width: 8),
-                          Text(l10n.block),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'report',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.flag, color: Colors.orange),
-                          const SizedBox(width: 8),
-                          Text(l10n.report),
-                        ],
-                      ),
-                    ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverTabBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  labelColor: Theme.of(context).colorScheme.primary,
+                  unselectedLabelColor:
+                      Theme.of(context).textTheme.bodySmall?.color ??
+                      Colors.grey,
+                  indicatorColor: Theme.of(context).colorScheme.primary,
+                  tabs: [
+                    Tab(text: l10n.profilePostsTab),
+                    Tab(text: l10n.profileGiftsTab),
                   ],
                 ),
-            ],
-          ),
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _SliverTabBarDelegate(
-              TabBar(
-                controller: _tabController,
-                labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor:
-                    Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
-                indicatorColor: Theme.of(context).colorScheme.primary,
-                tabs: [
-                  Tab(text: l10n.profilePostsTab),
-                  Tab(text: l10n.profileGiftsTab),
-                ],
               ),
             ),
-          ),
-        ];
-      },
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildConfessionsTab(provider),
-          _buildGiftsTab(),
-        ],
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: [_buildConfessionsTab(provider), _buildGiftsTab()],
+        ),
       ),
-    ),
     );
   }
 
@@ -518,8 +516,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   }
 
   Widget _buildConfessionTile(Confession confession) {
-    final imageUrl = _resolveMediaUrl(confession.imageUrl);
-    final videoUrl = _resolveMediaUrl(confession.videoUrl);
+    final imageUrl = resolveMediaUrl(confession.imageUrl);
+    final videoUrl = resolveMediaUrl(confession.videoUrl);
     final hasImage = confession.hasImage && imageUrl.isNotEmpty;
     final hasVideo = confession.hasVideo && videoUrl.isNotEmpty;
 
@@ -634,35 +632,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         return _buildConfessionPlaceholder(hasVideo: true);
       },
     );
-  }
-
-  String _resolveMediaUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    final cleaned = url.replaceAll('\\', '/');
-    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-    final baseUri = Uri.parse(base);
-
-    if (cleaned.startsWith('http')) {
-      final mediaUri = Uri.parse(cleaned);
-      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
-        final rewritten = mediaUri.replace(
-          scheme: baseUri.scheme,
-          host: baseUri.host,
-          port: baseUri.hasPort ? baseUri.port : null,
-        );
-        return Uri.encodeFull(rewritten.toString());
-      }
-      return Uri.encodeFull(cleaned);
-    }
-    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
-
-    if (cleaned.startsWith('/storage/')) {
-      return Uri.encodeFull('$base$cleaned');
-    }
-    if (cleaned.startsWith('storage/')) {
-      return Uri.encodeFull('$base/$cleaned');
-    }
-    return Uri.encodeFull('$base/storage/$cleaned');
   }
 
   Widget _buildGiftsTab() {
@@ -974,10 +943,9 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: gift != null ? _buildGiftMedia(gift) : const Icon(
-                    Icons.card_giftcard,
-                    size: 40,
-                  ),
+                  child: gift != null
+                      ? _buildGiftMedia(gift)
+                      : const Icon(Icons.card_giftcard, size: 40),
                 ),
               ),
               const SizedBox(height: 4),
@@ -1035,15 +1003,13 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
     if (animationUrl.isNotEmpty) {
       final lower = animationUrl.toLowerCase();
       if (lower.endsWith('.json')) {
-        return Lottie.network(
-          animationUrl,
-          fit: BoxFit.contain,
-        );
+        return Lottie.network(animationUrl, fit: BoxFit.contain);
       }
       return CachedNetworkImage(
         imageUrl: animationUrl,
         fit: BoxFit.contain,
-        errorWidget: (context, url, error) => const Icon(Icons.card_giftcard, size: 40),
+        errorWidget: (context, url, error) =>
+            const Icon(Icons.card_giftcard, size: 40),
       );
     }
 
@@ -1055,7 +1021,8 @@ class _GiftsTabViewState extends State<_GiftsTabView> {
       return CachedNetworkImage(
         imageUrl: iconUrl,
         fit: BoxFit.contain,
-        errorWidget: (context, url, error) => const Icon(Icons.card_giftcard, size: 40),
+        errorWidget: (context, url, error) =>
+            const Icon(Icons.card_giftcard, size: 40),
       );
     }
 

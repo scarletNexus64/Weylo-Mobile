@@ -457,6 +457,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get maskedInfo => 'Informations masquées';
 
   @override
+  String get maskedUsername => '@masqué';
+
+  @override
   String get statusNew => 'Nouveau';
 
   @override

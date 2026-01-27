@@ -51,7 +51,7 @@ class MessageService {
       '${ApiConstants.messages}/send/$username',
       data: data,
     );
-    return AnonymousMessage.fromJson(response.data['message'] ?? response.data);
+    return _parseAnonymousMessageResponse(response.data, content);
   }
 
   Future<AnonymousMessage> sendAnonymousMessage({
@@ -124,7 +124,7 @@ class MessageService {
       '${ApiConstants.messages}/send/$recipientUsername',
       data: formData,
     );
-    return AnonymousMessage.fromJson(response.data['message'] ?? response.data);
+    return _parseAnonymousMessageResponse(response.data, content);
   }
 
   Future<AnonymousMessage> revealIdentity(int messageId) async {
@@ -132,11 +132,36 @@ class MessageService {
       '${ApiConstants.messages}/$messageId/reveal',
     );
     final data = response.data;
-    final payload = data is Map<String, dynamic> ? data['message'] ?? data['data'] : null;
+    final payload = data is Map<String, dynamic>
+        ? data['message'] ?? data['data']
+        : null;
     if (payload is Map<String, dynamic>) {
       return AnonymousMessage.fromJson(payload);
     }
     return getMessage(messageId);
+  }
+
+  AnonymousMessage _parseAnonymousMessageResponse(
+    dynamic responseData,
+    String content,
+  ) {
+    final payload = responseData is Map<String, dynamic>
+        ? responseData['message'] ?? responseData['data'] ?? responseData
+        : null;
+    if (payload is Map<String, dynamic>) {
+      return AnonymousMessage.fromJson(payload);
+    }
+    return _fallbackAnonymousMessage(content);
+  }
+
+  AnonymousMessage _fallbackAnonymousMessage(String content) {
+    return AnonymousMessage(
+      id: 0,
+      senderId: 0,
+      recipientId: 0,
+      content: content,
+      createdAt: DateTime.now(),
+    );
   }
 
   Future<Map<String, dynamic>> startConversation(int messageId) async {

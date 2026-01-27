@@ -149,7 +149,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                         controller: _tabController,
                         labelColor: Theme.of(context).colorScheme.primary,
                         unselectedLabelColor:
-                            Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                            Theme.of(context).textTheme.bodySmall?.color ??
+                            Colors.grey,
                         indicatorColor: Theme.of(context).colorScheme.primary,
                         tabs: [
                           Tab(
@@ -404,7 +405,11 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.trending_up, size: 18, color: AppColors.primary),
+                      const Icon(
+                        Icons.trending_up,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Promotions',
@@ -485,8 +490,8 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     Confession confession,
     ProfileProvider profileProvider,
   ) {
-    final imageUrl = _resolveMediaUrl(confession.imageUrl);
-    final videoUrl = _resolveMediaUrl(confession.videoUrl);
+    final imageUrl = resolveMediaUrl(confession.imageUrl);
+    final videoUrl = resolveMediaUrl(confession.videoUrl);
     final hasImage = confession.hasImage && imageUrl.isNotEmpty;
     final hasVideo = confession.hasVideo && videoUrl.isNotEmpty;
 
@@ -777,35 +782,6 @@ class _MyProfileScreenState extends State<MyProfileScreen>
     );
   }
 
-  String _resolveMediaUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    final cleaned = url.replaceAll('\\', '/');
-    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-    final baseUri = Uri.parse(base);
-
-    if (cleaned.startsWith('http')) {
-      final mediaUri = Uri.parse(cleaned);
-      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
-        final rewritten = mediaUri.replace(
-          scheme: baseUri.scheme,
-          host: baseUri.host,
-          port: baseUri.hasPort ? baseUri.port : null,
-        );
-        return Uri.encodeFull(rewritten.toString());
-      }
-      return Uri.encodeFull(cleaned);
-    }
-    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
-
-    if (cleaned.startsWith('/storage/')) {
-      return Uri.encodeFull('$base$cleaned');
-    }
-    if (cleaned.startsWith('storage/')) {
-      return Uri.encodeFull('$base/$cleaned');
-    }
-    return Uri.encodeFull('$base/storage/$cleaned');
-  }
-
   Widget _buildLikesTab() {
     return Consumer<ProfileProvider>(
       builder: (context, profileProvider, child) {
@@ -922,11 +898,13 @@ class _MyProfileScreenState extends State<MyProfileScreen>
                 gradient: AppColors.primaryGradient,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: gift != null ? _buildGiftMedia(gift) : const Icon(
-                Icons.card_giftcard,
-                color: Colors.white,
-                size: 28,
-              ),
+              child: gift != null
+                  ? _buildGiftMedia(gift)
+                  : const Icon(
+                      Icons.card_giftcard,
+                      color: Colors.white,
+                      size: 28,
+                    ),
             ),
             const SizedBox(width: 16),
             // Gift info

@@ -301,7 +301,7 @@ class ConfessionService {
 
       final formData = FormData.fromMap({
         'content': content,
-        'is_anonymous': isAnonymous,
+        'is_anonymous': isAnonymous ? 1 : 0,
         if (parentId != null) 'parent_id': parentId,
         'image': await MultipartFile.fromFile(
           image.path,
@@ -376,11 +376,15 @@ class ConfessionService {
   }
 
   Future<void> markPromotionImpression(int confessionId) async {
-    await _apiClient.post('${ApiConstants.confessions}/$confessionId/promotion-impression');
+    await _apiClient.post(
+      '${ApiConstants.confessions}/$confessionId/promotion-impression',
+    );
   }
 
   Future<void> markPromotionClick(int confessionId) async {
-    await _apiClient.post('${ApiConstants.confessions}/$confessionId/promotion-click');
+    await _apiClient.post(
+      '${ApiConstants.confessions}/$confessionId/promotion-click',
+    );
   }
 
   Future<List<Confession>> searchConfessions(String query) async {

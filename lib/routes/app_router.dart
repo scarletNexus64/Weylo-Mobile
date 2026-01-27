@@ -41,7 +41,7 @@ import '../models/message.dart';
 import '../core/theme/app_colors.dart';
 import '../core/constants/app_constants.dart';
 import '../core/utils/helpers.dart';
-import '../core/constants/api_constants.dart';
+import '../core/utils/media_utils.dart';
 import '../services/voice_effects_service.dart';
 import '../services/widgets/common/avatar_widget.dart';
 import '../services/widgets/common/link_text.dart';
@@ -3424,7 +3424,11 @@ class _FollowersScreenState extends State<_FollowersScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
       setState(() => _isLoading = false);
@@ -3589,7 +3593,11 @@ class _FollowingScreenState extends State<_FollowingScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.errorMessage(e.toString()))),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.errorMessage(e.toString()),
+            ),
+          ),
         );
       }
       setState(() => _isLoading = false);
@@ -3794,35 +3802,6 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
     } catch (e) {
       // Handle error
     }
-  }
-
-  String _resolveMediaUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    final cleaned = url.replaceAll('\\', '/');
-    final base = ApiConstants.baseUrl.replaceFirst(RegExp(r'/api/v1/?$'), '');
-    final baseUri = Uri.parse(base);
-
-    if (cleaned.startsWith('http')) {
-      final mediaUri = Uri.parse(cleaned);
-      if (mediaUri.host != baseUri.host || mediaUri.port != baseUri.port) {
-        final rewritten = mediaUri.replace(
-          scheme: baseUri.scheme,
-          host: baseUri.host,
-          port: baseUri.hasPort ? baseUri.port : null,
-        );
-        return Uri.encodeFull(rewritten.toString());
-      }
-      return Uri.encodeFull(cleaned);
-    }
-    if (cleaned.startsWith('//')) return Uri.encodeFull('https:$cleaned');
-
-    if (cleaned.startsWith('/storage/')) {
-      return Uri.encodeFull('$base$cleaned');
-    }
-    if (cleaned.startsWith('storage/')) {
-      return Uri.encodeFull('$base/$cleaned');
-    }
-    return Uri.encodeFull('$base/storage/$cleaned');
   }
 
   Future<void> _toggleVoicePlayback(
@@ -4041,15 +4020,22 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
     final isOwnerOnly = _group?.onlyOwnerCanPost ?? false;
-    final canSend = !isOwnerOnly || (_currentUserId != null && _currentUserId == _group?.creatorId);
+    final canSend =
+        !isOwnerOnly ||
+        (_currentUserId != null && _currentUserId == _group?.creatorId);
 
     if (!canSend) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Seul le propriétaire du groupe peut écrire.')),
+        const SnackBar(
+          content: Text('Seul le propriétaire du groupe peut écrire.'),
+        ),
       );
       return;
     }
-    if (content.isEmpty && _selectedImage == null && _selectedVideo == null && _voiceFile == null) {
+    if (content.isEmpty &&
+        _selectedImage == null &&
+        _selectedVideo == null &&
+        _voiceFile == null) {
       return;
     }
 
@@ -4498,18 +4484,23 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                 ),
               ),
 
-          if (!canSend)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                'Seul le propriétaire du groupe peut écrire.',
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
+            if (!canSend)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
-                textAlign: TextAlign.center,
+                child: Text(
+                  'Seul le propriétaire du groupe peut écrire.',
+                  style: TextStyle(
+                    color:
+                        Theme.of(context).textTheme.bodySmall?.color ??
+                        AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
 
             // Input area
             ClipRRect(
@@ -4561,7 +4552,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                                 : Colors.grey,
                           ),
                           onPressed: () {
-                          if (!canSend) return;
+                            if (!canSend) return;
                             setState(() {
                               _showVoiceRecorder = !_showVoiceRecorder;
                             });
@@ -4570,13 +4561,13 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                         Expanded(
                           child: TextField(
                             controller: _messageController,
-                          enabled: canSend,
+                            enabled: canSend,
                             decoration: InputDecoration(
                               hintText: _editingMessageId != null
                                   ? l10n.editMessageHint
                                   : (canSend
-                                    ? l10n.messageInputHint
-                                    : 'Seul le propriétaire peut écrire.'),
+                                        ? l10n.messageInputHint
+                                        : 'Seul le propriétaire peut écrire.'),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(24),
                                 borderSide: BorderSide.none,
@@ -4662,7 +4653,7 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
   Widget _buildMessageBubble(Map<String, dynamic> message) {
     final isMe = message['is_mine'] == true;
     final rawMediaUrl = message['media_full_url'] ?? message['media_url'];
-    final mediaUrl = _resolveMediaUrl(rawMediaUrl);
+    final mediaUrl = resolveMediaUrl(rawMediaUrl);
     final messageType = message['type'] ?? 'text';
     final hasImage = messageType == 'image' && mediaUrl.isNotEmpty;
     final hasVoice = messageType == 'voice' && mediaUrl.isNotEmpty;
@@ -5220,7 +5211,11 @@ class _GroupChatScreenState extends State<_GroupChatScreen> {
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(AppLocalizations.of(context)!.errorMessage(e.toString())),
+                        content: Text(
+                          AppLocalizations.of(
+                            context,
+                          )!.errorMessage(e.toString()),
+                        ),
                       ),
                     );
                   }

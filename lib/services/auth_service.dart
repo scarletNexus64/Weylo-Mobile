@@ -148,12 +148,45 @@ class AuthResponse {
 
   AuthResponse({this.success = false, this.message, this.token, this.user});
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) {
+  factory AuthResponse.fromJson(dynamic json) {
+    final payload = _normalizePayload(json);
+    final userJson = _mapFromJson(payload['user']);
     return AuthResponse(
-      success: json['success'] ?? true,
-      message: json['message'],
-      token: json['token'] ?? json['access_token'],
-      user: json['user'] != null ? User.fromJson(json['user']) : null,
+      success: payload['success'] ?? true,
+      message: payload['message'],
+      token: payload['token'] ?? payload['access_token'],
+      user: userJson != null ? User.fromJson(userJson) : null,
     );
+  }
+
+  static Map<String, dynamic>? _mapFromJson(dynamic json) {
+    if (json is Map<String, dynamic>) {
+      return json;
+    }
+    if (json is List) {
+      for (final entry in json) {
+        if (entry is Map<String, dynamic>) {
+          return entry;
+        }
+      }
+    }
+    return null;
+  }
+
+  static Map<String, dynamic> _normalizePayload(dynamic json) {
+    final map = _mapFromJson(json);
+    if (map != null) {
+      return map;
+    }
+
+    if (json is List && json.isNotEmpty) {
+      return {'message': json.first.toString()};
+    }
+
+    if (json != null) {
+      return {'message': json.toString()};
+    }
+
+    return {};
   }
 }

@@ -237,8 +237,9 @@ class StoryService {
     final response = await _apiClient.get(
       '${ApiConstants.stories}/$storyId/comments',
     );
-    final data = response.data['comments'] ?? response.data['data'] ?? [];
-    return (data as List).map((c) => StoryComment.fromJson(c)).toList();
+    final payload = _unwrapCommentPayload(response.data);
+    final commentList = _extractCommentList(payload);
+    return commentList.map((entry) => StoryComment.fromJson(entry)).toList();
   }
 
   Future<StoryComment> addComment(
@@ -258,5 +259,35 @@ class StoryService {
       '${ApiConstants.stories}/$storyId/comments/$commentId',
     );
     return response.data['success'] ?? true;
+  }
+
+  dynamic _unwrapCommentPayload(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      for (final key in ['comments', 'data', 'items', 'results']) {
+        if (data[key] != null) {
+          return _unwrapCommentPayload(data[key]);
+        }
+      }
+    }
+    return data;
+  }
+
+  List<Map<String, dynamic>> _extractCommentList(dynamic data) {
+    if (data is List) {
+      return data.whereType<Map<String, dynamic>>().toList();
+    }
+
+    if (data is Map<String, dynamic>) {
+      for (final key in ['comments', 'data', 'items', 'results']) {
+        if (data[key] != null) {
+          final nested = _extractCommentList(data[key]);
+          if (nested.isNotEmpty) {
+            return nested;
+          }
+        }
+      }
+    }
+
+    return [];
   }
 }

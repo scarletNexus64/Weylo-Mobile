@@ -44,7 +44,8 @@ class ConfessionCard extends StatefulWidget {
   State<ConfessionCard> createState() => _ConfessionCardState();
 }
 
-class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProviderStateMixin {
+class _ConfessionCardState extends State<ConfessionCard>
+    with SingleTickerProviderStateMixin {
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
   bool _videoInitError = false;
@@ -84,6 +85,7 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
 
   void _initVideoPlayer() {
     final resolvedUrl = _resolveMediaUrl(widget.confession.videoUrl);
+    debugPrint('[ConfessionCard] resolved video URL: $resolvedUrl');
     if (resolvedUrl.isEmpty) {
       setState(() {
         _isVideoInitialized = false;
@@ -95,20 +97,29 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
       ..initialize()
           .then((_) {
             if (!mounted) return;
+            debugPrint(
+              '[ConfessionCard] Video duration: ${_videoController?.value.duration}',
+            );
             _videoController?.setLooping(true);
             _videoController?.setVolume(_isMuted ? 0 : 1);
+            _videoController?.addListener(_handleVideoProgress);
+            if (_videoController?.value.hasError ?? false) {
+              debugPrint(
+                '[ConfessionCard] Video player error after init: ${_videoController?.value.errorDescription}',
+              );
+            }
             if (_isVideoVisible) {
               _videoController?.play();
             } else {
               _videoController?.pause();
             }
-            _videoController?.addListener(_handleVideoProgress);
             setState(() {
               _isVideoInitialized = true;
               _videoInitError = false;
             });
           })
-          .catchError((_) {
+          .catchError((error) {
+            debugPrint('[ConfessionCard] Video init failed: $error');
             if (!mounted) return;
             setState(() {
               _isVideoInitialized = false;
@@ -200,7 +211,10 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
                             if (confession.isSponsored) ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.orange.withOpacity(0.12),
                                   borderRadius: BorderRadius.circular(12),
@@ -360,10 +374,8 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
                 ),
               ),
             // Video
-            if (confession.hasVideo)
-              _buildVideoSection(),
-            if (confession.isSponsored)
-              _buildSponsoredCta(context),
+            if (confession.hasVideo) _buildVideoSection(),
+            if (confession.isSponsored) _buildSponsoredCta(context),
             // Recipient info if private
             if (confession.recipient != null)
               Padding(
@@ -408,7 +420,9 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
               child: Row(
                 children: [
                   _buildActionButton(
-                    icon: confession.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                    icon: confession.isLiked
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
                     label: Helpers.formatNumber(confession.likesCount),
                     color: confession.isLiked ? Colors.red : actionColor,
                     onTap: _handleLikeTap,
@@ -705,7 +719,12 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
@@ -799,11 +818,7 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  Icon(
-                    icon,
-                    size: 20,
-                    color: fillColor,
-                  ),
+                  Icon(icon, size: 20, color: fillColor),
                   if (_isLikeAnimating)
                     ScaleTransition(
                       scale: _likeScale,
@@ -816,11 +831,7 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
                 ],
               )
             else
-              Icon(
-                icon,
-                size: 20,
-                color: fillColor,
-              ),
+              Icon(icon, size: 20, color: fillColor),
             const SizedBox(width: 6),
             Text(
               label,
@@ -969,7 +980,8 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
                       (reason) => RadioListTile<String>(
                         value: reason['value']!,
                         groupValue: selectedReason,
-                        onChanged: (value) => setState(() => selectedReason = value),
+                        onChanged: (value) =>
+                            setState(() => selectedReason = value),
                         title: Text(reason['label']!),
                       ),
                     ),
@@ -994,13 +1006,18 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
                   onPressed: () {
                     if (selectedReason == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Veuillez choisir une raison.')),
+                        const SnackBar(
+                          content: Text('Veuillez choisir une raison.'),
+                        ),
                       );
                       return;
                     }
-                    if (isOtherReason() && descriptionController.text.trim().isEmpty) {
+                    if (isOtherReason() &&
+                        descriptionController.text.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Veuillez ajouter une description.')),
+                        const SnackBar(
+                          content: Text('Veuillez ajouter une description.'),
+                        ),
                       );
                       return;
                     }
@@ -1029,15 +1046,15 @@ class _ConfessionCardState extends State<ConfessionCard> with SingleTickerProvid
             : descriptionController.text.trim(),
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Signalement envoyé')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Signalement envoyé')));
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur: ${e.toString()}')));
       }
     } finally {
       descriptionController.dispose();

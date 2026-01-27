@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:video_player/video_player.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
@@ -42,6 +43,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   bool _showComments = false;
   List<StoryComment> _comments = [];
   bool _isLoadingComments = false;
+  final TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
@@ -67,6 +69,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     _pageController.dispose();
     _progressController.dispose();
     _videoController?.dispose();
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -85,7 +88,11 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
       _videoController =
           VideoPlayerController.networkUrl(Uri.parse(story.mediaUrl!))
             ..initialize().then((_) {
-              setState(() {});
+              if (!mounted) return;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() {});
+              });
               _videoController!.play();
               _progressController.duration = _videoController!.value.duration;
               _progressController.forward();
@@ -158,6 +165,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   void _toggleComments() {
     setState(() {
       _showComments = !_showComments;
+      if (!_showComments) {
+        _commentController.clear();
+      }
     });
     if (_showComments) {
       _pauseStory();
@@ -171,16 +181,19 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   Future<void> _loadComments() async {
     final story = widget.stories[_currentIndex];
+    if (!mounted) return;
     setState(() {
       _isLoadingComments = true;
     });
     try {
       final comments = await _storyService.getComments(story.id);
+      if (!mounted) return;
       setState(() {
         _comments = comments;
         _isLoadingComments = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoadingComments = false;
       });
@@ -451,7 +464,6 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   Widget _buildCommentsOverlay() {
     final l10n = AppLocalizations.of(context)!;
-    final TextEditingController commentController = TextEditingController();
 
     return Positioned.fill(
       child: GestureDetector(
@@ -543,7 +555,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                     children: [
                       Expanded(
                         child: TextField(
-                          controller: commentController,
+                          controller: _commentController,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             hintText: l10n.commentHint,
@@ -572,9 +584,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                         child: IconButton(
                           icon: const Icon(Icons.send, color: Colors.white),
                           onPressed: () {
-                            if (commentController.text.trim().isNotEmpty) {
-                              _addComment(commentController.text.trim());
-                              commentController.clear();
+                            if (_commentController.text.trim().isNotEmpty) {
+                              _addComment(_commentController.text.trim());
+                              _commentController.clear();
                             }
                           },
                         ),

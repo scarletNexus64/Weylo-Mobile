@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/helpers.dart';
@@ -20,6 +21,7 @@ class MessageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
     return Card(
       elevation: message.isRead ? 0 : 2,
       child: InkWell(
@@ -32,7 +34,7 @@ class MessageCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  _buildAvatar(),
+                  _buildAvatar(context),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -95,7 +97,9 @@ class MessageCard extends StatelessWidget {
                   ),
                 ),
               ],
-              if (message.isIdentityRevealed && message.sender != null) ...[
+              if (message.isIdentityRevealed &&
+                  ((isReceived && message.sender != null) ||
+                      (!isReceived && message.recipient != null))) ...[
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -116,7 +120,11 @@ class MessageCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        l10n.identityRevealed(message.sender!.fullName),
+                        isReceived
+                            ? l10n.identityRevealed(message.sender!.fullName)
+                            : l10n.identityRevealed(
+                                message.recipient!.fullName,
+                              ),
                         style: const TextStyle(
                           color: AppColors.success,
                           fontSize: 12,
@@ -134,7 +142,7 @@ class MessageCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar() {
+  Widget _buildAvatar(BuildContext context) {
     if (isReceived) {
       if (message.sender?.avatar != null &&
           message.sender!.avatar!.isNotEmpty) {
@@ -144,20 +152,36 @@ class MessageCard extends StatelessWidget {
           size: 48,
         );
       }
-      return _PulsingAvatarPlaceholder(
-        initials: message.senderInitials,
-      );
-    } else {
+      return _PulsingAvatarPlaceholder(initials: message.senderInitials);
+    }
+
+    if (message.isIdentityRevealed) {
+      if (message.recipient?.avatar != null &&
+          message.recipient!.avatar != null &&
+          message.recipient!.avatar!.isNotEmpty) {
+        return AvatarWidget(
+          imageUrl: message.recipient!.avatar,
+          name: message.recipient?.fullName,
+          size: 48,
+        );
+      }
       return AvatarWidget(
-        imageUrl: message.recipient?.avatar,
-        name: message.recipient?.fullName,
+        imageUrl: '',
+        name: _getRecipientInitials(),
         size: 48,
       );
     }
+
+    return AvatarWidget(
+        imageUrl: '',
+        name: _getRecipientInitials(),
+        size: 48,
+      );
   }
 
   Widget _buildSenderInfo(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
     if (isReceived) {
       if (message.isIdentityRevealed && message.sender != null) {
         return Text(
@@ -167,14 +191,10 @@ class MessageCard extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         );
       }
+
       return Row(
         children: [
-          const Icon(
-            Icons.person_off,
-            size: 16,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(
             l10n.anonymousUser,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -184,14 +204,66 @@ class MessageCard extends StatelessWidget {
           ),
         ],
       );
-    } else {
+    }
+
+    if (message.isIdentityRevealed && message.recipient != null) {
       return Text(
-        l10n.toRecipient(message.recipient?.fullName ?? l10n.userFallback),
+        l10n.toRecipient(message.recipient!.fullName),
         style: Theme.of(
           context,
         ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       );
     }
+
+    return Row(
+      children: [
+        const SizedBox(width: 6),
+        Text(
+          l10n.toRecipient(l10n.anonymousUser),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getRecipientInitials() {
+    final fullName = (message.recipient?.fullName ?? '').trim();
+    if (fullName.isEmpty) return '?';
+
+    final parts = fullName
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
+    final first = parts.isNotEmpty ? parts[0] : '';
+
+    final a = first.isNotEmpty ? first[0] : '';
+
+    final initials = (a).trim();
+    return initials.isEmpty ? '?' : initials.toUpperCase();
+  }
+}
+
+class _SmallInitialsCircle extends StatelessWidget {
+  final String initials;
+
+  const _SmallInitialsCircle({required this.initials});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: AppColors.textSecondary.withOpacity(0.15),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: AvatarWidget(imageUrl: '', name: initials, size: 48),
+      ),
+    );
   }
 }
 
@@ -201,7 +273,8 @@ class _PulsingAvatarPlaceholder extends StatefulWidget {
   const _PulsingAvatarPlaceholder({required this.initials});
 
   @override
-  State<_PulsingAvatarPlaceholder> createState() => _PulsingAvatarPlaceholderState();
+  State<_PulsingAvatarPlaceholder> createState() =>
+      _PulsingAvatarPlaceholderState();
 }
 
 class _PulsingAvatarPlaceholderState extends State<_PulsingAvatarPlaceholder>
@@ -211,9 +284,10 @@ class _PulsingAvatarPlaceholderState extends State<_PulsingAvatarPlaceholder>
     duration: const Duration(milliseconds: 1600),
   )..repeat(reverse: true);
 
-  late final Animation<double> _pulse = Tween<double>(begin: 0.2, end: 0.6).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-  );
+  late final Animation<double> _pulse = Tween<double>(
+    begin: 0.2,
+    end: 0.6,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
   @override
   void dispose() {

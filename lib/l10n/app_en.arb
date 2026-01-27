@@ -202,6 +202,10 @@
   "noUsersFound": "No users found",
   "noUsersAvailable": "No users available at the moment",
   "maskedInfo": "Information hidden",
+  "maskedUsername": "@hidden",
+  "@maskedUsername": {
+    "description": "Handle placeholder when the identity is hidden"
+  },
   "statusNew": "New",
   "statusRevealed": "Revealed",
   "statusAnonymous": "Anonymous",
