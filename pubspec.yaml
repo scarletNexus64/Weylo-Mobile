@@ -111,6 +111,8 @@ dependencies:
 
   # QR Code
   qr_flutter: ^4.1.0
+  get: ^4.7.3
+  rename_app: ^1.6.5
 
 dev_dependencies:
   flutter_test:

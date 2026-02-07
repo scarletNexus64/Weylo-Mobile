@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'l10n/app_localizations.dart';
+import 'package:get/get.dart';
 
+import 'bindings/initial_binding.dart';
+import 'routes/app_pages.dart';
 import 'core/theme/app_theme.dart';
-import 'providers/auth_provider.dart';
-import 'providers/locale_provider.dart';
-import 'providers/theme_provider.dart';
-import 'providers/feed_provider.dart';
-import 'providers/profile_provider.dart';
-import 'providers/wallet_provider.dart';
-import 'providers/messages_provider.dart';
-import 'providers/conversations_provider.dart';
-import 'routes/app_router.dart';
-import 'services/deep_link_service.dart';
-import 'services/local_notification_service.dart';
-import 'services/story_background_uploader.dart';
-import 'services/story_upload_fallback_service.dart';
+import 'data/providers/local_notification_service.dart';
+import 'data/providers/story_background_uploader.dart';
+import 'data/providers/story_upload_fallback_service.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +29,7 @@ void main() async {
     ),
   );
 
+  // Initialize services
   await LocalNotificationService.initialize();
   await StoryBackgroundUploader.initialize();
   StoryUploadFallbackService().resumePendingUploads();
@@ -49,66 +42,24 @@ class WeyloApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => FeedProvider()),
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => WalletProvider()),
-        ChangeNotifierProvider(create: (_) => MessagesProvider()),
-        ChangeNotifierProvider(create: (_) => ConversationsProvider()),
-      ],
-      child: const _AppContent(),
-    );
-  }
-}
-
-class _AppContent extends StatefulWidget {
-  const _AppContent();
-
-  @override
-  State<_AppContent> createState() => _AppContentState();
-}
-
-class _AppContentState extends State<_AppContent> {
-  final DeepLinkService _deepLinkService = DeepLinkService();
-
-  @override
-  void initState() {
-    super.initState();
-    // Check auth status and load theme
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().checkAuthStatus();
-      context.read<LocaleProvider>().loadLocale();
-      context.read<ThemeProvider>().loadTheme();
-      _deepLinkService.initialize(context);
-    });
-  }
-
-  @override
-  void dispose() {
-    _deepLinkService.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
-    final themeProvider = context.watch<ThemeProvider>();
-    final localeProvider = context.watch<LocaleProvider>();
-
-    return MaterialApp.router(
+    return GetMaterialApp(
       title: 'Weylo',
       debugShowCheckedModeBanner: false,
+      initialBinding: InitialBinding(),
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
+
+      // Theme configuration
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: themeProvider.themeMode,
-      locale: localeProvider.locale,
+      themeMode: ThemeMode.system,
+
+      // Localization configuration
+      locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: AppRouter.router(authProvider),
+
+      // Builder for text scaling
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
